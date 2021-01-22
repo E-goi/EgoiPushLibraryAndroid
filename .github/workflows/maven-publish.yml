@@ -22,6 +22,6 @@ jobs:
       run: chmod +x gradlew
     - name: Publish Library
       env:
-        bintrayUser: ${{ secrets.BINTRAY_USER }}
-        bintrayApiKey: ${{ secrets.BINTRAY_KEY }}
+        BINTRAY_USER: ${{ secrets.BINTRAY_USER }}
+        BINTRAY_KEY: ${{ secrets.BINTRAY_KEY }}
       run: ./gradlew bintrayUpload
