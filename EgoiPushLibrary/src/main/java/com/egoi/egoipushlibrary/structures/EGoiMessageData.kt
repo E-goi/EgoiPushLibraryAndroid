@@ -1,0 +1,14 @@
+package com.egoi.egoipushlibrary.structures
+
+data class EGoiMessageData(
+    var os: String,
+    var messageHash: String,
+    var listId: Int,
+    var contactId: String,
+    var accountId: Int,
+    var applicationId: Int,
+    var messageId: Int,
+    var deviceId: Int,
+    var geo: EGoiMessageDataGeo = EGoiMessageDataGeo(),
+    var actions: EGoiMessageDataAction = EGoiMessageDataAction()
+)

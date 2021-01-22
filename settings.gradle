@@ -1,2 +1,3 @@
+include ':EgoiPushLibrary'
 include ':app'
 rootProject.name = "EgoiPushLibraryAndroid"

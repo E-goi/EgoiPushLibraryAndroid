@@ -1,0 +1,39 @@
+package com.egoi.egoipushlibraryandroid
+
+import android.content.Intent
+import android.util.Log
+import com.egoi.egoipushlibrary.EgoiPushLibrary
+import com.google.firebase.messaging.FirebaseMessagingService
+import com.google.firebase.messaging.RemoteMessage
+
+class FirebaseService : FirebaseMessagingService() {
+
+    override fun onNewToken(token: String) {
+        EgoiPushLibrary.getInstance().firebase.updateToken(token)
+        Log.d(TAG, token)
+    }
+
+    override fun onMessageReceived(message: RemoteMessage) {
+        EgoiPushLibrary.getInstance().firebase.messageReceived()
+    }
+
+    override fun handleIntent(intent: Intent?) {
+        if (intent != null) {
+            EgoiPushLibrary.getInstance().firebase.processMessage(intent)
+        }
+
+        super.handleIntent(intent)
+    }
+
+    override fun handleIntentOnMainThread(intent: Intent?): Boolean {
+        if (intent != null) {
+            EgoiPushLibrary.getInstance().firebase.showDialog(intent)
+        }
+
+        return super.handleIntentOnMainThread(intent)
+    }
+
+    companion object {
+        private const val TAG: String = "FirebaseService"
+    }
+}

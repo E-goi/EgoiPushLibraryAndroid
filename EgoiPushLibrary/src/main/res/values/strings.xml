@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="location_updated">Location Updated: %1$s</string>
+    <string name="close">Close</string>
+    <string name="launch_activity">Launch activity</string>
+    <string name="stop_location_updates">Stop location updates</string>
+    <string name="application_using_location">This application is using your location</string>
+</resources>

@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.egoi.egoipushlibrary">
+
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+
+    <application>
+        <uses-library
+            android:name="org.apache.http.legacy"
+            android:required="false" />
+
+        <service
+            android:name=".services.GeofenceService"
+            android:exported="false"
+            android:enabled="true">
+            <intent-filter>
+                <action android:name="com.egoi.actions.ACTION_GEOFENCE_EVENT" />
+            </intent-filter>
+        </service>
+
+        <service
+            android:name=".services.NotificationService"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.egoi.actions.SEND_NOTIFICATION" />
+            </intent-filter>
+        </service>
+
+        <service
+            android:name=".services.LocationService"
+            android:exported="true"
+            android:enabled="true"
+            android:permission="android.permission.ACCESS_FINE_LOCATION|android.permission.FOREGROUND_SERVICE"
+            android:foregroundServiceType="location">
+            <intent-filter>
+                <action android:name="com.egoi.actions.LOCATION_UPDATE" />
+            </intent-filter>
+        </service>
+
+        <receiver
+            android:name=".receivers.NotificationEventReceiver"
+            android:enabled="true" />
+    </application>
+
+</manifest>
