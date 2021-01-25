@@ -1,8 +1,8 @@
 plugins {
     id 'com.android.library'
     id 'kotlin-android'
-    id 'com.github.dcendents.android-maven'
-    id 'com.jfrog.bintray'
+    id 'maven-publish'
+    id "com.jfrog.bintray" version "1.8.5"
 }
 
 android {
@@ -36,106 +36,69 @@ android {
 }
 
 ext {
-    // This should be same as you've created in bintray
-    bintrayRepo = 'Maven'
-
-    // Name which will be visible on bintray
-    bintrayName = 'EgoiPushLibrary'
-
-    // Library Details
-    publishedGroupId = 'com.egoi'
-    libraryName = 'EgoiPushLibrary'
-    artifact = 'EgoiPushLibrary'
-    libraryDescription = 'Android library to handle notifications from E-goi.'
-    libraryVersion = '1.0.5'
-
-    // Repository Link (For e.g. GitHub repo)
-    siteUrl = 'https://github.com/E-goi/EgoiPushLibraryAndroid'
-    gitUrl = 'https://github.com/E-goi/EgoiPushLibraryAndroid.git'
-    githubRepository= 'E-goi/EgoiPushLibraryAndroid'
-
-    // License Details
-    licenseName = 'The Apache Software License, Version 2.0'
-    licenseUrl = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
-    allLicenses = ["Apache-2.0"]
+    groupId = "com.egoi"
+    artifactId = "EgoiPushLibrary"
+    version = "1.0.6"
 }
 
-// This is mandatory
-group = publishedGroupId
+afterEvaluate {
+    publishing {
+        publications {
+            release(MavenPublication) {
+                from components.release
 
-install {
-    repositories.mavenInstaller {
-        // This generates POM.xml with proper parameters
-        pom {
-            project {
-                packaging 'aar'
+                groupId = groupId
+                artifactId = artifactId
+                version = version
 
-                groupId publishedGroupId
-                artifactId = artifact
-                name libraryName
-                description = libraryDescription
-                version = libraryVersion
-                url siteUrl
+                pom {
+                    name = artifactId
+                    description = "Android library responsible for handling notifications from E-goi."
+                    url = "https://github.com/E-goi/EgoiPushLibraryAndroid"
 
-                licenses {
-                    license {
-                        name licenseName
-                        url licenseUrl
+                    licenses {
+                        license {
+                            name = "The Apache Software License, Version 2.0"
+                            url = "http://www.apache.org/licenses/LICENSE-2.0.txt"
+                        }
                     }
-                }
 
-                scm {
-                    connection gitUrl
-                    developerConnection gitUrl
-                    url siteUrl
+                    developers {
+                        developer {
+                            id = "jsilva"
+                            name = "João Silva"
+                            email = "jsilva@e-goi.com"
+                        }
+                    }
+
+                    scm {
+                        connection = "https://github.com/E-goi/EgoiPushLibraryAndroid.git"
+                        developerConnection = "https://github.com/E-goi/EgoiPushLibraryAndroid.git"
+                        url = "https://github.com/E-goi/EgoiPushLibraryAndroid"
+                    }
                 }
             }
         }
     }
 }
 
-// Avoid Kotlin docs error
-tasks.withType(Javadoc) {
-    enabled = false
-}
-
-// Remove javadoc related tasks
-task javadoc(type: Javadoc) {
-    source = android.sourceSets.main.java.srcDirs
-    classpath += project.files(android.getBootClasspath().join(File.pathSeparator))
-}
-
-task sourcesJar(type: Jar) {
-    from android.sourceSets.main.java.srcDirs
-    getArchiveClassifier().set('sources')
-}
-
-task javadocJar(type: Jar, dependsOn: javadoc) {
-    getArchiveClassifier().set('javadoc')
-    from javadoc.destinationDir
-}
-
-artifacts {
-    archives javadocJar
-    archives sourcesJar
-}
-
 bintray {
     user = System.getenv("BINTRAY_USER")
     key = System.getenv("BINTRAY_KEY")
 
-    configurations = ['archives']
+    publications = ["release"]
 
     pkg {
-        repo = bintrayRepo
-        name = bintrayName
-        websiteUrl = siteUrl
-        vcsUrl = gitUrl
-        licenses = allLicenses
-        publish = true
+        repo = "Maven"
+        name = artifactId
+        userOrg = System.getenv("BINTRAY_USER")
+        licenses = ['Apache-2.0']
+        vcsUrl = 'https://github.com/E-goi/EgoiPushLibraryAndroid.git'
+
         version {
-            name = libraryVersion
-            vcsTag = libraryVersion
+            name = version
+            released = new Date()
+            vcsTag = version
         }
     }
 }
