@@ -38,7 +38,6 @@ android {
 ext {
     groupId = "com.egoi"
     artifactId = "EgoiPushLibrary"
-    version = "1.0.7"
 }
 
 afterEvaluate {
@@ -49,7 +48,7 @@ afterEvaluate {
 
                 groupId = groupId
                 artifactId = artifactId
-                version = version
+                version = "1.0.8"
 
                 pom {
                     name = artifactId
@@ -100,9 +99,9 @@ bintray {
         githubRepo = 'E-goi/EgoiPushLibraryAndroid'
 
         version {
-            name = version
+            name = "1.0.8"
             released = new Date()
-            vcsTag = version
+            vcsTag = "1.0.8"
         }
     }
 }
