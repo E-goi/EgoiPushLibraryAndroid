@@ -47,7 +47,7 @@ ext {
     libraryName = 'EgoiPushLibrary'
     artifact = 'EgoiPushLibrary'
     libraryDescription = 'Android library to handle notifications from E-goi.'
-    libraryVersion = System.getenv("VERSION")
+    libraryVersion = '1.0.4'
 
     // Repository Link (For e.g. GitHub repo)
     siteUrl = 'https://github.com/E-goi/EgoiPushLibraryAndroid'
@@ -132,6 +132,10 @@ bintray {
         vcsUrl = gitUrl
         licenses = allLicenses
         publish = true
+        version {
+            name = libraryVersion
+            vcsTag = libraryVersion
+        }
     }
 }
 
