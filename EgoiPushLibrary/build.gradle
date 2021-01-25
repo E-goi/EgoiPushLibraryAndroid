@@ -87,13 +87,17 @@ bintray {
     key = System.getenv("BINTRAY_KEY")
 
     publications = ["release"]
+    publish = true
+    override = true
 
     pkg {
         repo = "Maven"
         name = artifactId
         userOrg = System.getenv("BINTRAY_USER")
         licenses = ['Apache-2.0']
+        websiteUrl = 'https://github.com/E-goi/EgoiPushLibraryAndroid'
         vcsUrl = 'https://github.com/E-goi/EgoiPushLibraryAndroid.git'
+        githubRepo = 'E-goi/EgoiPushLibraryAndroid'
 
         version {
             name = version
