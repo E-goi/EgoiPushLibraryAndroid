@@ -47,7 +47,7 @@ ext {
     libraryName = 'EgoiPushLibrary'
     artifact = 'EgoiPushLibrary'
     libraryDescription = 'Android library to handle notifications from E-goi.'
-    libraryVersion = version
+    libraryVersion = System.getenv("VERSION")
 
     // Repository Link (For e.g. GitHub repo)
     siteUrl = 'https://github.com/E-goi/EgoiPushLibraryAndroid'
@@ -119,7 +119,6 @@ artifacts {
     archives sourcesJar
 }
 
-// https://github.com/bintray/gradle-bintray-plugin
 bintray {
     user = System.getenv("BINTRAY_USER")
     key = System.getenv("BINTRAY_KEY")
