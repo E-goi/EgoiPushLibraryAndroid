@@ -55,9 +55,7 @@ class MainActivity : EgoiPushActivity() {
 required but recommended since this class handles the life cycle of our location service and handles the responses of
 the user to the location access requests.
 
-## References
-
-### Metadata
+## Metadata
 
 ### Location Notification
 
@@ -127,6 +125,8 @@ You should declare this metadata if you want to customize the text that is displ
    android:name="com.egoi.egoipushlibrary.close_label"
    android:resource=">>Your resource goes here (i.e. @string/close)<<" />
 ```
+
+## References
 
 ### Configurations
 
