@@ -228,3 +228,7 @@ user is already registered on your E-goi list, updates the token automatically.
 </tr>
 </tbody>
 </table>
+
+## Author
+
+E-goi, integrations@e-goi.com
