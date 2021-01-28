@@ -54,12 +54,16 @@ class FireDialogWorker(
             { _, _ ->
                 registerEvent(event = "open")
 
-                EgoiPushLibrary.getInstance().context.startActivity(
-                    Intent(
-                        Intent.ACTION_VIEW,
-                        Uri.parse(actionUrl)
+                if (actionType == "deeplink") {
+                    EgoiPushLibrary.getInstance().deepLinkCallback?.let { it(actionUrl) }
+                } else {
+                    EgoiPushLibrary.getInstance().context.startActivity(
+                        Intent(
+                            Intent.ACTION_VIEW,
+                            Uri.parse(actionUrl)
+                        )
                     )
-                )
+                }
             }
         }
 

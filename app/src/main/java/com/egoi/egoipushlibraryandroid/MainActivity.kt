@@ -18,7 +18,10 @@ class MainActivity : EgoiPushActivity() {
         EgoiPushLibrary.getInstance().config(
             context = this,
             appId = 123,
-            apiKey = "abc"
+            apiKey = "abc",
+            deepLinkCallback = fun (link: String) {
+                Log.d("DEEP_LINK", link)
+            }
         )
     }
 

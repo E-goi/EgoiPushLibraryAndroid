@@ -44,9 +44,12 @@ class MainActivity : EgoiPushActivity() {
 
         EgoiPushLibrary.getInstance().config(
             context = this,
-            appId = /* (int) required */,
-            apiKey = /* (string) required */,
-            geoEnabled = /* (boolean) (optional / defaults to true) */
+            appId = 123,
+            apiKey = "abc",
+            geoEnabled = true,
+            deepLinkCallback = fun (link: String) {
+               Log.d("DEEP_LINK", link)
+            }
         )
     }
 ```
@@ -170,6 +173,13 @@ Responsible for initializing the library. The call of this method is required.
    <td>geoEnabled</td>
    <td>Bool</td>
    <td>Flag that enables or disabled location related functionalities.</td>
+   <td>false</td>
+   <td>true</td>
+</tr>
+<tr>
+   <td>deepLinkCallback</td>
+   <td>(string) -> Unit</td>
+   <td>Callback to be invoked when the action type of the notification is a deeplink</td>
    <td>false</td>
    <td>true</td>
 </tr>

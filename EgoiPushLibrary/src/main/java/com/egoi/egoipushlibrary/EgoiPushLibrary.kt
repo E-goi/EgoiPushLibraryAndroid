@@ -20,14 +20,19 @@ import com.egoi.egoipushlibrary.structures.EGoiMessage
  * This is the main class of the library. Every method that can be used, is called through here.
  */
 class EgoiPushLibrary {
-    lateinit var context: Context
-    lateinit var appId: Number
-    lateinit var apiKey: String
-
     private lateinit var geofenceHandler: GeofenceHandler
     private lateinit var locationHandler: LocationHandler
 
     val firebase = FirebaseHandler()
+
+    // [configs]
+    lateinit var context: Context
+    lateinit var appId: Number
+    lateinit var apiKey: String
+
+    var geoEnabled: Boolean = false
+    var deepLinkCallback: ((String) -> Unit)? = null
+    // [end_configs]
 
     // Resources
     var notificationIcon: Int = 0
@@ -39,8 +44,6 @@ class EgoiPushLibrary {
     var stopLocationUpdatesLabel: Int = 0
     var applicationUsingLocationLabel: Int = 0
 
-    var geoEnabled: Boolean = false
-
     var dataStore: DataStore<Preferences>? = null
     val locationUpdatesKey = booleanPreferencesKey("location_updates")
 
@@ -50,17 +53,21 @@ class EgoiPushLibrary {
      * @param appId The ID of the E-goi's push app
      * @param apiKey The API key of the E-goi's account
      * @param geoEnabled Flag that enables/disables location functionalities
+     * @param deepLinkCallback Callback to be invoked when the action type of the notification is a
+     * deeplink
      */
     fun config(
         context: Context,
         appId: Int,
         apiKey: String,
         geoEnabled: Boolean = true,
+        deepLinkCallback: ((String) -> Unit)? = null
     ) {
         this.context = context
         this.appId = appId
         this.apiKey = apiKey
         this.geoEnabled = geoEnabled
+        this.deepLinkCallback = deepLinkCallback
 
         readMetadata()
 

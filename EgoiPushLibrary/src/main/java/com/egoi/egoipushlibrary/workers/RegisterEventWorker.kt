@@ -19,7 +19,7 @@ class RegisterEventWorker(
     workerParams: WorkerParameters
 ) : Worker(context, workerParams) {
     private val queue: RequestQueue = Volley.newRequestQueue(context)
-    private val domain = "https://btg-push-wrapper.egoiapp.com"
+    private val domain = "https://push-wrapper.egoiapp.com"
     private val registerEventUrl = "${domain}/event"
 
     override fun doWork(): Result {

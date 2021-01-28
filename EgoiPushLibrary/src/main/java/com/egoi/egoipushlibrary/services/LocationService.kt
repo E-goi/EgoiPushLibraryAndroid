@@ -63,8 +63,6 @@ class LocationService : Service() {
     }
 
     override fun onStartCommand(intent: Intent, flags: Int, startId: Int): Int {
-        Log.d(TAG, "Location service started...")
-
         val startedFromNotification = intent.getBooleanExtra(EXTRA_STARTED_FROM_NOTIFICATION, false)
 
         if (startedFromNotification) {
@@ -81,8 +79,6 @@ class LocationService : Service() {
     }
 
     override fun onBind(intent: Intent?): IBinder {
-        Log.d(TAG, "onBind()...")
-
         stopForeground(true)
 
         changingConfiguration = false
@@ -91,8 +87,6 @@ class LocationService : Service() {
     }
 
     override fun onRebind(intent: Intent?) {
-        Log.d(TAG, "onRebind()...")
-
         stopForeground(true)
         changingConfiguration = false
 
@@ -100,8 +94,6 @@ class LocationService : Service() {
     }
 
     override fun onUnbind(intent: Intent?): Boolean {
-        Log.d(TAG, "Last client unbound from service")
-
         if (!changingConfiguration && EgoiPushLibrary.getInstance().getLocationUpdates()) {
             Log.d(TAG, "Starting foreground service...")
             startForeground(NOTIFICATION_ID, getNotification())
@@ -116,8 +108,6 @@ class LocationService : Service() {
     }
 
     private fun onNewLocation(location: Location) {
-        Log.d(TAG, "onNewLocation() started")
-
         this.location = location
 
         val intent = Intent(ACTION_BROADCAST)
@@ -198,8 +188,6 @@ class LocationService : Service() {
     }
 
     fun requestLocationUpdates() {
-        Log.d(TAG, "Requesting location updates...")
-
         if (ActivityCompat.checkSelfPermission(
                 this,
                 Manifest.permission.ACCESS_FINE_LOCATION
@@ -222,8 +210,6 @@ class LocationService : Service() {
     }
 
     fun removeLocationUpdates() {
-        Log.d(TAG, "Removing location updates...")
-
         try {
             fusedLocationProviderClient.removeLocationUpdates(locationCallback)
             EgoiPushLibrary.getInstance().setLocationUpdates(false)
