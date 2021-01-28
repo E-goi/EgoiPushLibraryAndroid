@@ -12,9 +12,9 @@ There are a few things you must configure in your app in order for the library t
 
 2. You must create a service that extends Firebase's FirebaseMessagingService and declare it in your app's manifest. You
    can use the FirebaseService
-   file [located in the demo app](https://github.com/E-goi/EgoiPushLibraryAndroid/blob/master/app/src/main/java/com/egoi/egoipushlibraryandroid/FirebaseService.kt)
+   file [located in the demo app](app/src/main/java/com/egoi/egoipushlibraryandroid/FirebaseService.kt)
    and see how to declare in
-   the [demo app's manifest](https://github.com/E-goi/EgoiPushLibraryAndroid/blob/master/app/src/main/AndroidManifest.xml)
+   the [demo app's manifest](app/src/main/AndroidManifest.xml)
    .
 
 
