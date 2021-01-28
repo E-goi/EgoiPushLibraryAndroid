@@ -11,6 +11,9 @@ import androidx.work.WorkerParameters
 import androidx.work.workDataOf
 import com.egoi.egoipushlibrary.EgoiPushLibrary
 
+/**
+ * Worker responsible for creating and displaying a dialog to the user
+ */
 class FireDialogWorker(
     context: Context,
     workerParams: WorkerParameters

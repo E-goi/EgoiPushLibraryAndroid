@@ -19,6 +19,10 @@ import com.google.android.gms.location.*
 import java.text.DateFormat
 import java.util.*
 
+/**
+ * Service responsible for receiving the location updates. Triggers a notification when the app is
+ * minimized or closed.
+ */
 class LocationService : Service() {
     private lateinit var notificationManager: NotificationManager
     private lateinit var locationRequest: LocationRequest

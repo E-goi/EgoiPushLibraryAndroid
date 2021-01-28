@@ -1,8 +1,8 @@
 <resources>
     <string name="app_name">EgoiPushLibraryAndroid</string>
-    <string name="location_updated">Localização Atualizada: %1$s</string>
-    <string name="launch_activity">Abrir</string>
-    <string name="close">Fechar</string>
-    <string name="stop_location_updates">Parar localização</string>
-    <string name="application_using_location">Aplicação a usar a localização</string>
+<!--    <string name="location_updated">Localização Atualizada: %1$s</string>-->
+<!--    <string name="launch_activity">Abrir</string>-->
+<!--    <string name="close">Fechar</string>-->
+<!--    <string name="stop_location_updates">Parar localização</string>-->
+<!--    <string name="application_using_location">Aplicação a usar a localização</string>-->
 </resources>

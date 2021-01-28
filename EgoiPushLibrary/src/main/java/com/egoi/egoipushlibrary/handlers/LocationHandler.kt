@@ -22,9 +22,13 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 
+/**
+ * Class responsible for handling operations related to the location
+ */
 class LocationHandler(private val context: Context) {
     private var locationService: LocationService? = null
     private var bound: Boolean = false
+
 
     private val serviceConnection: ServiceConnection = object : ServiceConnection {
         override fun onServiceConnected(name: ComponentName, service: IBinder) {
@@ -70,7 +74,8 @@ class LocationHandler(private val context: Context) {
     }
 
     /**
-     * Request access to the location when the app is in background.
+     * Request access to the location when the app is in background. Only applicable for devices
+     * with Android Q or higher.
      */
     @RequiresApi(Build.VERSION_CODES.Q)
     fun requestBackgroundAccess() {
@@ -115,6 +120,10 @@ class LocationHandler(private val context: Context) {
         return false
     }
 
+    /**
+     * Enable/disable the location updates
+     * @param status The status to be defined
+     */
     fun setLocationUpdates(status: Boolean) {
         GlobalScope.launch {
             EgoiPushLibrary.getInstance().dataStore!!.edit { settings ->
@@ -123,6 +132,10 @@ class LocationHandler(private val context: Context) {
         }
     }
 
+    /**
+     * Check if the location updates are enabled
+     * @return True of False
+     */
     fun getLocationUpdates(): Boolean {
         val deferred = GlobalScope.async {
             EgoiPushLibrary.getInstance().dataStore!!.data.map { settings ->
@@ -139,6 +152,10 @@ class LocationHandler(private val context: Context) {
         return status
     }
 
+    /**
+     * Unbinds the foreground location service. Must be called when the application enters in
+     * foreground.
+     */
     fun unbindService() {
         if (bound) {
             context.unbindService(serviceConnection)
@@ -146,12 +163,10 @@ class LocationHandler(private val context: Context) {
         }
     }
 
-    fun removeLocationUpdates() {
-        if (locationService != null) {
-            context.stopService(Intent(EgoiPushLibrary.getInstance().context, LocationService::class.java))
-        }
-    }
-
+    /**
+     * Rebinds the foreground location service. Must be called when the application is minimized or
+     * closed.
+     */
     fun rebindService() {
         context.bindService(
             Intent(EgoiPushLibrary.getInstance().context, LocationService::class.java),
@@ -176,13 +191,30 @@ class LocationHandler(private val context: Context) {
         )
     }
 
+    /**
+     * Check if the user granted access to the location
+     * @return True or false
+     */
     private fun checkPermissions(): Boolean {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q &&
+            PackageManager.PERMISSION_GRANTED != ActivityCompat.checkSelfPermission(
+                EgoiPushLibrary.getInstance().context,
+                Manifest.permission.ACCESS_BACKGROUND_LOCATION
+            )
+        ) {
+            return false
+        }
+
         return PackageManager.PERMISSION_GRANTED == ActivityCompat.checkSelfPermission(
             EgoiPushLibrary.getInstance().context,
             Manifest.permission.ACCESS_FINE_LOCATION
         )
     }
 
+    /**
+     * Check if the user granted access to a specific permission
+     * @param permission The permission to be checked
+     */
     private fun hasPermission(permission: String): Boolean {
         if (permission == Manifest.permission.ACCESS_BACKGROUND_LOCATION &&
             Build.VERSION.SDK_INT < Build.VERSION_CODES.Q

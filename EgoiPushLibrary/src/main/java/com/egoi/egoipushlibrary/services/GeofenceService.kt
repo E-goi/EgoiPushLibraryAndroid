@@ -8,6 +8,9 @@ import com.egoi.egoipushlibrary.EgoiPushLibrary
 import com.google.android.gms.location.Geofence
 import com.google.android.gms.location.GeofencingEvent
 
+/**
+ * This service is responsible creating geofences
+ */
 class GeofenceService : Service() {
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {

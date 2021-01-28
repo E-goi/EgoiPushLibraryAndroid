@@ -17,8 +17,8 @@ class MainActivity : EgoiPushActivity() {
 
         EgoiPushLibrary.getInstance().config(
             context = this,
-            appId = 4867,
-            apiKey = "a411902635c2d794df1488bf9fc32a4814eb266e"
+            appId = 123,
+            apiKey = "abc"
         )
     }
 
@@ -43,7 +43,7 @@ class MainActivity : EgoiPushActivity() {
             EgoiPushLibrary.getInstance().firebase.registerToken(
                 token = token,
                 field = "email",
-                value = "jsilva+test123@e-goi.com"
+                value = "email@email.com"
             )
         }
     }

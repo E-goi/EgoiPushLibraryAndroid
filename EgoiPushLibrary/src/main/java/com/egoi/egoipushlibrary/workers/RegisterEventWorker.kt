@@ -11,6 +11,9 @@ import com.android.volley.toolbox.JsonObjectRequest
 import com.android.volley.toolbox.Volley
 import org.json.JSONObject
 
+/**
+ * Worker responsible for sending the interactions of the user with the notification to E-goi
+ */
 class RegisterEventWorker(
     context: Context,
     workerParams: WorkerParameters

@@ -9,8 +9,14 @@ import androidx.work.workDataOf
 import com.egoi.egoipushlibrary.EgoiPushLibrary
 import com.egoi.egoipushlibrary.workers.FireDialogWorker
 
+/**
+ * Receiver responsible for handling the clicks on notifications triggered by a geofence
+ */
 class NotificationEventReceiver : BroadcastReceiver() {
 
+    /**
+     * Check if the action is a notification click and displays a dialog to the user
+     */
     override fun onReceive(context: Context?, intent: Intent?) {
         if (intent?.action == "com.egoi.action.NOTIFICATION_OPEN") {
 

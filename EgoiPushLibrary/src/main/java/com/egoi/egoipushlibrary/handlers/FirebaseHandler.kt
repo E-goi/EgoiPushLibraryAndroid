@@ -11,17 +11,30 @@ import com.egoi.egoipushlibrary.workers.FireDialogWorker
 import com.egoi.egoipushlibrary.workers.RegisterTokenWorker
 import org.json.JSONObject
 
+/**
+ * Class responsible for handling every operation related with Firebase and the tokens
+ */
 class FirebaseHandler {
     private lateinit var message: EGoiMessage
 
     private var geoPush: Boolean = false
 
+    /**
+     * Update the token saved in the library
+     * @param token The token to be saved
+     */
     fun updateToken(token: String) {
         if (tokenRegistered && token != Companion.token) {
             registerToken(token = token)
         }
     }
 
+    /**
+     * Register the token in E-goi's contact list. If it already exists, updates the contact
+     * @param token The token to be registered in E-goi
+     * @param field The column in E-goi's list that will be written in (optional)
+     * @param value The value to be written in the field defined above (optional)
+     */
     fun registerToken(token: String, field: String = "", value: String = "") {
         Companion.token = token
 
@@ -52,6 +65,10 @@ class FirebaseHandler {
         )
     }
 
+    /**
+     * Handle notifications received. If it is a notification with geolocation, creates a geofence
+     * that will trigger the notification. Otherwise, displays a dialog to the user.
+     */
     fun messageReceived() {
         if (this::message.isInitialized) {
             if (!geoPush) {
@@ -62,6 +79,10 @@ class FirebaseHandler {
         }
     }
 
+    /**
+     * Build a local message with the data received from the remote notification
+     * @param intent The intent of the notification received
+     */
     fun processMessage(intent: Intent) {
         val extras = intent.extras
 
@@ -115,6 +136,11 @@ class FirebaseHandler {
         }
     }
 
+    /**
+     * Validate if the intent received was from a click on a notification. If it was, display a
+     * dialog to the user.
+     * @param intent The intent of the notification received
+     */
     fun showDialog(intent: Intent) {
         if (
             intent.action == "com.google.firebase.messaging.NOTIFICATION_OPEN" &&
@@ -124,6 +150,10 @@ class FirebaseHandler {
         }
     }
 
+    /**
+     * Display a dialog with the content of the notification to the user when the notification is
+     * pressed in the notification bar.
+     */
     private fun fireDialog() {
         EgoiPushLibrary.getInstance().requestWork(
             OneTimeWorkRequestBuilder<FireDialogWorker>()

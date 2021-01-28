@@ -2,7 +2,7 @@ plugins {
     id 'com.android.library'
     id 'kotlin-android'
     id 'maven-publish'
-    id "com.jfrog.bintray" version "1.8.5"
+    id 'com.jfrog.bintray' version '1.8.5'
 }
 
 android {
@@ -35,9 +35,23 @@ android {
     }
 }
 
-ext {
-    groupId = "com.egoi"
-    artifactId = "EgoiPushLibrary"
+tasks.withType(Javadoc) {
+    enabled = false
+}
+
+task javadoc(type: Javadoc) {
+    source = android.sourceSets.main.java.srcDirs
+    classpath += project.files(android.getBootClasspath().join(File.pathSeparator))
+}
+
+task sourcesJar(type: Jar) {
+    from android.sourceSets.main.java.srcDirs
+    getArchiveClassifier().set("sources")
+}
+
+task javadocJar(type: Jar, dependsOn: javadoc) {
+    getArchiveClassifier().set("javadoc")
+    from javadoc.destinationDir
 }
 
 afterEvaluate {
@@ -46,12 +60,15 @@ afterEvaluate {
             release(MavenPublication) {
                 from components.release
 
-                groupId = groupId
-                artifactId = artifactId
+                artifact javadocJar
+                artifact sourcesJar
+
+                groupId = "com.egoi"
+                artifactId = "egoipushlibrary"
                 version = "1.0.8"
 
                 pom {
-                    name = artifactId
+                    name = "EgoiPushLibrary"
                     description = "Android library responsible for handling notifications from E-goi."
                     url = "https://github.com/E-goi/EgoiPushLibraryAndroid"
 
@@ -76,6 +93,21 @@ afterEvaluate {
                         url = "https://github.com/E-goi/EgoiPushLibraryAndroid"
                     }
                 }
+
+                pom.withXml {
+                    def dependenciesNode = asNode()['dependencies'][0] ?: asNode().appendNode('dependencies')
+
+                    // Iterate over the implementation dependencies (we don't want the test ones), adding a <dependency> node for each
+                    configurations.implementation.allDependencies.each {
+                        // Ensure dependencies such as fileTree are not included.
+                        if (it.name != 'unspecified') {
+                            def dependencyNode = dependenciesNode.appendNode('dependency')
+                            dependencyNode.appendNode('groupId', it.group)
+                            dependencyNode.appendNode('artifactId', it.name)
+                            dependencyNode.appendNode('version', it.version)
+                        }
+                    }
+                }
             }
         }
     }
@@ -86,12 +118,13 @@ bintray {
     key = System.getenv("BINTRAY_KEY")
 
     publications = ["release"]
+
     publish = true
     override = true
 
     pkg {
         repo = "Maven"
-        name = artifactId
+        name = "EgoiPushLibrary"
         userOrg = System.getenv("BINTRAY_USER")
         licenses = ['Apache-2.0']
         websiteUrl = 'https://github.com/E-goi/EgoiPushLibraryAndroid'

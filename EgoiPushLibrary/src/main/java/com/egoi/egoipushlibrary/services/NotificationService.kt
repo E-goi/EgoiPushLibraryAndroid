@@ -17,6 +17,9 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.runBlocking
 import java.net.URL
 
+/**
+ * Service responsible for building and displaying local notifications
+ */
 class NotificationService : Service() {
     private lateinit var notificationChannel: NotificationChannel
     private lateinit var notificationManager: NotificationManager
@@ -37,7 +40,7 @@ class NotificationService : Service() {
     override fun onCreate() {
         super.onCreate()
 
-        configWorker()
+        configNotificationManager()
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
@@ -74,7 +77,11 @@ class NotificationService : Service() {
         return null
     }
 
-    private fun configWorker() {
+    /**
+     * Initializes the notification manager and creates a custom channel if the Android version is
+     * equal or higher to Android O
+     */
+    private fun configNotificationManager() {
         notificationManager = startNotificationManager()
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -83,6 +90,11 @@ class NotificationService : Service() {
         }
     }
 
+    /**
+     * Creates a custom notification channel. Only applicable if device's Android version is equal
+     * or higher to Android O
+     * @return The custom notification channel
+     */
     @RequiresApi(Build.VERSION_CODES.O)
     private fun startNotificationChannel(): NotificationChannel {
         val name = "egoi_channel_push"
@@ -94,10 +106,17 @@ class NotificationService : Service() {
         }
     }
 
+    /**
+     * Retrieves an instance of a notification manager
+     */
     private fun startNotificationManager(): NotificationManager {
         return EgoiPushLibrary.getInstance().context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
     }
 
+    /**
+     * Builds a local notification
+     * @return Local notification
+     */
     private fun buildNotification(): Notification {
         val intent =
             Intent(EgoiPushLibrary.getInstance().context, NotificationEventReceiver::class.java)
@@ -146,6 +165,10 @@ class NotificationService : Service() {
         return builder.build()
     }
 
+    /**
+     * Converts an url image to a bitmap
+     * @return The image in bitmap format
+     */
     private fun decodeImage(): Bitmap? {
         val url = URL(image)
 
@@ -163,6 +186,9 @@ class NotificationService : Service() {
         return bitmap
     }
 
+    /**
+     * Sends a local notification to the user's device
+     */
     private fun sendNotification() {
         notificationManager.notify(0, notification)
     }

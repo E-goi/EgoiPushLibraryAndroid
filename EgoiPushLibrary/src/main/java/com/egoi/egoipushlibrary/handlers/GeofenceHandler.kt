@@ -16,6 +16,9 @@ import com.google.android.gms.location.GeofencingRequest
 import com.google.android.gms.location.LocationServices
 import java.util.concurrent.TimeUnit
 
+/**
+ * Class responsible for every operation related to geofencing
+ */
 class GeofenceHandler(private val context: Context) {
     private val geofencingClient = LocationServices.getGeofencingClient(context)
     private val pendingNotifications: HashMap<String, EGoiMessage> = HashMap()
@@ -31,6 +34,10 @@ class GeofenceHandler(private val context: Context) {
         )
     }
 
+    /**
+     * Create a geofence that triggers a notification
+     * @param message The data of teh notification to be displayed
+     */
     fun addGeofence(message: EGoiMessage) {
         val geofence = Geofence.Builder()
             .setRequestId(message.data.messageHash)
@@ -57,7 +64,7 @@ class GeofenceHandler(private val context: Context) {
             geofencingClient.addGeofences(geofencingRequest, geofencePendingIntent).run {
                 addOnSuccessListener {
                     pendingNotifications[message.data.messageHash] = message
-                    Log.i("GEOFENCE", "CREATED")
+                    Log.d("GEOFENCE", "CREATED")
                 }
 
                 addOnFailureListener {
@@ -67,6 +74,10 @@ class GeofenceHandler(private val context: Context) {
         }
     }
 
+    /**
+     * Displays a notification when a geofence is triggered
+     * @param id The id of the notification that will be displayed
+     */
     fun sendGeoNotification(id: String) {
         val message: EGoiMessage? = pendingNotifications[id]
 

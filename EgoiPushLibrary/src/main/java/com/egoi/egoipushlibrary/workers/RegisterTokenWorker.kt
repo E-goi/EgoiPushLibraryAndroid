@@ -15,12 +15,15 @@ import java.io.*
 import java.net.URL
 import javax.net.ssl.HttpsURLConnection
 
+/**
+ * Worker responsible for registering/updating the Firebase token in E-goi's list
+ */
 class RegisterTokenWorker(
     context: Context,
     workerParams: WorkerParameters
 ) : Worker(context, workerParams) {
     private val queue: RequestQueue = Volley.newRequestQueue(context)
-    private val domain = "https://btg-push-wrapper.egoiapp.com"
+    private val domain = "https://push-wrapper.egoiapp.com"
     private val registerTokenUrl = "${domain}/token"
 
     override fun doWork(): Result {
