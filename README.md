@@ -59,7 +59,10 @@ the user to the location access requests.
 
 ### Metadata
 
-### [Location Notification]()
+### Location Notification
+
+![Location Notification](.github/assets/location-notification.jpg)
+
 #### com.egoi.egoipushlibrary.notification_icon (1)
 
 You should declare this metadata if you want to change the logo that is displayed on the notification. Otherwise, it will display a default logo provided by us.
@@ -113,8 +116,8 @@ You should declare this metadata if you want to customize the text that is displ
    android:resource=">>Your resource goes here (i.e. @string/stop_location_updates)<<" />
 ```
 
-### [Dialog]()
-
+### Dialog
+![Dialog](.github/assets/dialog.jpg)
 #### com.egoi.egoipushlibrary.close_label (1)
 
 You should declare this metadata if you want to customize the text that is displayed on the close button of the dialog that is presented to the user. If no value is provided, a default one in english will be used.
