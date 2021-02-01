@@ -27,8 +27,9 @@ There are a few things you must configure in your app in order for the library t
 This library is available through jcenter. To install it, simply add the following line to your Podfile:
 
 ```gradle
-implementation 'com.egoi:egoipushlibrary:1.0.8'
+implementation 'com.egoi:egoipushlibrary:1.0.X'
 ```
+X = latest version
 
 After installing, you can initialize the library in the **MainActivity** with following instruction:
 
