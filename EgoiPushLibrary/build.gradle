@@ -65,7 +65,7 @@ afterEvaluate {
 
                 groupId = "com.egoi"
                 artifactId = "egoipushlibrary"
-                version = "1.0.10"
+                version = "1.0.11"
 
                 pom {
                     name = "EgoiPushLibrary"
@@ -132,9 +132,9 @@ bintray {
         githubRepo = 'E-goi/EgoiPushLibraryAndroid'
 
         version {
-            name = "1.0.10"
+            name = "1.0.11"
             released = new Date()
-            vcsTag = "1.0.10"
+            vcsTag = "1.0.11"
         }
     }
 }
