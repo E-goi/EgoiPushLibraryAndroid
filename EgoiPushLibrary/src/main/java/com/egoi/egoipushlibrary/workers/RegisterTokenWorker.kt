@@ -30,7 +30,7 @@ class RegisterTokenWorker(
         val payload = JSONObject()
 
         payload.put("api_key", inputData.getString("apiKey"))
-        payload.put("app_id", inputData.getInt("appId", 0))
+        payload.put("app_id", inputData.getString("appId"))
         payload.put("token", inputData.getString("token"))
         payload.put("os", "android")
 

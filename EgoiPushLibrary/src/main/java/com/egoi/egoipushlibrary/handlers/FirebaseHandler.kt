@@ -4,6 +4,7 @@ import android.content.Intent
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.workDataOf
 import com.egoi.egoipushlibrary.EgoiPushLibrary
+import com.egoi.egoipushlibrary.services.NotificationService
 import com.egoi.egoipushlibrary.structures.EGoiMessage
 import com.egoi.egoipushlibrary.structures.EGoiMessageData
 import com.egoi.egoipushlibrary.structures.EGoiMessageNotification
@@ -72,7 +73,7 @@ class FirebaseHandler {
     fun messageReceived() {
         if (this::message.isInitialized) {
             if (!geoPush) {
-                fireDialog()
+                fireNotification()
             } else {
                 EgoiPushLibrary.getInstance().addGeofence(message)
             }
@@ -99,7 +100,7 @@ class FirebaseHandler {
                     listId = extras.getString("list-id")?.toInt() ?: 0,
                     contactId = extras.getString("contact-id") ?: "",
                     accountId = extras.getString("account-id")?.toInt() ?: 0,
-                    applicationId = extras.getString("application-id")?.toInt() ?: 0,
+                    applicationId = extras.getString("application-id") ?: "",
                     messageId = extras.getString("message-id")?.toInt() ?: 0,
                     deviceId = extras.getString("device-id")?.toInt() ?: 0,
                 )
@@ -175,6 +176,26 @@ class FirebaseHandler {
                 )
                 .build()
         )
+    }
+
+    private fun fireNotification() {
+        val intent = Intent(EgoiPushLibrary.getInstance().context, NotificationService::class.java)
+        intent.action = "com.egoi.action.SEND_NOTIFICATION"
+        // Dialog Data
+        intent.putExtra("title", message.notification.title)
+        intent.putExtra("text", message.notification.body)
+        intent.putExtra("image", message.notification.image)
+        intent.putExtra("actionType", message.data.actions.type)
+        intent.putExtra("actionText", message.data.actions.text)
+        intent.putExtra("actionUrl", message.data.actions.url)
+        // Event Data
+        intent.putExtra("apiKey", EgoiPushLibrary.getInstance().apiKey)
+        intent.putExtra("appId", EgoiPushLibrary.getInstance().appId)
+        intent.putExtra("contactId", message.data.contactId)
+        intent.putExtra("messageHash", message.data.messageHash)
+        intent.putExtra("deviceId", message.data.deviceId)
+
+        EgoiPushLibrary.getInstance().context.startService(intent)
     }
 
     companion object {

@@ -27,7 +27,7 @@ class EgoiPushLibrary {
 
     // [configs]
     lateinit var context: Context
-    lateinit var appId: Number
+    lateinit var appId: String
     lateinit var apiKey: String
 
     var geoEnabled: Boolean = false
@@ -58,7 +58,7 @@ class EgoiPushLibrary {
      */
     fun config(
         context: Context,
-        appId: Int,
+        appId: String,
         apiKey: String,
         geoEnabled: Boolean = true,
         deepLinkCallback: ((String) -> Unit)? = null
