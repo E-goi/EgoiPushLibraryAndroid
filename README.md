@@ -9,18 +9,16 @@ There are a few things you must configure in your app in order for the library t
 1. You must have Firebase installed and configured on your app. The easiest way to do this is by following the steps in
    this [article](https://firebase.google.com/docs/android/setup#assistant).
 
-
 2. You must create a service that extends Firebase's FirebaseMessagingService and declare it in your app's manifest. You
    can use the FirebaseService
    file [located in the demo app](app/src/main/java/com/egoi/egoipushlibraryandroid/FirebaseService.kt)
    and see how to declare in
-   the [demo app's manifest](app/src/main/AndroidManifest.xml)
-   .
+   the [demo app's manifest](app/src/main/AndroidManifest.xml).
+   
+3. The activity that will be used to open the app from a notification must have the property **exported** set to **true**.
 
-
-3. You must have an [E-goi account](https://login.egoiapp.com/signup/email) with
-   a [Push application configured](https://helpdesk.e-goi.com/650296-Integrar-o-E-goi-com-a-app-m%C3%B3vel-da-minha-empresa-para-enviar-push)
-   .
+4. You must have an [E-goi account](https://login.egoiapp.com/signup/email) with
+   a [Push application configured](https://helpdesk.e-goi.com/650296-Integrar-o-E-goi-com-a-app-m%C3%B3vel-da-minha-empresa-para-enviar-push).
 
 ## Install
 
@@ -43,13 +41,14 @@ class MainActivity : EgoiPushActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        EgoiPushLibrary.getInstance().config(
-            context = this,
-            appId = 123,
+        EgoiPushLibrary.getInstance(applicationContext).config(
+            activityContext = this,
+            activityPackage = "com.egoi.egoipushlibraryandroid",
+            activityName = "MainActivity",
+            appId = "abc",
             apiKey = "abc",
-            geoEnabled = true,
-            deepLinkCallback = fun (link: String) {
-               Log.d("DEEP_LINK", link)
+            deepLinkCallback = fun (link: EgoiNotification) {
+                Log.d("DEEP_LINK", link.toString())
             }
         )
     }
@@ -134,6 +133,31 @@ You should declare this metadata if you want to customize the text that is displ
 
 ### Configurations
 
+#### EgoiPushLibrary.getInstance()
+
+Retrieve the current instance of the library.
+
+<table>
+<thead>
+<tr>
+   <th>Property</th>
+   <th>Type</th>
+   <th>Description</th>
+   <th>Required</th>
+   <th>Default</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+   <td>context</td>
+   <td>Context</td>
+   <td>The context that will be used in the library to execute operations such as requesting access to the location of the device.</td>
+   <td>true</td>
+   <td>---</td>
+</tr>
+</tbody>
+</table>
+
 #### EgoiPushLibrary.getInstance().config()
 
 Responsible for initializing the library. The call of this method is required.
@@ -150,9 +174,23 @@ Responsible for initializing the library. The call of this method is required.
 </thead>
 <tbody>
 <tr>
-   <td>context</td>
+   <td>activityContext</td>
    <td>Activity</td>
-   <td>The context that will be used in the library to execute operations such as requesting access to the location of the device.</td>
+   <td>The context of the activity that will be used to display the notification dialog on the app.</td>
+   <td>true</td>
+   <td>---</td>
+</tr>
+<tr>
+   <td>activityPackage</td>
+   <td>String</td>
+   <td>The package of the activity that will be used to open the app from the notification.</td>
+   <td>true</td>
+   <td>---</td>
+</tr>
+<tr>
+   <td>activityName</td>
+   <td>String</td>
+   <td>The activity that will be used to open the app from the notification.</td>
    <td>true</td>
    <td>---</td>
 </tr>
@@ -171,15 +209,8 @@ Responsible for initializing the library. The call of this method is required.
    <td>---</td>
 </tr>
 <tr>
-   <td>geoEnabled</td>
-   <td>Bool</td>
-   <td>Flag that enables or disabled location related functionalities.</td>
-   <td>false</td>
-   <td>true</td>
-</tr>
-<tr>
    <td>deepLinkCallback</td>
-   <td>(string) -> Unit</td>
+   <td>(EgoiNotification) -> Unit</td>
    <td>Callback to be invoked when the action type of the notification is a deeplink</td>
    <td>false</td>
    <td>true</td>
