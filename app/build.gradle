@@ -39,5 +39,5 @@ dependencies {
     implementation 'androidx.constraintlayout:constraintlayout:2.0.4'
     implementation 'com.google.android.material:material:1.3.0'
     implementation 'com.google.firebase:firebase-messaging:21.0.1'
-    implementation project(':EgoiPushLibrary')
+    compile(group: 'EgoiPushLibrary.com.egoi', name: 'egoipushlibrary', version: '1.0.0-SNAPSHOT')
 }

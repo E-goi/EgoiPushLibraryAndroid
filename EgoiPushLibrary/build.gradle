@@ -2,6 +2,7 @@ plugins {
     id 'com.android.library'
     id 'kotlin-android'
     id 'maven-publish'
+    id 'com.jfrog.artifactory' version '4.20.0'
     id 'com.jfrog.bintray' version '1.8.5'
 }
 
@@ -57,7 +58,7 @@ task javadocJar(type: Jar, dependsOn: javadoc) {
 afterEvaluate {
     publishing {
         publications {
-            release(MavenPublication) {
+            aar(MavenPublication) {
                 from components.release
 
                 artifact javadocJar
@@ -65,7 +66,7 @@ afterEvaluate {
 
                 groupId = "com.egoi"
                 artifactId = "egoipushlibrary"
-                version = "1.0.12"
+                version = currentVersion
 
                 pom {
                     name = "EgoiPushLibrary"
@@ -108,33 +109,31 @@ afterEvaluate {
                         }
                     }
                 }
+
+                artifact("$buildDir/outputs/aar/${project.getName()}-release.aar")
             }
         }
     }
+
+    artifactoryPublish {
+        publications(publishing.publications.aar)
+    }
 }
 
-bintray {
-    user = System.getenv("BINTRAY_USER")
-    key = System.getenv("BINTRAY_KEY")
+artifactory {
+    clientConfig.setIncludeEnvVars(true)
 
-    publications = ["release"]
-
-    publish = true
-    override = true
-
-    pkg {
-        repo = "Maven"
-        name = "EgoiPushLibrary"
-        userOrg = System.getenv("BINTRAY_USER")
-        licenses = ['Apache-2.0']
-        websiteUrl = 'https://github.com/E-goi/EgoiPushLibraryAndroid'
-        vcsUrl = 'https://github.com/E-goi/EgoiPushLibraryAndroid.git'
-        githubRepo = 'E-goi/EgoiPushLibraryAndroid'
-
-        version {
-            name = "1.0.12"
-            released = new Date()
-            vcsTag = "1.0.12"
+    contextUrl = 'https://egoiintegrations.jfrog.io/artifactory/artifactory-gradle-dev-local/'
+    publish {
+        repository {
+            repoKey = 'EgoiPushLibrary'
+            username = "${artifactory_user}"
+            password = "${artifactory_password}"
+        }
+        defaults {
+            publishArtifacts = true
+            properties = ['qa.level' : 'basic', 'dev.team' : 'mobile']
+            publishPom = true
         }
     }
 }
