@@ -65,7 +65,7 @@ afterEvaluate {
 
                 groupId = "com.egoi"
                 artifactId = "egoipushlibrary"
-                version = "1.0.11"
+                version = "1.0.12"
 
                 pom {
                     name = "EgoiPushLibrary"
@@ -132,9 +132,9 @@ bintray {
         githubRepo = 'E-goi/EgoiPushLibraryAndroid'
 
         version {
-            name = "1.0.11"
+            name = "1.0.12"
             released = new Date()
-            vcsTag = "1.0.11"
+            vcsTag = "1.0.12"
         }
     }
 }
@@ -148,7 +148,6 @@ dependencies {
     implementation 'androidx.work:work-runtime-ktx:2.5.0'
     implementation 'androidx.datastore:datastore-preferences:1.0.0-alpha06'
     implementation 'androidx.localbroadcastmanager:localbroadcastmanager:1.0.0'
-    implementation 'com.android.volley:dc-volley:1.1.0'
-    implementation 'com.google.android.material:material:1.2.1'
+    implementation 'com.google.android.material:material:1.3.0'
     implementation 'com.google.android.gms:play-services-location:17.1.0'
 }

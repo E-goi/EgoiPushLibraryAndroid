@@ -2,74 +2,111 @@ package com.egoi.egoipushlibrary.handlers
 
 import android.Manifest
 import android.app.Activity
-import android.content.ComponentName
-import android.content.Context
+import android.app.PendingIntent
 import android.content.Intent
-import android.content.ServiceConnection
 import android.content.pm.PackageManager
 import android.os.Build
-import android.os.IBinder
+import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.core.app.ActivityCompat
-import androidx.datastore.preferences.core.edit
 import com.egoi.egoipushlibrary.EgoiPushLibrary
-import com.egoi.egoipushlibrary.services.LocationService
-import com.egoi.egoipushlibrary.services.LocationService.LocalBinder
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.async
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
+import com.egoi.egoipushlibrary.receivers.LocationBroadcastReceiver
+import com.egoi.egoipushlibrary.services.LocationUpdatesIntentService
+import com.google.android.gms.location.FusedLocationProviderClient
+import com.google.android.gms.location.LocationRequest
+import com.google.android.gms.location.LocationServices
 
 /**
  * Class responsible for handling operations related to the location
  */
-class LocationHandler(private val context: Context) {
-    private var locationService: LocationService? = null
-    private var bound: Boolean = false
+class LocationHandler(
+    private val instance: EgoiPushLibrary
+) {
+    private var fusedLocationClient: FusedLocationProviderClient =
+        LocationServices.getFusedLocationProviderClient(instance.context)
 
-
-    private val serviceConnection: ServiceConnection = object : ServiceConnection {
-        override fun onServiceConnected(name: ComponentName, service: IBinder) {
-            val binder: LocalBinder = service as LocalBinder
-            locationService = binder.getService()
-            bound = true
-
-            if (checkPermissions() && getLocationUpdates()) {
-                locationService?.requestLocationUpdates()
-            } else {
-                locationService?.removeLocationUpdates()
-            }
-        }
-
-        override fun onServiceDisconnected(name: ComponentName) {
-            locationService = null
-            bound = false
-        }
+    private val locationRequest: LocationRequest? = LocationRequest.create()?.apply {
+        interval = UPDATE_INTERVAL_IN_MILLISECONDS
+        fastestInterval = FASTEST_UPDATE_INTERVAL_IN_MILLISECONDS
+        priority = LocationRequest.PRIORITY_HIGH_ACCURACY
     }
 
     init {
-        if (checkPermissions()) {
-            context.bindService(
-                Intent(EgoiPushLibrary.getInstance().context, LocationService::class.java),
-                serviceConnection,
-                Context.BIND_AUTO_CREATE
+        if (checkPermissions() && EgoiPushLibrary.getInstance(instance.context).dataStore.getDSConfigs()?.locationUpdates == true) {
+            requestLocationUpdates()
+        }
+    }
+
+    private fun requestLocationUpdates() {
+        try {
+            Log.d(TAG, "Starting location updates...")
+
+            fusedLocationClient.requestLocationUpdates(locationRequest, getPendingIntent())
+        } catch (e: SecurityException) {
+            e.printStackTrace()
+        }
+    }
+
+    fun removeLocationUpdates() {
+        Log.d(TAG, "Removing location updates...")
+
+        stopService()
+
+        fusedLocationClient.removeLocationUpdates(getPendingIntent())
+
+        EgoiPushLibrary.getInstance(instance.context).dataStore.setDSLocationUpdates(false)
+    }
+
+    fun startService() {
+        if (checkPermissions() && EgoiPushLibrary.getInstance(instance.context).dataStore.getDSConfigs()?.locationUpdates == true) {
+            instance.context.startService(
+                Intent(
+                    instance.context,
+                    LocationUpdatesIntentService::class.java
+                )
             )
         }
+    }
+
+    fun stopService() {
+        if (checkPermissions() && EgoiPushLibrary.getInstance(instance.context).dataStore.getDSConfigs()?.locationUpdates == true) {
+            instance.context.stopService(
+                Intent(
+                    instance.context,
+                    LocationUpdatesIntentService::class.java
+                )
+            )
+        }
+    }
+
+    private fun getPendingIntent(): PendingIntent {
+        val intent = Intent(instance.context, LocationBroadcastReceiver::class.java)
+        intent.action = LocationBroadcastReceiver.ACTION_PROCESS_UPDATES
+
+        return PendingIntent.getBroadcast(
+            instance.context,
+            0,
+            intent,
+            PendingIntent.FLAG_UPDATE_CURRENT
+        )
     }
 
     /**
      * Request access to the location when the app is in foreground.
      */
     fun requestForegroundAccess() {
-        if (!hasPermission(Manifest.permission.ACCESS_FINE_LOCATION)) {
-            val permissions = arrayOf(Manifest.permission.ACCESS_FINE_LOCATION)
+        if (!checkPermissions()) {
+            if (!hasPermission(Manifest.permission.ACCESS_FINE_LOCATION)) {
+                val permissions = arrayOf(Manifest.permission.ACCESS_FINE_LOCATION)
 
-            requestAccess(permissions, 1)
+                requestAccess(permissions, 1)
+            } else {
+                instance.dataStore.setDSLocationUpdates(status = true)
+                requestLocationUpdates()
+            }
         } else {
-            setLocationUpdates(true)
-            locationService?.requestLocationUpdates()
+            instance.dataStore.setDSLocationUpdates(status = true)
+            requestLocationUpdates()
         }
     }
 
@@ -79,13 +116,18 @@ class LocationHandler(private val context: Context) {
      */
     @RequiresApi(Build.VERSION_CODES.Q)
     fun requestBackgroundAccess() {
-        if (!hasPermission(Manifest.permission.ACCESS_BACKGROUND_LOCATION)) {
-            val permissions = arrayOf(Manifest.permission.ACCESS_BACKGROUND_LOCATION)
+        if (!checkPermissions()) {
+            if (!hasPermission(Manifest.permission.ACCESS_BACKGROUND_LOCATION)) {
+                val permissions = arrayOf(Manifest.permission.ACCESS_BACKGROUND_LOCATION)
 
-            requestAccess(permissions, 2)
+                requestAccess(permissions, 2)
+            } else {
+                instance.dataStore.setDSLocationUpdates(status = true)
+                requestLocationUpdates()
+            }
         } else {
-            setLocationUpdates(true)
-            locationService?.requestLocationUpdates()
+            instance.dataStore.setDSLocationUpdates(status = true)
+            requestLocationUpdates()
         }
     }
 
@@ -107,72 +149,12 @@ class LocationHandler(private val context: Context) {
             permissions.contains(Manifest.permission.ACCESS_FINE_LOCATION) ||
             permissions.contains(Manifest.permission.ACCESS_BACKGROUND_LOCATION)
         ) {
-            setLocationUpdates(true)
+            instance.dataStore.setDSLocationUpdates(status = true)
 
-            context.bindService(
-                Intent(EgoiPushLibrary.getInstance().context, LocationService::class.java),
-                serviceConnection,
-                Context.BIND_AUTO_CREATE
-            )
             return true
         }
 
         return false
-    }
-
-    /**
-     * Enable/disable the location updates
-     * @param status The status to be defined
-     */
-    fun setLocationUpdates(status: Boolean) {
-        GlobalScope.launch {
-            EgoiPushLibrary.getInstance().dataStore!!.edit { settings ->
-                settings[EgoiPushLibrary.getInstance().locationUpdatesKey] = status
-            }
-        }
-    }
-
-    /**
-     * Check if the location updates are enabled
-     * @return True of False
-     */
-    fun getLocationUpdates(): Boolean {
-        val deferred = GlobalScope.async {
-            EgoiPushLibrary.getInstance().dataStore!!.data.map { settings ->
-                settings[EgoiPushLibrary.getInstance().locationUpdatesKey] ?: true
-            }.first()
-        }
-
-        val status: Boolean
-
-        runBlocking {
-            status = deferred.await()
-        }
-
-        return status
-    }
-
-    /**
-     * Unbinds the foreground location service. Must be called when the application enters in
-     * foreground.
-     */
-    fun unbindService() {
-        if (bound) {
-            context.unbindService(serviceConnection)
-            bound = false
-        }
-    }
-
-    /**
-     * Rebinds the foreground location service. Must be called when the application is minimized or
-     * closed.
-     */
-    fun rebindService() {
-        context.bindService(
-            Intent(EgoiPushLibrary.getInstance().context, LocationService::class.java),
-            serviceConnection,
-            Context.BIND_AUTO_CREATE
-        )
     }
 
     /**
@@ -185,7 +167,7 @@ class LocationHandler(private val context: Context) {
             return
 
         ActivityCompat.requestPermissions(
-            context as Activity,
+            instance.activityContext as Activity,
             permissions,
             requestCode
         )
@@ -195,10 +177,10 @@ class LocationHandler(private val context: Context) {
      * Check if the user granted access to the location
      * @return True or false
      */
-    private fun checkPermissions(): Boolean {
+    fun checkPermissions(): Boolean {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q &&
             PackageManager.PERMISSION_GRANTED != ActivityCompat.checkSelfPermission(
-                EgoiPushLibrary.getInstance().context,
+                instance.context,
                 Manifest.permission.ACCESS_BACKGROUND_LOCATION
             )
         ) {
@@ -206,7 +188,7 @@ class LocationHandler(private val context: Context) {
         }
 
         return PackageManager.PERMISSION_GRANTED == ActivityCompat.checkSelfPermission(
-            EgoiPushLibrary.getInstance().context,
+            instance.context,
             Manifest.permission.ACCESS_FINE_LOCATION
         )
     }
@@ -222,7 +204,16 @@ class LocationHandler(private val context: Context) {
             return true
         }
 
-        return ActivityCompat.checkSelfPermission(context, permission) ==
-                PackageManager.PERMISSION_GRANTED
+        return ActivityCompat.checkSelfPermission(
+            instance.context,
+            permission
+        ) == PackageManager.PERMISSION_GRANTED
+    }
+
+    companion object {
+        private const val TAG: String = "LocationHandler"
+        const val UPDATE_INTERVAL_IN_MILLISECONDS: Long = 10000
+        const val FASTEST_UPDATE_INTERVAL_IN_MILLISECONDS: Long =
+            UPDATE_INTERVAL_IN_MILLISECONDS / 2
     }
 }

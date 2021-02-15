@@ -12,7 +12,7 @@ open class EgoiPushActivity : AppCompatActivity() {
      */
     override fun onStart() {
         super.onStart()
-        EgoiPushLibrary.getInstance().rebindLocationService()
+        EgoiPushLibrary.getInstance(this).location.stopService()
     }
 
     /**
@@ -20,7 +20,7 @@ open class EgoiPushActivity : AppCompatActivity() {
      * location is being accessed by the application.
      */
     override fun onStop() {
-        EgoiPushLibrary.getInstance().unbindLocationService()
+        EgoiPushLibrary.getInstance(this).location.startService()
         super.onStop()
     }
 
@@ -33,6 +33,6 @@ open class EgoiPushActivity : AppCompatActivity() {
         permissions: Array<out String>,
         grantResults: IntArray
     ) {
-        EgoiPushLibrary.getInstance().handleLocationAccessResponse(permissions, grantResults)
+        EgoiPushLibrary.getInstance(this).location.handleAccessResponse(permissions, grantResults)
     }
 }

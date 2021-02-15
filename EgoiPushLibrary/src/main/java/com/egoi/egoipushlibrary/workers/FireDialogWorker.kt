@@ -10,64 +10,64 @@ import androidx.work.Worker
 import androidx.work.WorkerParameters
 import androidx.work.workDataOf
 import com.egoi.egoipushlibrary.EgoiPushLibrary
+import com.egoi.egoipushlibrary.structures.EgoiNotification
 
 /**
  * Worker responsible for creating and displaying a dialog to the user
  */
 class FireDialogWorker(
-    context: Context,
+    val context: Context,
     workerParams: WorkerParameters
 ) : Worker(context, workerParams) {
-    private lateinit var apiKey: String
-    private lateinit var appId: Number
-    private lateinit var contactId: String
-    private lateinit var messageHash: String
-    private lateinit var deviceId: Number
+    private lateinit var egoiNotification: EgoiNotification
 
     override fun doWork(): Result {
-        val builder: AlertDialog.Builder = AlertDialog.Builder(EgoiPushLibrary.getInstance().context)
+        val builder: AlertDialog.Builder =
+            AlertDialog.Builder(EgoiPushLibrary.getInstance(context).activityContext)
 
         // Dialog data
-        val title = inputData.getString("title")
-        val body = inputData.getString("body")
-        val actionType = inputData.getString("actionType")
-        val actionText = inputData.getString("actionText")
-        val actionUrl = inputData.getString("actionUrl")
+        egoiNotification.title = inputData.getString("title") ?: ""
+        egoiNotification.body = inputData.getString("body") ?: ""
+        egoiNotification.actionType = inputData.getString("actionType") ?: ""
+        egoiNotification.actionText = inputData.getString("actionText") ?: ""
+        egoiNotification.actionUrl = inputData.getString("actionUrl") ?: ""
 
         // Event data
-        apiKey = inputData.getString("apiKey") ?: ""
-        appId = inputData.getInt("appId", 0)
-        contactId = inputData.getString("contactId") ?: ""
-        messageHash = inputData.getString("messageHash") ?: ""
-        deviceId = inputData.getInt("deviceId", 0)
+        egoiNotification.apiKey = inputData.getString("apiKey") ?: ""
+        egoiNotification.appId = inputData.getString("appId") ?: ""
+        egoiNotification.contactId = inputData.getString("contactId") ?: ""
+        egoiNotification.messageHash = inputData.getString("messageHash") ?: ""
+        egoiNotification.deviceId = inputData.getInt("deviceId", 0)
 
-        builder.setTitle(title)
-        builder.setMessage(body)
+        builder.setTitle(egoiNotification.title)
+        builder.setMessage(egoiNotification.body)
 
-        builder.setNegativeButton(EgoiPushLibrary.getInstance().closeLabel)
+        builder.setNegativeButton(EgoiPushLibrary.getInstance(context).closeLabel)
         { _, _ ->
             registerEvent(event = "canceled")
         }
 
-        if (actionType != null && actionText != null && actionUrl != null) {
-            builder.setPositiveButton(actionText)
+        if (egoiNotification.actionType != "" && egoiNotification.actionText != "" && egoiNotification.actionUrl != "") {
+            builder.setPositiveButton(egoiNotification.actionText)
             { _, _ ->
                 registerEvent(event = "open")
 
-                if (actionType == "deeplink") {
-                    EgoiPushLibrary.getInstance().deepLinkCallback?.let { it(actionUrl) }
+                if (egoiNotification.actionType == "deeplink") {
+                    EgoiPushLibrary.getInstance(context).deepLinkCallback?.let {
+                        it(egoiNotification)
+                    }
                 } else {
-                    EgoiPushLibrary.getInstance().context.startActivity(
+                    EgoiPushLibrary.getInstance(context).activityContext.startActivity(
                         Intent(
                             Intent.ACTION_VIEW,
-                            Uri.parse(actionUrl)
+                            Uri.parse(egoiNotification.actionUrl)
                         )
                     )
                 }
             }
         }
 
-        val mainHandler = Handler(EgoiPushLibrary.getInstance().context.mainLooper)
+        val mainHandler = Handler(EgoiPushLibrary.getInstance(context).activityContext.mainLooper)
 
         val runnable = Runnable {
             builder.show()
@@ -79,16 +79,16 @@ class FireDialogWorker(
     }
 
     private fun registerEvent(event: String) {
-        EgoiPushLibrary.getInstance().requestWork(
-            OneTimeWorkRequestBuilder<RegisterEventWorker>()
+        EgoiPushLibrary.getInstance(context).requestWork(
+            workRequest = OneTimeWorkRequestBuilder<RegisterEventWorker>()
                 .setInputData(
                     workDataOf(
-                        "apiKey" to apiKey,
-                        "appId" to appId,
-                        "contactId" to contactId,
-                        "messageHash" to messageHash,
+                        "apiKey" to egoiNotification.apiKey,
+                        "appId" to egoiNotification.appId,
+                        "contactId" to egoiNotification.contactId,
+                        "messageHash" to egoiNotification.messageHash,
                         "event" to event,
-                        "deviceId" to deviceId
+                        "deviceId" to egoiNotification.deviceId
                     )
                 )
                 .build()

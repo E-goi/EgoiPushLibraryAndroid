@@ -9,17 +9,17 @@ import com.google.firebase.messaging.RemoteMessage
 class FirebaseService : FirebaseMessagingService() {
 
     override fun onNewToken(token: String) {
-        EgoiPushLibrary.getInstance().firebase.updateToken(token)
+        EgoiPushLibrary.getInstance(applicationContext).firebase.updateToken(token)
         Log.d(TAG, token)
     }
 
     override fun onMessageReceived(message: RemoteMessage) {
-        EgoiPushLibrary.getInstance().firebase.messageReceived()
+        EgoiPushLibrary.getInstance(applicationContext).firebase.messageReceived()
     }
 
     override fun handleIntent(intent: Intent?) {
         if (intent != null) {
-            EgoiPushLibrary.getInstance().firebase.processMessage(intent)
+            EgoiPushLibrary.getInstance(applicationContext).firebase.processMessage(intent)
         }
 
         super.handleIntent(intent)
@@ -27,7 +27,7 @@ class FirebaseService : FirebaseMessagingService() {
 
     override fun handleIntentOnMainThread(intent: Intent?): Boolean {
         if (intent != null) {
-            EgoiPushLibrary.getInstance().firebase.showDialog(intent)
+            EgoiPushLibrary.getInstance(applicationContext).firebase.showDialog(intent)
         }
 
         return super.handleIntentOnMainThread(intent)

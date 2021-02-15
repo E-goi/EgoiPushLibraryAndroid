@@ -2,15 +2,17 @@ package com.egoi.egoipushlibrary.handlers
 
 import android.Manifest
 import android.app.PendingIntent
-import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.util.Log
 import androidx.core.app.ActivityCompat
+import androidx.work.OneTimeWorkRequestBuilder
+import androidx.work.workDataOf
 import com.egoi.egoipushlibrary.EgoiPushLibrary
 import com.egoi.egoipushlibrary.services.GeofenceService
-import com.egoi.egoipushlibrary.services.NotificationService
 import com.egoi.egoipushlibrary.structures.EGoiMessage
+import com.egoi.egoipushlibrary.structures.EgoiPreferences
+import com.egoi.egoipushlibrary.workers.FireNotificationWorker
 import com.google.android.gms.location.Geofence
 import com.google.android.gms.location.GeofencingRequest
 import com.google.android.gms.location.LocationServices
@@ -19,15 +21,18 @@ import java.util.concurrent.TimeUnit
 /**
  * Class responsible for every operation related to geofencing
  */
-class GeofenceHandler(private val context: Context) {
-    private val geofencingClient = LocationServices.getGeofencingClient(context)
+class GeofenceHandler(
+    private val instance: EgoiPushLibrary
+) {
+    private val geofencingClient =
+        LocationServices.getGeofencingClient(instance.context)
     private val pendingNotifications: HashMap<String, EGoiMessage> = HashMap()
     private val geofencePendingIntent: PendingIntent by lazy {
-        val intent = Intent(context, GeofenceService::class.java)
+        val intent = Intent(instance.context, GeofenceService::class.java)
         intent.action = "com.egoi.actions.ACTION_GEOFENCE_EVENT"
 
         PendingIntent.getService(
-            context,
+            instance.context,
             0,
             intent,
             PendingIntent.FLAG_UPDATE_CURRENT
@@ -57,7 +62,7 @@ class GeofenceHandler(private val context: Context) {
             .build()
 
         if (ActivityCompat.checkSelfPermission(
-                context,
+                instance.context,
                 Manifest.permission.ACCESS_FINE_LOCATION
             ) == PackageManager.PERMISSION_GRANTED
         ) {
@@ -82,28 +87,36 @@ class GeofenceHandler(private val context: Context) {
         val message: EGoiMessage? = pendingNotifications[id]
 
         if (message != null) {
-            val intent = Intent(context, NotificationService::class.java)
-            intent.action = "com.egoi.action.SEND_NOTIFICATION"
-            // Dialog Data
-            intent.putExtra("title", message.notification.title)
-            intent.putExtra("text", message.notification.body)
-            intent.putExtra("image", message.notification.image)
-            intent.putExtra("actionType", message.data.actions.type)
-            intent.putExtra("actionText", message.data.actions.text)
-            intent.putExtra("actionUrl", message.data.actions.url)
-            // Event Data
-            intent.putExtra("apiKey", EgoiPushLibrary.getInstance().apiKey)
-            intent.putExtra("appId", EgoiPushLibrary.getInstance().appId)
-            intent.putExtra("contactId", message.data.contactId)
-            intent.putExtra("messageHash", message.data.messageHash)
-            intent.putExtra("deviceId", message.data.deviceId)
+            val preferences: EgoiPreferences? =
+                instance.dataStore.getDSPreferences()
 
-            context.startService(intent)
+            if (preferences != null) {
+                instance.requestWork(
+                    workRequest = OneTimeWorkRequestBuilder<FireNotificationWorker>()
+                        .setInputData(
+                            workDataOf(
+                                "title" to message.notification.title,
+                                "text" to message.notification.body,
+                                "image" to message.notification.image,
+                                "actionType" to message.data.actions.type,
+                                "actionText" to message.data.actions.text,
+                                "actionUrl" to message.data.actions.url,
+                                "apiKey" to preferences.apiKey,
+                                "appId" to preferences.appId,
+                                "contactId" to message.data.contactId,
+                                "messageHash" to message.data.messageHash,
+                                "deviceId" to message.data.deviceId,
+                                "messageId" to message.data.messageId
+                            )
+                        )
+                        .build()
+                )
 
-            val list: List<String> = mutableListOf(id)
+                val list: List<String> = mutableListOf(id)
 
-            geofencingClient.removeGeofences(list)
-            pendingNotifications.remove(id)
+                geofencingClient.removeGeofences(list)
+                pendingNotifications.remove(id)
+            }
         }
     }
 }

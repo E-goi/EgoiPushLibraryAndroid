@@ -4,12 +4,6 @@ import android.content.Context
 import android.util.Log
 import androidx.work.Worker
 import androidx.work.WorkerParameters
-import com.android.volley.DefaultRetryPolicy
-import com.android.volley.Request
-import com.android.volley.RequestQueue
-import com.android.volley.toolbox.JsonObjectRequest
-import com.android.volley.toolbox.Volley
-import com.egoi.egoipushlibrary.handlers.FirebaseHandler
 import org.json.JSONObject
 import java.io.*
 import java.net.URL
@@ -22,47 +16,72 @@ class RegisterTokenWorker(
     context: Context,
     workerParams: WorkerParameters
 ) : Worker(context, workerParams) {
-    private val queue: RequestQueue = Volley.newRequestQueue(context)
-    private val domain = "https://push-wrapper.egoiapp.com"
+    private val domain = "https://dev-push-wrapper.egoiapp.com"
     private val registerTokenUrl = "${domain}/token"
 
     override fun doWork(): Result {
-        val payload = JSONObject()
+        var urlConnection: HttpsURLConnection? = null
+        var success = false
 
-        payload.put("api_key", inputData.getString("apiKey"))
-        payload.put("app_id", inputData.getString("appId"))
-        payload.put("token", inputData.getString("token"))
-        payload.put("os", "android")
+        try {
+            val payload = JSONObject()
+            payload.put("api_key", inputData.getString("apiKey"))
+            payload.put("app_id", inputData.getString("appId"))
+            payload.put("token", inputData.getString("token"))
+            payload.put("os", "android")
 
-        val twoStepsData = inputData.getString("twoStepsData")
+            val twoStepsData = inputData.getString("twoStepsData")
 
-        if (twoStepsData != null) {
-            val data = JSONObject(twoStepsData)
+            if (twoStepsData != null) {
+                val data = JSONObject(twoStepsData)
 
-            if (data.getString("field") != "" &&
-                data.getString("value") !== ""
-            ) {
-                payload.put("two_steps_data", data)
+                if (data.getString("field") !== "" &&
+                    data.getString("value") !== ""
+                ) {
+                    payload.put("two_steps_data", data)
+                }
             }
+
+            val url = URL(registerTokenUrl)
+
+            urlConnection = url.openConnection() as HttpsURLConnection
+            urlConnection.setRequestProperty("Content-Type", "application/json")
+            urlConnection.requestMethod = "POST"
+            urlConnection.doOutput = true
+            urlConnection.doInput = true
+            urlConnection.setChunkedStreamingMode(0)
+
+            val out = BufferedOutputStream(urlConnection.outputStream)
+
+            val writer = BufferedWriter(OutputStreamWriter(out, "UTF-8"))
+            writer.write(payload.toString())
+            writer.flush()
+
+            val code: Int = urlConnection.responseCode
+
+            if (code != 200) {
+                throw IOException("Invalid response from server $code")
+            }
+
+            val result: String =
+                urlConnection.inputStream.bufferedReader().use(BufferedReader::readText)
+
+            val resultJson = JSONObject(result)
+
+            if (resultJson.get("data") == "OK") {
+                success = true
+            }
+        } catch (e: Exception) {
+            e.message?.let { Log.d("TOKEN_EXCEPTION", it) }
+        } finally {
+            Log.d("TOKEN_REGISTER", success.toString())
+            urlConnection?.disconnect()
         }
 
-        val request = JsonObjectRequest(Request.Method.POST, registerTokenUrl, payload,
-            { response: JSONObject ->
-                FirebaseHandler.tokenRegistered = response["data"] == "OK"
-            },
-            { error ->
-                Log.e("ERROR", error.message ?: "")
-            }
-        )
-
-        request.retryPolicy = DefaultRetryPolicy(
-            2000,
-            1,
-            DefaultRetryPolicy.DEFAULT_BACKOFF_MULT
-        )
-
-        queue.add(request)
-
-        return Result.success()
+        return if (success) {
+            Result.success()
+        } else {
+            Result.failure()
+        }
     }
 }

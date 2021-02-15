@@ -1,115 +1,110 @@
 package com.egoi.egoipushlibrary
 
+import android.app.ActivityManager
+import android.app.ActivityManager.RunningAppProcessInfo
 import android.content.Context
 import android.content.pm.PackageManager
-import android.os.Build
-import androidx.annotation.RequiresApi
-import androidx.datastore.core.DataStore
-import androidx.datastore.preferences.core.Preferences
-import androidx.datastore.preferences.core.booleanPreferencesKey
-import androidx.datastore.preferences.createDataStore
 import androidx.work.WorkManager
 import androidx.work.WorkRequest
+import com.egoi.egoipushlibrary.handlers.DataStoreHandler
 import com.egoi.egoipushlibrary.handlers.FirebaseHandler
 import com.egoi.egoipushlibrary.handlers.GeofenceHandler
 import com.egoi.egoipushlibrary.handlers.LocationHandler
 import com.egoi.egoipushlibrary.structures.EGoiMessage
+import com.egoi.egoipushlibrary.structures.EgoiNotification
+import com.egoi.egoipushlibrary.structures.EgoiPreferences
 
 
 /**
  * This is the main class of the library. Every method that can be used, is called through here.
  */
 class EgoiPushLibrary {
-    private lateinit var geofenceHandler: GeofenceHandler
-    private lateinit var locationHandler: LocationHandler
-
-    val firebase = FirebaseHandler()
-
-    // [configs]
     lateinit var context: Context
-    lateinit var appId: String
-    lateinit var apiKey: String
+    lateinit var activityContext: Context
 
-    var geoEnabled: Boolean = false
-    var deepLinkCallback: ((String) -> Unit)? = null
-    // [end_configs]
+    // [handlers]
+    lateinit var dataStore: DataStoreHandler
+    lateinit var location: LocationHandler
+    lateinit var geofence: GeofenceHandler
+    lateinit var firebase: FirebaseHandler
+    // [end_handlers]
 
-    // Resources
+    private var libraryInitialized: Boolean = false
+
+    // [user_callbacks]
+    var deepLinkCallback: ((EgoiNotification) -> Unit)? = null
+    // [end_user_callbacks]
+
+    // [resources]
     var notificationIcon: Int = 0
+    // [end_resources]
 
-    // Strings
+    // [strings]
     var locationUpdatedLabel: Int = 0
     var closeLabel: Int = 0
     var launchActivityLabel: Int = 0
     var stopLocationUpdatesLabel: Int = 0
     var applicationUsingLocationLabel: Int = 0
+    // [end_strings]
 
-    var dataStore: DataStore<Preferences>? = null
-    val locationUpdatesKey = booleanPreferencesKey("location_updates")
+    fun initLibrary(context: Context) {
+        this.context = context
+
+        if (!libraryInitialized) {
+            libraryInitialized = true
+
+            dataStore = DataStoreHandler(this)
+            location = LocationHandler(this)
+            geofence = GeofenceHandler(this)
+            firebase = FirebaseHandler(this)
+
+            readMetadata()
+        }
+    }
 
     /**
      * Library initializer
-     * @param context The context to use in the library
      * @param appId The ID of the E-goi's push app
      * @param apiKey The API key of the E-goi's account
-     * @param geoEnabled Flag that enables/disables location functionalities
      * @param deepLinkCallback Callback to be invoked when the action type of the notification is a
      * deeplink
      */
     fun config(
-        context: Context,
+        activityContext: Context,
+        activityPackage: String,
+        activityName: String,
         appId: String,
         apiKey: String,
-        geoEnabled: Boolean = true,
-        deepLinkCallback: ((String) -> Unit)? = null
+        deepLinkCallback: ((EgoiNotification) -> Unit)? = null
     ) {
-        this.context = context
-        this.appId = appId
-        this.apiKey = apiKey
-        this.geoEnabled = geoEnabled
+        this.activityContext = activityContext
+
         this.deepLinkCallback = deepLinkCallback
 
-        readMetadata()
+        val egoiPreferences = EgoiPreferences(
+            appId = appId,
+            apiKey = apiKey,
+            activityPackage = activityPackage,
+            activityName = "$activityPackage.$activityName"
+        )
 
-        if (geoEnabled) {
-            dataStore = this.context.createDataStore(
-                name = "settings"
-            )
-            geofenceHandler = GeofenceHandler(this.context)
-            locationHandler = LocationHandler(this.context)
+        egoiPreferences.encode()?.let {
+            dataStore.setDSData(category = DataStoreHandler.PREFERENCES, data = it)
         }
     }
 
-    /**
-     * Request the user for permission to access the location when the app is in the foreground
-     */
-    fun requestForegroundLocationAccess() {
-        if (geoEnabled) {
-            locationHandler.requestForegroundAccess()
-        }
-    }
+    fun isAppOnForeground(): Boolean {
+        val activityManager = context.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
+        val appProcesses = activityManager.runningAppProcesses ?: return false
+        val packageName = context.packageName
 
-    /**
-     * Request the user for permission to access the location when the app is in the background/closed.
-     * Only applicable for devices with Android Q or higher.
-     */
-    @RequiresApi(Build.VERSION_CODES.Q)
-    fun requestBackgroundLocationAccess() {
-        if (geoEnabled) {
-            locationHandler.requestBackgroundAccess()
+        for (appProcess in appProcesses) {
+            if (appProcess.importance == RunningAppProcessInfo.IMPORTANCE_FOREGROUND && appProcess.processName == packageName) {
+                return true
+            }
         }
-    }
 
-    /**
-     * Handle the response of the user to the request for location access
-     * @param permissions The permissions requested
-     * @param grantResults The response of the user for each permission
-     */
-    fun handleLocationAccessResponse(
-        permissions: Array<out String>,
-        grantResults: IntArray
-    ): Boolean {
-        return locationHandler.handleAccessResponse(permissions, grantResults)
+        return false
     }
 
     /**
@@ -117,8 +112,8 @@ class EgoiPushLibrary {
      * @param message The data of the notification received
      */
     fun addGeofence(message: EGoiMessage) {
-        if (geoEnabled) {
-            geofenceHandler.addGeofence(message)
+        if (location.checkPermissions()) {
+            geofence.addGeofence(message)
         }
     }
 
@@ -127,8 +122,8 @@ class EgoiPushLibrary {
      * @param id The ID of the notification to be sent
      */
     fun sendGeoNotification(id: String) {
-        if (geoEnabled) {
-            geofenceHandler.sendGeoNotification(id)
+        if (location.checkPermissions()) {
+            geofence.sendGeoNotification(id)
         }
     }
 
@@ -143,43 +138,11 @@ class EgoiPushLibrary {
     }
 
     /**
-     * Enable or disable the location updates
-     */
-    fun setLocationUpdates(status: Boolean) {
-        if (geoEnabled) {
-            locationHandler.setLocationUpdates(status)
-        }
-    }
-
-    /**
-     * Get the status of the location updates
-     */
-    fun getLocationUpdates(): Boolean {
-        return locationHandler.getLocationUpdates()
-    }
-
-    /**
-     * Unbind the foreground location service
-     */
-    fun unbindLocationService() {
-        if (geoEnabled) {
-            locationHandler.unbindService()
-        }
-    }
-
-    /**
-     * Rebind the foreground location service
-     */
-    fun rebindLocationService() {
-        locationHandler.rebindService()
-    }
-
-    /**
      * Read the properties of the metadata
      */
-    private fun readMetadata() {
-        this.context.packageManager.getApplicationInfo(
-            this.context.packageName,
+    fun readMetadata() {
+        context.packageManager.getApplicationInfo(
+            context.packageName,
             PackageManager.GET_META_DATA
         ).apply {
             notificationIcon = metaData.getInt(
@@ -221,7 +184,9 @@ class EgoiPushLibrary {
          * Retrieve the static instance of the library
          * @return The library instance
          */
-        fun getInstance(): EgoiPushLibrary {
+        fun getInstance(context: Context): EgoiPushLibrary {
+            library.initLibrary(context)
+
             return library
         }
     }

@@ -4,18 +4,21 @@ import android.content.Intent
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.workDataOf
 import com.egoi.egoipushlibrary.EgoiPushLibrary
-import com.egoi.egoipushlibrary.services.NotificationService
 import com.egoi.egoipushlibrary.structures.EGoiMessage
 import com.egoi.egoipushlibrary.structures.EGoiMessageData
 import com.egoi.egoipushlibrary.structures.EGoiMessageNotification
+import com.egoi.egoipushlibrary.structures.EgoiPreferences
 import com.egoi.egoipushlibrary.workers.FireDialogWorker
+import com.egoi.egoipushlibrary.workers.FireNotificationWorker
 import com.egoi.egoipushlibrary.workers.RegisterTokenWorker
 import org.json.JSONObject
 
 /**
  * Class responsible for handling every operation related with Firebase and the tokens
  */
-class FirebaseHandler {
+class FirebaseHandler(
+    private val instance: EgoiPushLibrary
+) {
     private lateinit var message: EGoiMessage
 
     private var geoPush: Boolean = false
@@ -52,18 +55,23 @@ class FirebaseHandler {
             twoStepsData.put("value", value)
         }
 
-        EgoiPushLibrary.getInstance().requestWork(
-            OneTimeWorkRequestBuilder<RegisterTokenWorker>()
-                .setInputData(
-                    workDataOf(
-                        "apiKey" to EgoiPushLibrary.getInstance().apiKey,
-                        "appId" to EgoiPushLibrary.getInstance().appId,
-                        "token" to token,
-                        "twoStepsData" to twoStepsData.toString()
+        val preferences: EgoiPreferences? =
+            instance.dataStore.getDSPreferences()
+
+        if (preferences != null) {
+            instance.requestWork(
+                workRequest = OneTimeWorkRequestBuilder<RegisterTokenWorker>()
+                    .setInputData(
+                        workDataOf(
+                            "apiKey" to preferences.apiKey,
+                            "appId" to preferences.appId,
+                            "token" to token,
+                            "twoStepsData" to twoStepsData.toString()
+                        )
                     )
-                )
-                .build()
-        )
+                    .build()
+            )
+        }
     }
 
     /**
@@ -75,7 +83,7 @@ class FirebaseHandler {
             if (!geoPush) {
                 fireNotification()
             } else {
-                EgoiPushLibrary.getInstance().addGeofence(message)
+                instance.addGeofence(message)
             }
         }
     }
@@ -121,10 +129,10 @@ class FirebaseHandler {
 
             // [Handle geolocation]
             if (
-                EgoiPushLibrary.getInstance().geoEnabled &&
-                extras.containsKey("latitude") &&
-                extras.containsKey("longitude") &&
-                extras.containsKey("radius")
+                instance.location.checkPermissions() &&
+                extras.containsKey("latitude") && extras.getString("latitude") != "" &&
+                extras.containsKey("longitude") && extras.getString("longitude") != "" &&
+                extras.containsKey("radius") && extras.getString("radius") != ""
             ) {
                 this.message.data.geo.latitude =
                     extras.getString("latitude")?.toDouble() ?: Double.NaN
@@ -156,46 +164,59 @@ class FirebaseHandler {
      * pressed in the notification bar.
      */
     private fun fireDialog() {
-        EgoiPushLibrary.getInstance().requestWork(
-            OneTimeWorkRequestBuilder<FireDialogWorker>()
-                .setInputData(
-                    workDataOf(
-                        /* Dialog Data */
-                        "title" to message.notification.title,
-                        "body" to message.notification.body,
-                        "actionType" to message.data.actions.type,
-                        "actionText" to message.data.actions.text,
-                        "actionUrl" to message.data.actions.url,
-                        /* Event Data*/
-                        "apiKey" to EgoiPushLibrary.getInstance().apiKey,
-                        "appId" to EgoiPushLibrary.getInstance().appId,
-                        "contactId" to message.data.contactId,
-                        "messageHash" to message.data.messageHash,
-                        "deviceId" to message.data.deviceId
+        val preferences: EgoiPreferences? =
+            instance.dataStore.getDSPreferences()
+
+        if (preferences != null) {
+            instance.requestWork(
+                workRequest = OneTimeWorkRequestBuilder<FireDialogWorker>()
+                    .setInputData(
+                        workDataOf(
+                            /* Dialog Data */
+                            "title" to message.notification.title,
+                            "body" to message.notification.body,
+                            "actionType" to message.data.actions.type,
+                            "actionText" to message.data.actions.text,
+                            "actionUrl" to message.data.actions.url,
+                            /* Event Data*/
+                            "apiKey" to preferences.apiKey,
+                            "appId" to preferences.appId,
+                            "contactId" to message.data.contactId,
+                            "messageHash" to message.data.messageHash,
+                            "deviceId" to message.data.deviceId
+                        )
                     )
-                )
-                .build()
-        )
+                    .build()
+            )
+        }
     }
 
     private fun fireNotification() {
-        val intent = Intent(EgoiPushLibrary.getInstance().context, NotificationService::class.java)
-        intent.action = "com.egoi.action.SEND_NOTIFICATION"
-        // Dialog Data
-        intent.putExtra("title", message.notification.title)
-        intent.putExtra("text", message.notification.body)
-        intent.putExtra("image", message.notification.image)
-        intent.putExtra("actionType", message.data.actions.type)
-        intent.putExtra("actionText", message.data.actions.text)
-        intent.putExtra("actionUrl", message.data.actions.url)
-        // Event Data
-        intent.putExtra("apiKey", EgoiPushLibrary.getInstance().apiKey)
-        intent.putExtra("appId", EgoiPushLibrary.getInstance().appId)
-        intent.putExtra("contactId", message.data.contactId)
-        intent.putExtra("messageHash", message.data.messageHash)
-        intent.putExtra("deviceId", message.data.deviceId)
+        val preferences: EgoiPreferences? =
+            instance.dataStore.getDSPreferences()
 
-        EgoiPushLibrary.getInstance().context.startService(intent)
+        if (preferences != null) {
+            instance.requestWork(
+                workRequest = OneTimeWorkRequestBuilder<FireNotificationWorker>()
+                    .setInputData(
+                        workDataOf(
+                            "title" to message.notification.title,
+                            "text" to message.notification.body,
+                            "image" to message.notification.image,
+                            "actionType" to message.data.actions.type,
+                            "actionText" to message.data.actions.text,
+                            "actionUrl" to message.data.actions.url,
+                            "apiKey" to preferences.apiKey,
+                            "appId" to preferences.appId,
+                            "contactId" to message.data.contactId,
+                            "messageHash" to message.data.messageHash,
+                            "deviceId" to message.data.deviceId,
+                            "messageId" to message.data.messageId
+                        )
+                    )
+                    .build()
+            )
+        }
     }
 
     companion object {

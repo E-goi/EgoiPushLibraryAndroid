@@ -33,7 +33,7 @@ class GeofenceService : Service() {
                     }
                 }
 
-                EgoiPushLibrary.getInstance().sendGeoNotification(fenceId)
+                EgoiPushLibrary.getInstance(applicationContext).sendGeoNotification(fenceId)
             }
         }
 

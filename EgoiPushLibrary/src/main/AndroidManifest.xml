@@ -8,9 +8,7 @@
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
 
     <application>
-        <uses-library
-            android:name="org.apache.http.legacy"
-            android:required="false" />
+        <activity android:name=".EgoiPushActivity" />
 
         <service
             android:name=".services.GeofenceService"
@@ -22,15 +20,7 @@
         </service>
 
         <service
-            android:name=".services.NotificationService"
-            android:exported="false">
-            <intent-filter>
-                <action android:name="com.egoi.actions.SEND_NOTIFICATION" />
-            </intent-filter>
-        </service>
-
-        <service
-            android:name=".services.LocationService"
+            android:name=".services.LocationUpdatesIntentService"
             android:exported="true"
             android:enabled="true"
             android:permission="android.permission.ACCESS_FINE_LOCATION|android.permission.FOREGROUND_SERVICE"
@@ -42,7 +32,23 @@
 
         <receiver
             android:name=".receivers.NotificationEventReceiver"
-            android:enabled="true" />
+            android:enabled="true"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.egoi.action.NOTIFICATION_OPEN" />
+                <action android:name="com.egoi.action.NOTIFICATION_EVENT_VIEW" />
+                <action android:name="com.egoi.action.NOTIFICATION_EVENT_CLOSE" />
+            </intent-filter>
+        </receiver>
+
+        <receiver
+            android:name=".receivers.LocationBroadcastReceiver"
+            android:enabled="true"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.egoi.action.PROCESS_UPDATES" />
+            </intent-filter>
+        </receiver>
     </application>
 
 </manifest>
