@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.egoi.egoipushlibraryandroid">
+    package="com.egoiapp.egoipushlibraryandroid">
 
     <application
         android:allowBackup="false"
@@ -10,28 +10,28 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.EgoiPushLibraryAndroid">
 
-        <meta-data
-            android:name="com.egoi.egoipushlibrary.notification_icon"
-            android:resource="@drawable/ic_launch" />
+<!--        <meta-data-->
+<!--            android:name="com.egoiapp.egoipushlibrary.notification_icon"-->
+<!--            android:resource="@drawable/ic_launch" />-->
 
         <meta-data
-            android:name="com.egoi.egoipushlibrary.location_updated_label"
+            android:name="com.egoiapp.egoipushlibrary.location_updated_label"
             android:resource="@string/location_updated" />
 
         <meta-data
-            android:name="com.egoi.egoipushlibrary.close_label"
+            android:name="com.egoiapp.egoipushlibrary.close_label"
             android:resource="@string/close" />
 
         <meta-data
-            android:name="com.egoi.egoipushlibrary.launch_activity_label"
+            android:name="com.egoiapp.egoipushlibrary.launch_activity_label"
             android:resource="@string/launch_activity" />
 
         <meta-data
-            android:name="com.egoi.egoipushlibrary.stop_location_updates_label"
+            android:name="com.egoiapp.egoipushlibrary.stop_location_updates_label"
             android:resource="@string/stop_location_updates" />
 
         <meta-data
-            android:name="com.egoi.egoipushlibrary.application_using_location_label"
+            android:name="com.egoiapp.egoipushlibrary.application_using_location_label"
             android:resource="@string/application_using_location" />
 
         <activity

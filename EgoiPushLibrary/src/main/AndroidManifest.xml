@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.egoi.egoipushlibrary">
+    package="com.egoiapp.egoipushlibrary">
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
@@ -15,7 +15,7 @@
             android:exported="false"
             android:enabled="true">
             <intent-filter>
-                <action android:name="com.egoi.actions.ACTION_GEOFENCE_EVENT" />
+                <action android:name="com.egoiapp.actions.ACTION_GEOFENCE_EVENT" />
             </intent-filter>
         </service>
 
@@ -26,7 +26,7 @@
             android:permission="android.permission.ACCESS_FINE_LOCATION|android.permission.FOREGROUND_SERVICE"
             android:foregroundServiceType="location">
             <intent-filter>
-                <action android:name="com.egoi.actions.LOCATION_UPDATE" />
+                <action android:name="com.egoiapp.actions.LOCATION_UPDATE" />
             </intent-filter>
         </service>
 
@@ -35,9 +35,9 @@
             android:enabled="true"
             android:exported="false">
             <intent-filter>
-                <action android:name="com.egoi.action.NOTIFICATION_OPEN" />
-                <action android:name="com.egoi.action.NOTIFICATION_EVENT_VIEW" />
-                <action android:name="com.egoi.action.NOTIFICATION_EVENT_CLOSE" />
+                <action android:name="com.egoiapp.action.NOTIFICATION_OPEN" />
+                <action android:name="com.egoiapp.action.NOTIFICATION_EVENT_VIEW" />
+                <action android:name="com.egoiapp.action.NOTIFICATION_EVENT_CLOSE" />
             </intent-filter>
         </receiver>
 
@@ -46,7 +46,7 @@
             android:enabled="true"
             android:exported="false">
             <intent-filter>
-                <action android:name="com.egoi.action.PROCESS_UPDATES" />
+                <action android:name="com.egoiapp.action.PROCESS_UPDATES" />
             </intent-filter>
         </receiver>
     </application>

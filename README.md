@@ -11,7 +11,7 @@ There are a few things you must configure in your app in order for the library t
 
 2. You must create a service that extends Firebase's FirebaseMessagingService and declare it in your app's manifest. You
    can use the FirebaseService
-   file [located in the demo app](app/src/main/java/com/egoi/egoipushlibraryandroid/FirebaseService.kt)
+   file [located in the demo app](app/src/main/java/com/egoiapp/egoipushlibraryandroid/FirebaseService.kt)
    and see how to declare in
    the [demo app's manifest](app/src/main/AndroidManifest.xml).
    
@@ -22,18 +22,17 @@ There are a few things you must configure in your app in order for the library t
 
 ## Install
 
-This library is available through jcenter. To install it, simply add the following line to your Podfile:
+This library is available through Maven Central. To install it, simply add the following line to your Podfile:
 
 ```gradle
-implementation 'com.egoi:egoipushlibrary:1.0.X'
+implementation 'com.egoiapp.egoipushlibrary:egoipushlibrary:1.0.0'
 ```
-X = latest version
 
 After installing, you can initialize the library in the **MainActivity** with following instruction:
 
 ```kotlin
-import com.egoi.egoipushlibrary.EgoiPushActivity
-import com.egoi.egoipushlibrary.EgoiPushLibrary
+import com.egoiapp.egoipushlibrary.EgoiPushActivity
+import com.egoiapp.egoipushlibrary.EgoiPushLibrary
 
 class MainActivity : EgoiPushActivity() {
 
@@ -43,7 +42,7 @@ class MainActivity : EgoiPushActivity() {
 
         EgoiPushLibrary.getInstance(applicationContext).config(
             activityContext = this,
-            activityPackage = "com.egoi.egoipushlibraryandroid",
+            activityPackage = "com.egoiapp.egoipushlibraryandroid",
             activityName = "MainActivity",
             appId = "abc",
             apiKey = "abc",
@@ -52,6 +51,7 @@ class MainActivity : EgoiPushActivity() {
             }
         )
     }
+}
 ```
 
 **Note:** In the example above you can see that the MainActivity is extending our **EgoiPushActivity**. This is not
@@ -64,7 +64,7 @@ the user to the location access requests.
 
 ![Location Notification](.github/assets/location-notification.jpg)
 
-#### com.egoi.egoipushlibrary.notification_icon (1)
+#### com.egoiapp.egoipushlibrary.notification_icon (1)
 
 You should declare this metadata if you want to change the logo that is displayed on the notification. Otherwise, it will display a default logo provided by us.
 
@@ -73,59 +73,59 @@ notification with the app.
 
 ```xml
 <meta-data
-    android:name="com.egoi.egoipushlibrary.notification_icon"
+    android:name="com.egoiapp.egoipushlibrary.notification_icon"
     android:resource=">>Your resource goes here (i.e. @drawable/ic_launch)<<" />
 ```
 
-#### com.egoi.egoipushlibrary.application_using_location_label (2)
+#### com.egoiapp.egoipushlibrary.application_using_location_label (2)
 
 You should declare this metadata if you want to customize the title of the notification that is displayed to the user when the app is in background and accessing the location. If this metadata is not declared, it will display a default message in english.
 
 ```xml
 <meta-data
-   android:name="com.egoi.egoipushlibrary.application_using_location_label"
+   android:name="com.egoiapp.egoipushlibrary.application_using_location_label"
    android:resource=">>Your resource goes here (i.e. @string/application_using_location)<<" />
 ```
 
-#### com.egoi.egoipushlibrary.location_updated_label (3)
+#### com.egoiapp.egoipushlibrary.location_updated_label (3)
 
 You should declare this metadata if you want to customize the text of the notification that is displayed to the user when the app is in background and accessing the location. If this metadata is not declared, it will display a default message in english.
 
 ```xml
 <meta-data
-   android:name="com.egoi.egoipushlibrary.location_updated_label"
+   android:name="com.egoiapp.egoipushlibrary.location_updated_label"
    android:resource=">>Your resource goes here (i.e. @string/location_updated)<<" />
 ```
 
-#### com.egoi.egoipushlibrary.launch_activity_label (4)
+#### com.egoiapp.egoipushlibrary.launch_activity_label (4)
 
 You should declare this metadata if you want to customize the text that is displayed on the action button that opens the app on the location notification. If no value is provided, a default one in english will be used.
 
 ```xml
 <meta-data
-   android:name="com.egoi.egoipushlibrary.launch_activity_label"
+   android:name="com.egoiapp.egoipushlibrary.launch_activity_label"
    android:resource=">>Your resource goes here (i.e. @string/launch_activity)<<" />
 ```
 
-#### com.egoi.egoipushlibrary.stop_location_updates_label (5)
+#### com.egoiapp.egoipushlibrary.stop_location_updates_label (5)
 
 You should declare this metadata if you want to customize the text that is displayed on the action button that stops the location updates on the location notification. If no value is provided, a default one in english will be used.
 
 ```xml
 <meta-data
-   android:name="com.egoi.egoipushlibrary.stop_location_updates_label"
+   android:name="com.egoiapp.egoipushlibrary.stop_location_updates_label"
    android:resource=">>Your resource goes here (i.e. @string/stop_location_updates)<<" />
 ```
 
 ### Dialog
 ![Dialog](.github/assets/dialog.jpg)
-#### com.egoi.egoipushlibrary.close_label (1)
+#### com.egoiapp.egoipushlibrary.close_label (1)
 
 You should declare this metadata if you want to customize the text that is displayed on the close button of the dialog that is presented to the user. If no value is provided, a default one in english will be used.
 
 ```xml
 <meta-data
-   android:name="com.egoi.egoipushlibrary.close_label"
+   android:name="com.egoiapp.egoipushlibrary.close_label"
    android:resource=">>Your resource goes here (i.e. @string/close)<<" />
 ```
 
