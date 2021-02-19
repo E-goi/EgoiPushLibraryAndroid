@@ -183,7 +183,8 @@ class FirebaseHandler(
                             "appId" to preferences.appId,
                             "contactId" to message.data.contactId,
                             "messageHash" to message.data.messageHash,
-                            "deviceId" to message.data.deviceId
+                            "deviceId" to message.data.deviceId,
+                            "messageId" to message.data.messageId
                         )
                     )
                     .build()

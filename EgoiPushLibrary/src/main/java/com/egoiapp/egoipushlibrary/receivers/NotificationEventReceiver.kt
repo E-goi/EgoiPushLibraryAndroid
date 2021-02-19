@@ -47,17 +47,19 @@ class NotificationEventReceiver : BroadcastReceiver() {
                     }
                 }
 
-                egoiNotification.title = extras.getString("title") ?: ""
-                egoiNotification.body = extras.getString("body") ?: ""
-                egoiNotification.actionType = extras.getString("actionType") ?: ""
-                egoiNotification.actionText = extras.getString("actionText") ?: ""
-                egoiNotification.actionUrl = extras.getString("actionUrl") ?: ""
-                egoiNotification.apiKey = extras.getString("apiKey") ?: ""
-                egoiNotification.appId = extras.getString("appId") ?: ""
-                egoiNotification.contactId = extras.getString("contactId") ?: ""
-                egoiNotification.messageHash = extras.getString("messageHash") ?: ""
-                egoiNotification.deviceId = extras.getInt("deviceId", 0)
-                egoiNotification.messageId = extras.getInt("messageId", 0)
+                egoiNotification = EgoiNotification(
+                    title = extras.getString("title") ?: "",
+                    body = extras.getString("body") ?: "",
+                    actionType = extras.getString("actionType") ?: "",
+                    actionText = extras.getString("actionText") ?: "",
+                    actionUrl = extras.getString("actionUrl") ?: "",
+                    apiKey = extras.getString("apiKey") ?: "",
+                    appId = extras.getString("appId") ?: "",
+                    contactId = extras.getString("contactId") ?: "",
+                    messageHash = extras.getString("messageHash") ?: "",
+                    deviceId = extras.getInt("deviceId", 0),
+                    messageId = extras.getInt("messageId", 0)
+                )
 
                 if (intent.action == NOTIFICATION_OPEN) {
                     EgoiPushLibrary.getInstance(context).requestWork(
@@ -76,7 +78,8 @@ class NotificationEventReceiver : BroadcastReceiver() {
                                     "appId" to egoiNotification.appId,
                                     "contactId" to egoiNotification.contactId,
                                     "messageHash" to egoiNotification.messageHash,
-                                    "deviceId" to egoiNotification.deviceId
+                                    "deviceId" to egoiNotification.deviceId,
+                                    "messageId" to egoiNotification.messageId
                                 )
                             )
                             .build()

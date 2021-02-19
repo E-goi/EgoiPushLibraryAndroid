@@ -25,19 +25,19 @@ class FireDialogWorker(
         val builder: AlertDialog.Builder =
             AlertDialog.Builder(EgoiPushLibrary.getInstance(context).activityContext)
 
-        // Dialog data
-        egoiNotification.title = inputData.getString("title") ?: ""
-        egoiNotification.body = inputData.getString("body") ?: ""
-        egoiNotification.actionType = inputData.getString("actionType") ?: ""
-        egoiNotification.actionText = inputData.getString("actionText") ?: ""
-        egoiNotification.actionUrl = inputData.getString("actionUrl") ?: ""
-
-        // Event data
-        egoiNotification.apiKey = inputData.getString("apiKey") ?: ""
-        egoiNotification.appId = inputData.getString("appId") ?: ""
-        egoiNotification.contactId = inputData.getString("contactId") ?: ""
-        egoiNotification.messageHash = inputData.getString("messageHash") ?: ""
-        egoiNotification.deviceId = inputData.getInt("deviceId", 0)
+        egoiNotification = EgoiNotification(
+            title = inputData.getString("title") ?: "",
+            body = inputData.getString("body") ?: "",
+            actionType = inputData.getString("actionType") ?: "",
+            actionText = inputData.getString("actionText") ?: "",
+            actionUrl = inputData.getString("actionUrl") ?: "",
+            apiKey = inputData.getString("apiKey") ?: "",
+            appId = inputData.getString("appId") ?: "",
+            contactId = inputData.getString("contactId") ?: "",
+            messageHash = inputData.getString("messageHash") ?: "",
+            deviceId = inputData.getInt("deviceId", 0),
+            messageId = inputData.getInt("messageId", 0)
+        )
 
         builder.setTitle(egoiNotification.title)
         builder.setMessage(egoiNotification.body)

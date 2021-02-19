@@ -42,10 +42,11 @@ class LocationUpdatesIntentService : Service() {
     }
 
     private fun createLocationRequest() {
-        locationRequest = LocationRequest()
-        locationRequest.interval = LocationHandler.UPDATE_INTERVAL_IN_MILLISECONDS
-        locationRequest.fastestInterval = LocationHandler.FASTEST_UPDATE_INTERVAL_IN_MILLISECONDS
-        locationRequest.priority = LocationRequest.PRIORITY_HIGH_ACCURACY
+        locationRequest = LocationRequest.create().apply {
+            interval = LocationHandler.UPDATE_INTERVAL_IN_MILLISECONDS
+            fastestInterval = LocationHandler.FASTEST_UPDATE_INTERVAL_IN_MILLISECONDS
+            priority = LocationRequest.PRIORITY_HIGH_ACCURACY
+        }
     }
 
     private fun createNotificationManager() {
