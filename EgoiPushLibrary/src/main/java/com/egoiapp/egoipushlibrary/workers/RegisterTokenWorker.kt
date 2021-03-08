@@ -16,7 +16,7 @@ class RegisterTokenWorker(
     context: Context,
     workerParams: WorkerParameters
 ) : Worker(context, workerParams) {
-    private val domain = "https://dev-push-wrapper.egoiapp.com"
+    private val domain = "https://push-wrapper.egoiapp.com"
     private val registerTokenUrl = "${domain}/token"
 
     override fun doWork(): Result {

@@ -25,7 +25,7 @@ There are a few things you must configure in your app in order for the library t
 This library is available through Maven Central. To install it, simply add the following line to your Podfile:
 
 ```gradle
-implementation 'com.egoiapp.egoipushlibrary:egoipushlibrary:1.0.2'
+implementation 'com.egoiapp.egoipushlibrary:egoipushlibrary:1.0.3'
 ```
 
 After installing, you can initialize the library in the **MainActivity** with following instruction:
