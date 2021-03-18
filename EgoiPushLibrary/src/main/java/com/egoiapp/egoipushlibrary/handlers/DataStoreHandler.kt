@@ -1,10 +1,11 @@
 package com.egoiapp.egoipushlibrary.handlers
 
+import android.content.Context
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
-import androidx.datastore.preferences.createDataStore
+import androidx.datastore.preferences.preferencesDataStore
 import com.egoiapp.egoipushlibrary.EgoiPushLibrary
 import com.egoiapp.egoipushlibrary.structures.EgoiConfigs
 import com.egoiapp.egoipushlibrary.structures.EgoiPreferences
@@ -18,7 +19,7 @@ import kotlinx.coroutines.runBlocking
 class DataStoreHandler(
     private val instance: EgoiPushLibrary
 ) {
-    private lateinit var dataStore: DataStore<Preferences>
+    private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "settings")
 
     // [data_store_keys]
     private val preferencesKey = stringPreferencesKey("preferences")
@@ -26,8 +27,6 @@ class DataStoreHandler(
     // [end_data_store_keys]
 
     init {
-        initDataStore()
-
         if (getDSData(CONFIGS) === null) {
             val configs = EgoiConfigs()
             configs.locationUpdates = false
@@ -38,20 +37,12 @@ class DataStoreHandler(
         }
     }
 
-    private fun initDataStore() {
-        if (!this::dataStore.isInitialized) {
-            dataStore = instance.context.createDataStore(
-                name = "settings"
-            )
-        }
-    }
-
     fun setDSData(category: String, data: String) {
         val key = getKey(category)
 
         if (key != null) {
             GlobalScope.launch {
-                dataStore.edit { settings ->
+                (this as Context).dataStore.edit { settings ->
                     settings[key] = data
                 }
             }
@@ -98,7 +89,7 @@ class DataStoreHandler(
 
         if (key != null) {
             val deferred = GlobalScope.async {
-                dataStore.data.map { settings ->
+                (this as Context).dataStore.data.map { settings ->
                     settings[key] ?: ""
                 }.first()
             }

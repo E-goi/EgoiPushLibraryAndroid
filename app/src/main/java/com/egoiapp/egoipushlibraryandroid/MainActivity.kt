@@ -20,8 +20,8 @@ class MainActivity : EgoiPushActivity() {
             activityContext = this,
             activityPackage = "com.egoiapp.egoipushlibraryandroid",
             activityName = "MainActivity",
-            appId = "abc",
-            apiKey = "abc",
+            appId = "egoipushlibrary",
+            apiKey = "b7f15eac4900e6881f86467fac068b02a5f31d1e",
             deepLinkCallback = fun (link: EgoiNotification) {
                 Log.d("DEEP_LINK", link.toString())
             }
@@ -52,7 +52,7 @@ class MainActivity : EgoiPushActivity() {
             EgoiPushLibrary.getInstance(applicationContext).firebase.registerToken(
                 token = token,
                 field = "email",
-                value = "email@email.com"
+                value = "jsilva@e-goi.com"
             )
         }
     }
