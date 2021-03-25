@@ -4,10 +4,7 @@ import android.content.Intent
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.workDataOf
 import com.egoiapp.egoipushlibrary.EgoiPushLibrary
-import com.egoiapp.egoipushlibrary.structures.EGoiMessage
-import com.egoiapp.egoipushlibrary.structures.EGoiMessageData
-import com.egoiapp.egoipushlibrary.structures.EGoiMessageNotification
-import com.egoiapp.egoipushlibrary.structures.EgoiPreferences
+import com.egoiapp.egoipushlibrary.structures.*
 import com.egoiapp.egoipushlibrary.workers.FireDialogWorker
 import com.egoiapp.egoipushlibrary.workers.FireNotificationWorker
 import com.egoiapp.egoipushlibrary.workers.RegisterTokenWorker
@@ -155,7 +152,29 @@ class FirebaseHandler(
             intent.action == "com.google.firebase.messaging.NOTIFICATION_OPEN" &&
             this::message.isInitialized
         ) {
-            fireDialog()
+            if (instance.dialogCallback != null) {
+                val preferences: EgoiPreferences? =
+                    instance.dataStore.getDSPreferences()
+
+                val egoiNotification = EgoiNotification(
+                    title = message.notification.title,
+                    body = message.notification.body,
+                    actionType = message.data.actions.type,
+                    actionText = message.data.actions.text,
+                    actionUrl = message.data.actions.url,
+                    apiKey = preferences!!.apiKey,
+                    appId = preferences.appId,
+                    contactId = message.data.contactId,
+                    messageHash = message.data.messageHash,
+                    deviceId = message.data.deviceId,
+                    messageId = message.data.messageId
+                )
+                instance.dialogCallback?.let {
+                    it(egoiNotification)
+                }
+            } else {
+                fireDialog()
+            }
         }
     }
 

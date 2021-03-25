@@ -42,7 +42,7 @@ class DataStoreHandler(
 
         if (key != null) {
             GlobalScope.launch {
-                (this as Context).dataStore.edit { settings ->
+                instance.context.dataStore.edit { settings ->
                     settings[key] = data
                 }
             }
@@ -89,7 +89,7 @@ class DataStoreHandler(
 
         if (key != null) {
             val deferred = GlobalScope.async {
-                (this as Context).dataStore.data.map { settings ->
+                instance.context.dataStore.data.map { settings ->
                     settings[key] ?: ""
                 }.first()
             }

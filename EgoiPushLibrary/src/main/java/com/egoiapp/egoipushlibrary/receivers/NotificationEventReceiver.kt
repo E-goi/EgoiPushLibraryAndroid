@@ -62,28 +62,34 @@ class NotificationEventReceiver : BroadcastReceiver() {
                 )
 
                 if (intent.action == NOTIFICATION_OPEN) {
-                    EgoiPushLibrary.getInstance(context).requestWork(
-                        workRequest = OneTimeWorkRequestBuilder<FireDialogWorker>()
-                            .setInitialDelay(1, TimeUnit.SECONDS)
-                            .setInputData(
-                                workDataOf(
-                                    /* Dialog Data */
-                                    "title" to egoiNotification.title,
-                                    "body" to egoiNotification.body,
-                                    "actionType" to egoiNotification.actionType,
-                                    "actionText" to egoiNotification.actionText,
-                                    "actionUrl" to egoiNotification.actionUrl,
-                                    /* Event Data*/
-                                    "apiKey" to egoiNotification.apiKey,
-                                    "appId" to egoiNotification.appId,
-                                    "contactId" to egoiNotification.contactId,
-                                    "messageHash" to egoiNotification.messageHash,
-                                    "deviceId" to egoiNotification.deviceId,
-                                    "messageId" to egoiNotification.messageId
+                    if (EgoiPushLibrary.getInstance(context).dialogCallback != null) {
+                        EgoiPushLibrary.getInstance(context).dialogCallback?.let {
+                            it(egoiNotification)
+                        }
+                    } else {
+                        EgoiPushLibrary.getInstance(context).requestWork(
+                            workRequest = OneTimeWorkRequestBuilder<FireDialogWorker>()
+                                .setInitialDelay(1, TimeUnit.SECONDS)
+                                .setInputData(
+                                    workDataOf(
+                                        /* Dialog Data */
+                                        "title" to egoiNotification.title,
+                                        "body" to egoiNotification.body,
+                                        "actionType" to egoiNotification.actionType,
+                                        "actionText" to egoiNotification.actionText,
+                                        "actionUrl" to egoiNotification.actionUrl,
+                                        /* Event Data*/
+                                        "apiKey" to egoiNotification.apiKey,
+                                        "appId" to egoiNotification.appId,
+                                        "contactId" to egoiNotification.contactId,
+                                        "messageHash" to egoiNotification.messageHash,
+                                        "deviceId" to egoiNotification.deviceId,
+                                        "messageId" to egoiNotification.messageId
+                                    )
                                 )
-                            )
-                            .build()
-                    )
+                                .build()
+                        )
+                    }
                 }
 
                 if (intent.action === NOTIFICATION_EVENT_VIEW) {

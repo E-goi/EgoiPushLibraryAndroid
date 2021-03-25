@@ -46,6 +46,9 @@ class MainActivity : EgoiPushActivity() {
             activityName = "MainActivity",
             appId = "abc",
             apiKey = "abc",
+            dialogCallback = fun (link: EgoiNotification) {
+                Log.d("DIALOG", link.toString())
+            },
             deepLinkCallback = fun (link: EgoiNotification) {
                 Log.d("DEEP_LINK", link.toString())
             }
@@ -207,6 +210,13 @@ Responsible for initializing the library. The call of this method is required.
    <td>The API key of your E-goi account.</td>
    <td>true</td>
    <td>---</td>
+</tr>
+<tr>
+   <td>dialogCallback</td>
+   <td>(EgoiNotification) -> Unit</td>
+   <td>Callback to be invoked in the place of the dialog that is shown when a notification is pressed</td>
+   <td>false</td>
+   <td>true</td>
 </tr>
 <tr>
    <td>deepLinkCallback</td>

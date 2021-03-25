@@ -2,6 +2,7 @@ package com.egoiapp.egoipushlibrary
 
 import android.app.ActivityManager
 import android.app.ActivityManager.RunningAppProcessInfo
+import android.content.ComponentCallbacks
 import android.content.Context
 import android.content.pm.PackageManager
 import androidx.work.WorkManager
@@ -32,6 +33,7 @@ class EgoiPushLibrary {
     private var libraryInitialized: Boolean = false
 
     // [user_callbacks]
+    var dialogCallback: ((EgoiNotification) -> Unit)? = null
     var deepLinkCallback: ((EgoiNotification) -> Unit)? = null
     // [end_user_callbacks]
 
@@ -75,10 +77,12 @@ class EgoiPushLibrary {
         activityName: String,
         appId: String,
         apiKey: String,
+        dialogCallback: ((EgoiNotification) -> Unit)? = null,
         deepLinkCallback: ((EgoiNotification) -> Unit)? = null
     ) {
         this.activityContext = activityContext
 
+        this.dialogCallback = dialogCallback
         this.deepLinkCallback = deepLinkCallback
 
         val egoiPreferences = EgoiPreferences(
