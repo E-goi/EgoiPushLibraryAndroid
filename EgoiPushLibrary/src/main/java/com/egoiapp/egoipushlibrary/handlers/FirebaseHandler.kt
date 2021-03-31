@@ -135,7 +135,8 @@ class FirebaseHandler(
                     extras.getString("latitude")?.toDouble() ?: Double.NaN
                 this.message.data.geo.longitude =
                     extras.getString("longitude")?.toDouble() ?: Double.NaN
-                this.message.data.geo.radius = extras.getString("radius")?.toFloat() ?: Float.NaN
+                this.message.data.geo.radius = extras.getString("radius")?.toFloat() ?: 0.1.toFloat()
+                this.message.data.geo.duration = extras.getString("duration")?.toLong() ?: 0
 
                 this.geoPush = true
             }

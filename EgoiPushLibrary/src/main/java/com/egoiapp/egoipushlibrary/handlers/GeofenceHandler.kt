@@ -51,7 +51,7 @@ class GeofenceHandler(
                 message.data.geo.longitude,
                 message.data.geo.radius
             )
-            .setExpirationDuration(Geofence.NEVER_EXPIRE)
+            .setExpirationDuration(message.data.geo.duration)
             .setTransitionTypes(Geofence.GEOFENCE_TRANSITION_ENTER)
             .setNotificationResponsiveness(TimeUnit.MINUTES.toMillis(5).toInt())
             .build()
