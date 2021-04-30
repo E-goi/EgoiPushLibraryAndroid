@@ -117,10 +117,11 @@ class FirebaseHandler(
             if (actionsJson != null) {
                 val actions = JSONObject(actionsJson)
 
-                if (actions.has("type") && actions.has("text") && actions.has("url")) {
+                if (actions.has("type") && actions.has("text") && actions.has("url") && actions.has("text-cancel")) {
                     this.message.data.actions.type = actions.getString("type")
                     this.message.data.actions.text = actions.getString("text")
                     this.message.data.actions.url = actions.getString("url")
+                    this.message.data.actions.textCancel = actions.getString("text-cancel")
                 }
             }
 
@@ -135,7 +136,7 @@ class FirebaseHandler(
                     extras.getString("latitude")?.toDouble() ?: Double.NaN
                 this.message.data.geo.longitude =
                     extras.getString("longitude")?.toDouble() ?: Double.NaN
-                this.message.data.geo.radius = extras.getString("radius")?.toFloat() ?: 0.1.toFloat()
+                this.message.data.geo.radius = extras.getString("radius")?.toFloat() ?: 0.0.toFloat()
                 this.message.data.geo.duration = extras.getString("duration")?.toLong() ?: 0
 
                 this.geoPush = true
@@ -163,6 +164,7 @@ class FirebaseHandler(
                     actionType = message.data.actions.type,
                     actionText = message.data.actions.text,
                     actionUrl = message.data.actions.url,
+                    actionTextCancel = message.data.actions.textCancel,
                     apiKey = preferences!!.apiKey,
                     appId = preferences.appId,
                     contactId = message.data.contactId,
@@ -198,6 +200,7 @@ class FirebaseHandler(
                             "actionType" to message.data.actions.type,
                             "actionText" to message.data.actions.text,
                             "actionUrl" to message.data.actions.url,
+                            "actionTextCancel" to message.data.actions.textCancel,
                             /* Event Data*/
                             "apiKey" to preferences.apiKey,
                             "appId" to preferences.appId,
@@ -227,6 +230,7 @@ class FirebaseHandler(
                             "actionType" to message.data.actions.type,
                             "actionText" to message.data.actions.text,
                             "actionUrl" to message.data.actions.url,
+                            "actionTextCancel" to message.data.actions.textCancel,
                             "apiKey" to preferences.apiKey,
                             "appId" to preferences.appId,
                             "contactId" to message.data.contactId,

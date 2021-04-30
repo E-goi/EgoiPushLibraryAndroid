@@ -31,6 +31,7 @@ class FireDialogWorker(
             actionType = inputData.getString("actionType") ?: "",
             actionText = inputData.getString("actionText") ?: "",
             actionUrl = inputData.getString("actionUrl") ?: "",
+            actionTextCancel = inputData.getString("actionTextCancel") ?: "",
             apiKey = inputData.getString("apiKey") ?: "",
             appId = inputData.getString("appId") ?: "",
             contactId = inputData.getString("contactId") ?: "",
@@ -42,12 +43,7 @@ class FireDialogWorker(
         builder.setTitle(egoiNotification.title)
         builder.setMessage(egoiNotification.body)
 
-        builder.setNegativeButton(EgoiPushLibrary.getInstance(context).closeLabel)
-        { _, _ ->
-            registerEvent(event = "canceled")
-        }
-
-        if (egoiNotification.actionType != "" && egoiNotification.actionText != "" && egoiNotification.actionUrl != "") {
+        if (egoiNotification.actionType != "" && egoiNotification.actionText != "" && egoiNotification.actionUrl != "" && egoiNotification.actionTextCancel != "") {
             builder.setPositiveButton(egoiNotification.actionText)
             { _, _ ->
                 registerEvent(event = "open")
@@ -64,6 +60,11 @@ class FireDialogWorker(
                         )
                     )
                 }
+            }
+
+            builder.setNegativeButton(egoiNotification.actionTextCancel)
+            { _, _ ->
+                registerEvent(event = "canceled")
             }
         }
 

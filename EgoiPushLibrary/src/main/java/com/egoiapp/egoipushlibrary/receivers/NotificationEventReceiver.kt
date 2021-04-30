@@ -2,7 +2,6 @@ package com.egoiapp.egoipushlibrary.receivers
 
 import android.app.NotificationManager
 import android.content.BroadcastReceiver
-import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
@@ -36,11 +35,7 @@ class NotificationEventReceiver : BroadcastReceiver() {
                         EgoiPushLibrary.getInstance(context).dataStore.getDSPreferences()
 
                     if (preferences != null) {
-                        val activityIntent = Intent()
-                        activityIntent.component = ComponentName(
-                            preferences.activityPackage,
-                            preferences.activityName
-                        )
+                        val activityIntent = Intent(LAUNCH_APP)
                         activityIntent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
 
                         context.startActivity(activityIntent)
@@ -53,6 +48,7 @@ class NotificationEventReceiver : BroadcastReceiver() {
                     actionType = extras.getString("actionType") ?: "",
                     actionText = extras.getString("actionText") ?: "",
                     actionUrl = extras.getString("actionUrl") ?: "",
+                    actionTextCancel = extras.getString("actionTextCancel") ?: "",
                     apiKey = extras.getString("apiKey") ?: "",
                     appId = extras.getString("appId") ?: "",
                     contactId = extras.getString("contactId") ?: "",
@@ -78,6 +74,7 @@ class NotificationEventReceiver : BroadcastReceiver() {
                                         "actionType" to egoiNotification.actionType,
                                         "actionText" to egoiNotification.actionText,
                                         "actionUrl" to egoiNotification.actionUrl,
+                                        "actionTextCancel" to egoiNotification.actionTextCancel,
                                         /* Event Data*/
                                         "apiKey" to egoiNotification.apiKey,
                                         "appId" to egoiNotification.appId,
@@ -147,6 +144,7 @@ class NotificationEventReceiver : BroadcastReceiver() {
         const val NOTIFICATION_OPEN: String = "com.egoiapp.action.NOTIFICATION_OPEN"
         const val NOTIFICATION_EVENT_VIEW: String = "com.egoiapp.action.NOTIFICATION_EVENT_VIEW"
         const val NOTIFICATION_EVENT_CLOSE: String = "com.egoiapp.action.NOTIFICATION_EVENT_CLOSE"
+        const val LAUNCH_APP: String = "com.egoiapp.action.LAUNCH_APP"
     }
 
 }

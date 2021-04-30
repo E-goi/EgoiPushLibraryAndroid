@@ -6,6 +6,7 @@ data class EgoiNotification(
     var actionType: String,
     var actionText: String,
     var actionUrl: String,
+    var actionTextCancel: String,
     var apiKey: String,
     var appId: String,
     var contactId: String,

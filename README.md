@@ -1,3 +1,35 @@
+# What's new in version 2.0.0?
+
+### MAJOR:
+
+#### Notification target activity declaration:
+
+To increase de compatibility of our library with your applications you no longer need to pass the "activityPackage" and 
+"activityName" params to the config function. Now, you just need to add the following lines to the intent-filter of the 
+activity that you want to open when the notifications are clicked:
+
+```xml
+<intent-filter>
+   ...
+   <action android:name="com.egoiapp.action.LAUNCH_APP" />
+   <category android:name="android.intent.category.DEFAULT" />
+   ...
+</intent-filter>
+```
+
+### MINOR:
+
+#### "Cancel" notification / pop-up label:
+
+You no longer need to define a label for the "Cancel" action of the notifications during the configuration of the library.
+Now, you define the label on the E-goi platform during the creation of a campaign, and it is inserted automatically on your
+notification / pop-up.
+
+#### Geofence duration:
+
+You can now add a duration to the geofence during the creation of Push campaign in the E-goi 
+platform.
+
 # EgoiPushLibraryAndroid
 
 This Android library is responsible for handling all remote notifications received from E-goi's platform.
@@ -25,7 +57,7 @@ There are a few things you must configure in your app in order for the library t
 This library is available through Maven Central. To install it, simply add the following line to your Podfile:
 
 ```gradle
-implementation 'com.egoiapp.egoipushlibrary:egoipushlibrary:1.0.3'
+implementation 'com.egoiapp.egoipushlibrary:egoipushlibrary:2.0.0'
 ```
 
 After installing, you can initialize the library in the **MainActivity** with following instruction:
@@ -42,8 +74,6 @@ class MainActivity : EgoiPushActivity() {
 
         EgoiPushLibrary.getInstance(applicationContext).config(
             activityContext = this,
-            activityPackage = "com.egoiapp.egoipushlibraryandroid",
-            activityName = "MainActivity",
             appId = "abc",
             apiKey = "abc",
             dialogCallback = fun (link: EgoiNotification) {
@@ -61,6 +91,20 @@ class MainActivity : EgoiPushActivity() {
 required but recommended since this class handles the life cycle of our location service and handles the responses of
 the user to the location access requests.
 
+## Target launch Activity
+
+To define what activity you want to launch when a notification is clicked, you just need to add following lines to the 
+intent filter of the desired activity:
+
+```xml
+<intent-filter>
+   ...
+   <action android:name="com.egoiapp.action.LAUNCH_APP" />
+   <category android:name="android.intent.category.DEFAULT" />
+   ...
+</intent-filter>
+```
+
 ## Metadata
 
 ### Location Notification
@@ -72,7 +116,7 @@ the user to the location access requests.
 You should declare this metadata if you want to change the logo that is displayed on the notification. Otherwise, it will display a default logo provided by us.
 
 The use of this metadata e recommended. The logo of the notification is one of the main things that relates the
-notification with the app.
+notification with the app
 
 ```xml
 <meta-data
@@ -118,18 +162,6 @@ You should declare this metadata if you want to customize the text that is displ
 <meta-data
    android:name="com.egoiapp.egoipushlibrary.stop_location_updates_label"
    android:resource=">>Your resource goes here (i.e. @string/stop_location_updates)<<" />
-```
-
-### Dialog
-![Dialog](.github/assets/dialog.jpg)
-#### com.egoiapp.egoipushlibrary.close_label (1)
-
-You should declare this metadata if you want to customize the text that is displayed on the close button of the dialog that is presented to the user. If no value is provided, a default one in english will be used.
-
-```xml
-<meta-data
-   android:name="com.egoiapp.egoipushlibrary.close_label"
-   android:resource=">>Your resource goes here (i.e. @string/close)<<" />
 ```
 
 ## References
@@ -180,20 +212,6 @@ Responsible for initializing the library. The call of this method is required.
    <td>activityContext</td>
    <td>Activity</td>
    <td>The context of the activity that will be used to display the notification dialog on the app.</td>
-   <td>true</td>
-   <td>---</td>
-</tr>
-<tr>
-   <td>activityPackage</td>
-   <td>String</td>
-   <td>The package of the activity that will be used to open the app from the notification.</td>
-   <td>true</td>
-   <td>---</td>
-</tr>
-<tr>
-   <td>activityName</td>
-   <td>String</td>
-   <td>The activity that will be used to open the app from the notification.</td>
    <td>true</td>
    <td>---</td>
 </tr>

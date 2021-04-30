@@ -43,7 +43,6 @@ class EgoiPushLibrary {
 
     // [strings]
     var locationUpdatedLabel: Int = 0
-    var closeLabel: Int = 0
     var launchActivityLabel: Int = 0
     var stopLocationUpdatesLabel: Int = 0
     var applicationUsingLocationLabel: Int = 0
@@ -68,13 +67,12 @@ class EgoiPushLibrary {
      * Library initializer
      * @param appId The ID of the E-goi's push app
      * @param apiKey The API key of the E-goi's account
+     * @param dialogCallback Callback to be invoked in the place of the pop-up
      * @param deepLinkCallback Callback to be invoked when the action type of the notification is a
      * deeplink
      */
     fun config(
         activityContext: Context,
-        activityPackage: String,
-        activityName: String,
         appId: String,
         apiKey: String,
         dialogCallback: ((EgoiNotification) -> Unit)? = null,
@@ -87,9 +85,7 @@ class EgoiPushLibrary {
 
         val egoiPreferences = EgoiPreferences(
             appId = appId,
-            apiKey = apiKey,
-            activityPackage = activityPackage,
-            activityName = "$activityPackage.$activityName"
+            apiKey = apiKey
         )
 
         egoiPreferences.encode()?.let {
@@ -157,11 +153,6 @@ class EgoiPushLibrary {
             locationUpdatedLabel = metaData.getInt(
                 "com.egoiapp.egoipushlibrary.location_updated_label",
                 R.string.location_updated
-            )
-
-            closeLabel = metaData.getInt(
-                "com.egoiapp.egoipushlibrary.close_label",
-                R.string.close
             )
 
             launchActivityLabel = metaData.getInt(

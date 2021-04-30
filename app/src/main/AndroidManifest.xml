@@ -10,17 +10,9 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.EgoiPushLibraryAndroid">
 
-<!--        <meta-data-->
-<!--            android:name="com.egoiapp.egoipushlibrary.notification_icon"-->
-<!--            android:resource="@drawable/ic_launch" />-->
-
         <meta-data
             android:name="com.egoiapp.egoipushlibrary.location_updated_label"
             android:resource="@string/location_updated" />
-
-        <meta-data
-            android:name="com.egoiapp.egoipushlibrary.close_label"
-            android:resource="@string/close" />
 
         <meta-data
             android:name="com.egoiapp.egoipushlibrary.launch_activity_label"
@@ -39,6 +31,11 @@
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
+                <!-- Add this two lines do the intent filter of teh activity that you want to launch
+                when the notification is clicked -->
+                <action android:name="com.egoiapp.action.LAUNCH_APP" />
+                <category android:name="android.intent.category.DEFAULT" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
