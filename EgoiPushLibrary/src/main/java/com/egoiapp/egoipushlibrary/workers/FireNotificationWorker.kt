@@ -35,6 +35,7 @@ class FireNotificationWorker(
     private lateinit var actionType: String
     private lateinit var actionText: String
     private lateinit var actionUrl: String
+    private lateinit var actionTextCancel: String
     private lateinit var apiKey: String
     private lateinit var appId: String
     private lateinit var contactId: String
@@ -51,6 +52,7 @@ class FireNotificationWorker(
         actionType = inputData.getString("actionType") ?: ""
         actionText = inputData.getString("actionText") ?: ""
         actionUrl = inputData.getString("actionUrl") ?: ""
+        actionTextCancel = inputData.getString("actionTextCancel") ?: ""
         apiKey = inputData.getString("apiKey") ?: ""
         appId = inputData.getString("appId") ?: ""
         contactId = inputData.getString("contactId") ?: ""
@@ -114,6 +116,7 @@ class FireNotificationWorker(
         intent.putExtra("actionType", actionType)
         intent.putExtra("actionText", actionText)
         intent.putExtra("actionUrl", actionUrl)
+        intent.putExtra("actionTextCancel", actionTextCancel)
         // Event Data
         intent.putExtra("apiKey", apiKey)
         intent.putExtra("appId", appId)
@@ -136,6 +139,7 @@ class FireNotificationWorker(
         viewIntent.putExtra("actionType", actionType)
         viewIntent.putExtra("actionText", actionText)
         viewIntent.putExtra("actionUrl", actionUrl)
+        viewIntent.putExtra("actionTextCancel", actionTextCancel)
         // Event Data
         viewIntent.putExtra("apiKey", apiKey)
         viewIntent.putExtra("appId", appId)
@@ -159,6 +163,7 @@ class FireNotificationWorker(
         closeIntent.putExtra("actionType", actionType)
         closeIntent.putExtra("actionText", actionText)
         closeIntent.putExtra("actionUrl", actionUrl)
+        closeIntent.putExtra("actionTextCancel", actionTextCancel)
         // Event Data
         closeIntent.putExtra("apiKey", apiKey)
         closeIntent.putExtra("appId", appId)
@@ -190,7 +195,7 @@ class FireNotificationWorker(
                 )
                 .addAction(
                     0,
-                    context.getString(EgoiPushLibrary.getInstance(context).closeLabel),
+                    actionTextCancel,
                     closePendingIntent
                 )
 

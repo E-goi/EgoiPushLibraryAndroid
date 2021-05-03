@@ -18,13 +18,8 @@ class MainActivity : EgoiPushActivity() {
 
         EgoiPushLibrary.getInstance(applicationContext).config(
             activityContext = this,
-            activityPackage = "com.egoiapp.egoipushlibraryandroid",
-            activityName = "MainActivity",
             appId = "abc",
             apiKey = "abc",
-//            dialogCallback = fun (link: EgoiNotification) {
-//                Log.d("DIALOG", link.toString())
-//            },
             deepLinkCallback = fun (link: EgoiNotification) {
                 Log.d("DEEP_LINK", link.toString())
             }

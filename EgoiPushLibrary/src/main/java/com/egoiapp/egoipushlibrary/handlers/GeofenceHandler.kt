@@ -101,6 +101,7 @@ class GeofenceHandler(
                                 "actionType" to message.data.actions.type,
                                 "actionText" to message.data.actions.text,
                                 "actionUrl" to message.data.actions.url,
+                                "actionTextCancel" to message.data.actions.textCancel,
                                 "apiKey" to preferences.apiKey,
                                 "appId" to preferences.appId,
                                 "contactId" to message.data.contactId,
