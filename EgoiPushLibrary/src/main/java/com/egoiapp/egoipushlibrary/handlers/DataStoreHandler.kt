@@ -9,12 +9,9 @@ import androidx.datastore.preferences.preferencesDataStore
 import com.egoiapp.egoipushlibrary.EgoiPushLibrary
 import com.egoiapp.egoipushlibrary.structures.EgoiConfigs
 import com.egoiapp.egoipushlibrary.structures.EgoiPreferences
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.async
+import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 
 class DataStoreHandler(
     private val instance: EgoiPushLibrary
@@ -26,7 +23,7 @@ class DataStoreHandler(
     private val configsKey = stringPreferencesKey("configurations")
     // [end_data_store_keys]
 
-    init {
+    private suspend fun main() {
         if (getDSData(CONFIGS) === null) {
             val configs = EgoiConfigs()
             configs.locationUpdates = false
@@ -37,27 +34,41 @@ class DataStoreHandler(
         }
     }
 
-    fun setDSData(category: String, data: String) {
+    init {
+        runBlocking {
+            main()
+        }
+    }
+
+    suspend fun setDSData(category: String, data: String) {
         val key = getKey(category)
 
         if (key != null) {
-            GlobalScope.launch {
-                instance.context.dataStore.edit { settings ->
-                    settings[key] = data
-                }
+            instance.context.dataStore.edit {
+                settings -> settings[key] = data
             }
         }
     }
 
     fun getDSPreferences(): EgoiPreferences? {
-        return getDSData(PREFERENCES) as EgoiPreferences?
+        var preferences: EgoiPreferences?
+
+        runBlocking {
+            preferences = getDSData(PREFERENCES) as EgoiPreferences?
+        }
+
+        return preferences
     }
 
-    fun getDSConfigs(): EgoiConfigs? {
-        return getDSData(CONFIGS) as EgoiConfigs?
+    fun getDSConfigs(): EgoiConfigs? = runBlocking {
+        val deferred = async {
+            getDSData(CONFIGS) as EgoiConfigs?
+        }
+
+        return@runBlocking deferred.await()
     }
 
-    fun setDSLocationUpdates(status: Boolean) {
+    fun setDSLocationUpdates(status: Boolean) = runBlocking {
         val configs: EgoiConfigs? = getDSConfigs()
 
         if (configs !== null && configs.locationUpdates != status) {
@@ -84,35 +95,23 @@ class DataStoreHandler(
         }
     }
 
-    private fun getDSData(category: String): Any? {
+    private suspend fun getDSData(category: String): Any? {
         val key = getKey(category)
 
         if (key != null) {
-            val deferred = GlobalScope.async {
-                instance.context.dataStore.data.map { settings ->
-                    settings[key] ?: ""
-                }.first()
+            val data: String = instance.context.dataStore.data.map { settings ->
+                settings[key] ?: ""
+            }.first()
+
+            var dsData: Any? = null
+
+            if (category === PREFERENCES) {
+                dsData = EgoiPreferences().decode(data)
+            } else if (category === CONFIGS) {
+                dsData = EgoiConfigs().decode(data)
             }
 
-            val data: String?
-
-            runBlocking {
-                data = deferred.await()
-            }
-
-            if (data != null) {
-                return when {
-                    category === PREFERENCES -> {
-                        EgoiPreferences().decode(data)
-                    }
-                    category === CONFIGS -> {
-                        EgoiConfigs().decode(data)
-                    }
-                    else -> {
-                        null
-                    }
-                }
-            }
+            return dsData
         }
 
         return null

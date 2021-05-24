@@ -14,6 +14,7 @@ import com.egoiapp.egoipushlibrary.handlers.LocationHandler
 import com.egoiapp.egoipushlibrary.structures.EGoiMessage
 import com.egoiapp.egoipushlibrary.structures.EgoiNotification
 import com.egoiapp.egoipushlibrary.structures.EgoiPreferences
+import kotlinx.coroutines.runBlocking
 
 
 /**
@@ -83,6 +84,10 @@ class EgoiPushLibrary {
         this.dialogCallback = dialogCallback
         this.deepLinkCallback = deepLinkCallback
 
+        setDSData(appId, apiKey)
+    }
+
+    private fun setDSData(appId: String, apiKey: String) = runBlocking {
         val egoiPreferences = EgoiPreferences(
             appId = appId,
             apiKey = apiKey

@@ -17,19 +17,13 @@ class FirebaseService : FirebaseMessagingService() {
         EgoiPushLibrary.getInstance(applicationContext).firebase.messageReceived()
     }
 
-    override fun handleIntent(intent: Intent?) {
-        if (intent != null) {
-            EgoiPushLibrary.getInstance(applicationContext).firebase.processMessage(intent)
-        }
-
+    override fun handleIntent(intent: Intent) {
+        EgoiPushLibrary.getInstance(applicationContext).firebase.processMessage(intent)
         super.handleIntent(intent)
     }
 
-    override fun handleIntentOnMainThread(intent: Intent?): Boolean {
-        if (intent != null) {
-            EgoiPushLibrary.getInstance(applicationContext).firebase.showDialog(intent)
-        }
-
+    override fun handleIntentOnMainThread(intent: Intent): Boolean {
+        EgoiPushLibrary.getInstance(applicationContext).firebase.showDialog(intent)
         return super.handleIntentOnMainThread(intent)
     }
 
