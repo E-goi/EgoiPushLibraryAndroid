@@ -33,6 +33,7 @@ open class EgoiPushActivity : AppCompatActivity() {
         permissions: Array<out String>,
         grantResults: IntArray
     ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         EgoiPushLibrary.getInstance(this).location.handleAccessResponse(permissions, grantResults)
     }
 }
