@@ -16,8 +16,8 @@ class RegisterTokenWorker(
     context: Context,
     workerParams: WorkerParameters
 ) : Worker(context, workerParams) {
-    private val domain = "https://push-wrapper.egoiapp.com"
-    private val registerTokenUrl = "${domain}/token"
+    private val domain = "https://api.egoiapp.com/push/apps/"
+    private val registerTokenUrl = "/token"
 
     override fun doWork(): Result {
         var urlConnection: HttpsURLConnection? = null
@@ -25,8 +25,6 @@ class RegisterTokenWorker(
 
         try {
             val payload = JSONObject()
-            payload.put("api_key", inputData.getString("apiKey"))
-            payload.put("app_id", inputData.getString("appId"))
             payload.put("token", inputData.getString("token"))
             payload.put("os", "android")
 
@@ -42,10 +40,11 @@ class RegisterTokenWorker(
                 }
             }
 
-            val url = URL(registerTokenUrl)
+            val url = URL(domain + inputData.getString("appId") + registerTokenUrl)
 
             urlConnection = url.openConnection() as HttpsURLConnection
             urlConnection.setRequestProperty("Content-Type", "application/json")
+            urlConnection.setRequestProperty("Apikey", inputData.getString("apiKey"))
             urlConnection.requestMethod = "POST"
             urlConnection.doOutput = true
             urlConnection.doInput = true
@@ -59,7 +58,7 @@ class RegisterTokenWorker(
 
             val code: Int = urlConnection.responseCode
 
-            if (code != 200) {
+            if (code != 202) {
                 throw IOException("Invalid response from server $code")
             }
 
@@ -68,7 +67,7 @@ class RegisterTokenWorker(
 
             val resultJson = JSONObject(result)
 
-            if (resultJson.get("data") == "OK") {
+            if (resultJson.getBoolean("success")) {
                 success = true
             }
         } catch (e: Exception) {

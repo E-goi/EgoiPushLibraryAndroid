@@ -11,13 +11,12 @@ import android.graphics.BitmapFactory
 import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.core.app.NotificationCompat
+import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.Worker
 import androidx.work.WorkerParameters
+import androidx.work.workDataOf
 import com.egoiapp.egoipushlibrary.EgoiPushLibrary
 import com.egoiapp.egoipushlibrary.receivers.NotificationEventReceiver
-import kotlinx.coroutines.Deferred
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.async
 import kotlinx.coroutines.runBlocking
 import java.net.URL
 
@@ -218,21 +217,10 @@ class FireNotificationWorker(
      * Converts an url image to a bitmap
      * @return The image in bitmap format
      */
-    private fun decodeImage(): Bitmap? {
+    private fun decodeImage(): Bitmap? = runBlocking {
         val url = URL(image)
 
-        val deferred: Deferred<Bitmap?> = GlobalScope.async {
-            @Suppress("BlockingMethodInNonBlockingContext")
-            BitmapFactory.decodeStream(url.openStream())
-        }
-
-        var bitmap: Bitmap?
-
-        runBlocking {
-            bitmap = deferred.await()
-        }
-
-        return bitmap
+        return@runBlocking BitmapFactory.decodeStream(url.openStream())
     }
 
     /**
@@ -240,5 +228,23 @@ class FireNotificationWorker(
      */
     private fun sendNotification() {
         notificationManager.notify(messageId.toInt(), notification)
+        registerEvent()
+    }
+
+    private fun registerEvent() {
+        EgoiPushLibrary.getInstance(context).requestWork(
+            workRequest = OneTimeWorkRequestBuilder<RegisterEventWorker>()
+                .setInputData(
+                    workDataOf(
+                        "apiKey" to apiKey,
+                        "appId" to appId,
+                        "contactId" to contactId,
+                        "messageHash" to messageHash,
+                        "event" to "received",
+                        "deviceId" to deviceId
+                    )
+                )
+                .build()
+        )
     }
 }
