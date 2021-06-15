@@ -12,6 +12,7 @@ import com.egoiapp.egoipushlibrary.structures.EgoiNotification
 import com.egoiapp.egoipushlibrary.structures.EgoiPreferences
 import com.egoiapp.egoipushlibrary.workers.FireDialogWorker
 import com.egoiapp.egoipushlibrary.workers.RegisterEventWorker
+import kotlinx.coroutines.runBlocking
 import java.util.concurrent.TimeUnit
 
 /**
@@ -31,14 +32,16 @@ class NotificationEventReceiver : BroadcastReceiver() {
                 if (!EgoiPushLibrary.getInstance(context)
                         .isAppOnForeground() && intent.action !== NOTIFICATION_EVENT_CLOSE
                 ) {
-                    val preferences: EgoiPreferences? =
-                        EgoiPushLibrary.getInstance(context).dataStore.getDSPreferences()
+                    runBlocking {
+                        val preferences: EgoiPreferences? =
+                            EgoiPushLibrary.getInstance(context).dataStore.getDSPreferences()
 
-                    if (preferences != null) {
-                        val activityIntent = Intent(LAUNCH_APP)
-                        activityIntent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                        if (preferences != null) {
+                            val activityIntent = Intent(LAUNCH_APP)
+                            activityIntent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
 
-                        context.startActivity(activityIntent)
+                            context.startActivity(activityIntent)
+                        }
                     }
                 }
 

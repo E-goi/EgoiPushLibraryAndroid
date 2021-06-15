@@ -1,34 +1,14 @@
-# What's new in version 2.0.0?
-
-### MAJOR:
-
-#### Notification target activity declaration:
-
-To increase de compatibility of our library with your applications you no longer need to pass the "activityPackage" and 
-"activityName" params to the config function. Now, you just need to add the following lines to the intent-filter of the 
-activity that you want to open when the notifications are clicked:
-
-```xml
-<intent-filter>
-   ...
-   <action android:name="com.egoiapp.action.LAUNCH_APP" />
-   <category android:name="android.intent.category.DEFAULT" />
-   ...
-</intent-filter>
-```
+# What's new in version 2.0.1?
 
 ### MINOR:
 
-#### "Cancel" notification / pop-up label:
+#### Event "received":
 
-You no longer need to define a label for the "Cancel" action of the notifications during the configuration of the library.
-Now, you define the label on the E-goi platform during the creation of a campaign, and it is inserted automatically on your
-notification / pop-up.
+Now, when a notification is displayed in the device, the event "received" is sent to E-goi.
 
-#### Geofence duration:
+#### Support for FirebaseMessaging 22.0.0:
 
-You can now add a duration to the geofence during the creation of Push campaign in the E-goi 
-platform.
+Our library now supports the version 22.0.0 of the FirebaseMessaging plugin.
 
 # EgoiPushLibraryAndroid
 
@@ -57,7 +37,7 @@ There are a few things you must configure in your app in order for the library t
 This library is available through Maven Central. To install it, simply add the following line to your Podfile:
 
 ```gradle
-implementation 'com.egoiapp.egoipushlibrary:egoipushlibrary:2.0.0'
+implementation 'com.egoiapp.egoipushlibrary:egoipushlibrary:2.0.1'
 ```
 
 After installing, you can initialize the library in the **MainActivity** with following instruction:
@@ -104,6 +84,19 @@ intent filter of the desired activity:
    ...
 </intent-filter>
 ```
+
+## Disable location services
+
+If you do not want to use our location services, you need to insert the following lines in the your manifest:
+
+```xml
+<manifest>
+    ...
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" tools:node="remove" />
+    <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION" tools:node="remove" />
+    ...
+</manifest>
+``` 
 
 ## Metadata
 

@@ -8,6 +8,7 @@ import com.egoiapp.egoipushlibrary.structures.*
 import com.egoiapp.egoipushlibrary.workers.FireDialogWorker
 import com.egoiapp.egoipushlibrary.workers.FireNotificationWorker
 import com.egoiapp.egoipushlibrary.workers.RegisterTokenWorker
+import kotlinx.coroutines.runBlocking
 import org.json.JSONObject
 
 /**
@@ -52,22 +53,24 @@ class FirebaseHandler(
             twoStepsData.put("value", value)
         }
 
-        val preferences: EgoiPreferences? =
-            instance.dataStore.getDSPreferences()
+        runBlocking {
+            val preferences: EgoiPreferences? =
+                instance.dataStore.getDSPreferences()
 
-        if (preferences != null) {
-            instance.requestWork(
-                workRequest = OneTimeWorkRequestBuilder<RegisterTokenWorker>()
-                    .setInputData(
-                        workDataOf(
-                            "apiKey" to preferences.apiKey,
-                            "appId" to preferences.appId,
-                            "token" to token,
-                            "twoStepsData" to twoStepsData.toString()
+            if (preferences != null) {
+                instance.requestWork(
+                    workRequest = OneTimeWorkRequestBuilder<RegisterTokenWorker>()
+                        .setInputData(
+                            workDataOf(
+                                "apiKey" to preferences.apiKey,
+                                "appId" to preferences.appId,
+                                "token" to token,
+                                "twoStepsData" to twoStepsData.toString()
+                            )
                         )
-                    )
-                    .build()
-            )
+                        .build()
+                )
+            }
         }
     }
 
@@ -155,25 +158,27 @@ class FirebaseHandler(
             this::message.isInitialized
         ) {
             if (instance.dialogCallback != null) {
-                val preferences: EgoiPreferences? =
-                    instance.dataStore.getDSPreferences()
+                runBlocking {
+                    val preferences: EgoiPreferences? =
+                        instance.dataStore.getDSPreferences()
 
-                val egoiNotification = EgoiNotification(
-                    title = message.notification.title,
-                    body = message.notification.body,
-                    actionType = message.data.actions.type,
-                    actionText = message.data.actions.text,
-                    actionUrl = message.data.actions.url,
-                    actionTextCancel = message.data.actions.textCancel,
-                    apiKey = preferences!!.apiKey,
-                    appId = preferences.appId,
-                    contactId = message.data.contactId,
-                    messageHash = message.data.messageHash,
-                    deviceId = message.data.deviceId,
-                    messageId = message.data.messageId
-                )
-                instance.dialogCallback?.let {
-                    it(egoiNotification)
+                    val egoiNotification = EgoiNotification(
+                        title = message.notification.title,
+                        body = message.notification.body,
+                        actionType = message.data.actions.type,
+                        actionText = message.data.actions.text,
+                        actionUrl = message.data.actions.url,
+                        actionTextCancel = message.data.actions.textCancel,
+                        apiKey = preferences!!.apiKey,
+                        appId = preferences.appId,
+                        contactId = message.data.contactId,
+                        messageHash = message.data.messageHash,
+                        deviceId = message.data.deviceId,
+                        messageId = message.data.messageId
+                    )
+                    instance.dialogCallback?.let {
+                        it(egoiNotification)
+                    }
                 }
             } else {
                 fireDialog()
@@ -186,61 +191,65 @@ class FirebaseHandler(
      * pressed in the notification bar.
      */
     private fun fireDialog() {
-        val preferences: EgoiPreferences? =
-            instance.dataStore.getDSPreferences()
+        runBlocking {
+            val preferences: EgoiPreferences? =
+                instance.dataStore.getDSPreferences()
 
-        if (preferences != null) {
-            instance.requestWork(
-                workRequest = OneTimeWorkRequestBuilder<FireDialogWorker>()
-                    .setInputData(
-                        workDataOf(
-                            /* Dialog Data */
-                            "title" to message.notification.title,
-                            "body" to message.notification.body,
-                            "actionType" to message.data.actions.type,
-                            "actionText" to message.data.actions.text,
-                            "actionUrl" to message.data.actions.url,
-                            "actionTextCancel" to message.data.actions.textCancel,
-                            /* Event Data*/
-                            "apiKey" to preferences.apiKey,
-                            "appId" to preferences.appId,
-                            "contactId" to message.data.contactId,
-                            "messageHash" to message.data.messageHash,
-                            "deviceId" to message.data.deviceId,
-                            "messageId" to message.data.messageId
+            if (preferences != null) {
+                instance.requestWork(
+                    workRequest = OneTimeWorkRequestBuilder<FireDialogWorker>()
+                        .setInputData(
+                            workDataOf(
+                                /* Dialog Data */
+                                "title" to message.notification.title,
+                                "body" to message.notification.body,
+                                "actionType" to message.data.actions.type,
+                                "actionText" to message.data.actions.text,
+                                "actionUrl" to message.data.actions.url,
+                                "actionTextCancel" to message.data.actions.textCancel,
+                                /* Event Data*/
+                                "apiKey" to preferences.apiKey,
+                                "appId" to preferences.appId,
+                                "contactId" to message.data.contactId,
+                                "messageHash" to message.data.messageHash,
+                                "deviceId" to message.data.deviceId,
+                                "messageId" to message.data.messageId
+                            )
                         )
-                    )
-                    .build()
-            )
+                        .build()
+                )
+            }
         }
     }
 
     private fun fireNotification() {
-        val preferences: EgoiPreferences? =
-            instance.dataStore.getDSPreferences()
+        runBlocking {
+            val preferences: EgoiPreferences? =
+                instance.dataStore.getDSPreferences()
 
-        if (preferences != null) {
-            instance.requestWork(
-                workRequest = OneTimeWorkRequestBuilder<FireNotificationWorker>()
-                    .setInputData(
-                        workDataOf(
-                            "title" to message.notification.title,
-                            "text" to message.notification.body,
-                            "image" to message.notification.image,
-                            "actionType" to message.data.actions.type,
-                            "actionText" to message.data.actions.text,
-                            "actionUrl" to message.data.actions.url,
-                            "actionTextCancel" to message.data.actions.textCancel,
-                            "apiKey" to preferences.apiKey,
-                            "appId" to preferences.appId,
-                            "contactId" to message.data.contactId,
-                            "messageHash" to message.data.messageHash,
-                            "deviceId" to message.data.deviceId,
-                            "messageId" to message.data.messageId
+            if (preferences != null) {
+                instance.requestWork(
+                    workRequest = OneTimeWorkRequestBuilder<FireNotificationWorker>()
+                        .setInputData(
+                            workDataOf(
+                                "title" to message.notification.title,
+                                "text" to message.notification.body,
+                                "image" to message.notification.image,
+                                "actionType" to message.data.actions.type,
+                                "actionText" to message.data.actions.text,
+                                "actionUrl" to message.data.actions.url,
+                                "actionTextCancel" to message.data.actions.textCancel,
+                                "apiKey" to preferences.apiKey,
+                                "appId" to preferences.appId,
+                                "contactId" to message.data.contactId,
+                                "messageHash" to message.data.messageHash,
+                                "deviceId" to message.data.deviceId,
+                                "messageId" to message.data.messageId
+                            )
                         )
-                    )
-                    .build()
-            )
+                        .build()
+                )
+            }
         }
     }
 

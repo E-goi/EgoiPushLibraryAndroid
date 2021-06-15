@@ -16,8 +16,8 @@ class RegisterEventWorker(
     context: Context,
     workerParams: WorkerParameters
 ) : Worker(context, workerParams) {
-    private val domain = "https://push-wrapper.egoiapp.com"
-    private val registerEventUrl = "${domain}/event"
+    private val domain = "https://api.egoiapp.com/push/apps/"
+    private val registerEventUrl = "/event"
 
     override fun doWork(): Result {
         var urlConnection: HttpsURLConnection? = null
@@ -25,18 +25,17 @@ class RegisterEventWorker(
 
         try {
             val payload = JSONObject()
-            payload.put("api_key", inputData.getString("apiKey"))
-            payload.put("app_id", inputData.getString("appId"))
             payload.put("contact", inputData.getString("contactId"))
             payload.put("os", "android")
             payload.put("message_hash", inputData.getString("messageHash"))
             payload.put("event", inputData.getString("event"))
             payload.put("device_id", inputData.getInt("deviceId", 0))
 
-            val url = URL(registerEventUrl)
+            val url = URL(domain + inputData.getString("appId") + registerEventUrl)
 
             urlConnection = url.openConnection() as HttpsURLConnection
             urlConnection.setRequestProperty("Content-Type", "application/json")
+            urlConnection.setRequestProperty("Apikey", inputData.getString("apiKey"))
             urlConnection.requestMethod = "POST"
             urlConnection.doOutput = true
             urlConnection.doInput = true
@@ -50,7 +49,7 @@ class RegisterEventWorker(
 
             val code: Int = urlConnection.responseCode
 
-            if (code != 200) {
+            if (code != 202) {
                 throw IOException("Invalid response from server $code")
             }
 
@@ -59,7 +58,7 @@ class RegisterEventWorker(
 
             val resultJson = JSONObject(result)
 
-            if (resultJson.get("data") == "OK") {
+            if (resultJson.get("success") == true) {
                 success = true
             }
         } catch (e: Exception) {

@@ -16,6 +16,7 @@ import com.egoiapp.egoipushlibrary.workers.FireNotificationWorker
 import com.google.android.gms.location.Geofence
 import com.google.android.gms.location.GeofencingRequest
 import com.google.android.gms.location.LocationServices
+import kotlinx.coroutines.runBlocking
 import java.util.concurrent.TimeUnit
 
 /**
@@ -87,36 +88,38 @@ class GeofenceHandler(
         val message: EGoiMessage? = pendingNotifications[id]
 
         if (message != null) {
-            val preferences: EgoiPreferences? =
-                instance.dataStore.getDSPreferences()
+            runBlocking {
+                val preferences: EgoiPreferences? =
+                    instance.dataStore.getDSPreferences()
 
-            if (preferences != null) {
-                instance.requestWork(
-                    workRequest = OneTimeWorkRequestBuilder<FireNotificationWorker>()
-                        .setInputData(
-                            workDataOf(
-                                "title" to message.notification.title,
-                                "text" to message.notification.body,
-                                "image" to message.notification.image,
-                                "actionType" to message.data.actions.type,
-                                "actionText" to message.data.actions.text,
-                                "actionUrl" to message.data.actions.url,
-                                "actionTextCancel" to message.data.actions.textCancel,
-                                "apiKey" to preferences.apiKey,
-                                "appId" to preferences.appId,
-                                "contactId" to message.data.contactId,
-                                "messageHash" to message.data.messageHash,
-                                "deviceId" to message.data.deviceId,
-                                "messageId" to message.data.messageId
+                if (preferences != null) {
+                    instance.requestWork(
+                        workRequest = OneTimeWorkRequestBuilder<FireNotificationWorker>()
+                            .setInputData(
+                                workDataOf(
+                                    "title" to message.notification.title,
+                                    "text" to message.notification.body,
+                                    "image" to message.notification.image,
+                                    "actionType" to message.data.actions.type,
+                                    "actionText" to message.data.actions.text,
+                                    "actionUrl" to message.data.actions.url,
+                                    "actionTextCancel" to message.data.actions.textCancel,
+                                    "apiKey" to preferences.apiKey,
+                                    "appId" to preferences.appId,
+                                    "contactId" to message.data.contactId,
+                                    "messageHash" to message.data.messageHash,
+                                    "deviceId" to message.data.deviceId,
+                                    "messageId" to message.data.messageId
+                                )
                             )
-                        )
-                        .build()
-                )
+                            .build()
+                    )
 
-                val list: List<String> = mutableListOf(id)
+                    val list: List<String> = mutableListOf(id)
 
-                geofencingClient.removeGeofences(list)
-                pendingNotifications.remove(id)
+                    geofencingClient.removeGeofences(list)
+                    pendingNotifications.remove(id)
+                }
             }
         }
     }
