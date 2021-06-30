@@ -1,14 +1,10 @@
-# What's new in version 2.0.1?
+# What's new in version 2.0.2?
 
-### MINOR:
+### PATCH:
 
-#### Event "received":
+#### Conditional actions on the notification:
 
-Now, when a notification is displayed in the device, the event "received" is sent to E-goi.
-
-#### Support for FirebaseMessaging 22.0.0:
-
-Our library now supports the version 22.0.0 of the FirebaseMessaging plugin.
+A bug was fixed where, if you sent a campaign without actions, the actions were still displayed in the dialog box.
 
 # EgoiPushLibraryAndroid
 
@@ -37,7 +33,7 @@ There are a few things you must configure in your app in order for the library t
 This library is available through Maven Central. To install it, simply add the following line to your Podfile:
 
 ```gradle
-implementation 'com.egoiapp.egoipushlibrary:egoipushlibrary:2.0.1'
+implementation 'com.egoiapp.egoipushlibrary:egoipushlibrary:2.0.2'
 ```
 
 After installing, you can initialize the library in the **MainActivity** with following instruction:

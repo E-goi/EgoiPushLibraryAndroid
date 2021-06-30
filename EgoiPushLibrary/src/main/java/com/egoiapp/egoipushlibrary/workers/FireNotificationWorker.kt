@@ -187,6 +187,9 @@ class FireNotificationWorker(
                 .setContentIntent(pendingIntent)
                 .setDeleteIntent(closePendingIntent)
                 .setAutoCancel(true)
+
+        if (actionType !== "" && actionText !== "" && actionUrl !== "" && actionTextCancel !== "") {
+            builder
                 .addAction(
                     0,
                     actionText,
@@ -197,6 +200,7 @@ class FireNotificationWorker(
                     actionTextCancel,
                     closePendingIntent
                 )
+        }
 
         if (image != "") {
             val bitmap: Bitmap? = decodeImage()
