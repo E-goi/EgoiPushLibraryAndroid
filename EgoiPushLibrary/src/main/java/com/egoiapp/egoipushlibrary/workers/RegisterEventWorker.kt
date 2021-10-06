@@ -23,6 +23,8 @@ class RegisterEventWorker(
         var urlConnection: HttpsURLConnection? = null
         var success = false
 
+        if (inputData.getString("contactId") == "") return Result.success()
+
         try {
             val payload = JSONObject()
             payload.put("contact", inputData.getString("contactId"))
