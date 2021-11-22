@@ -105,12 +105,12 @@ class FirebaseHandler(
                 data = EGoiMessageData(
                     os = extras.getString("os") ?: "android",
                     messageHash = extras.getString("message-hash") ?: "",
-                    listId = extras.getString("list-id")?.toInt() ?: 0,
+                    listId = if (extras.getString("list-id", "0") != "") extras.getString("list-id", "0").toInt() else 0,
                     contactId = extras.getString("contact-id") ?: "",
-                    accountId = extras.getString("account-id")?.toInt() ?: 0,
+                    accountId = if (extras.getString("account-id", "0") != "") extras.getString("account-id", "0").toInt() else 0,
                     applicationId = extras.getString("application-id") ?: "",
-                    messageId = extras.getString("message-id")?.toInt() ?: 0,
-                    deviceId = extras.getString("device-id")?.toInt() ?: 0,
+                    messageId = if (extras.getString("message-id", "0") != "") extras.getString("message-id", "0").toInt() else 0,
+                    deviceId = if (extras.getString("device-id", "0") != "") extras.getString("device-id", "0").toInt() else 0,
                 )
             )
 

@@ -1,10 +1,14 @@
-# What's new in version 2.0.2?
+# What's new in version 2.0.3?
 
 ### PATCH:
 
-#### Conditional actions on the notification:
+#### Update dependencies:
 
-A bug was fixed where, if you sent a campaign without actions, the actions were still displayed in the dialog box.
+The dependencies used in this SDK were updated to the latest versions.
+
+#### Compatibility with test campaigns:
+
+Add compatibility with test campaigns from E-goi by not sending the campaign events to E-goi.
 
 # EgoiPushLibraryAndroid
 
@@ -33,7 +37,7 @@ There are a few things you must configure in your app in order for the library t
 This library is available through Maven Central. To install it, simply add the following line to your Podfile:
 
 ```gradle
-implementation 'com.egoiapp.egoipushlibrary:egoipushlibrary:2.0.2'
+implementation 'com.egoiapp.egoipushlibrary:egoipushlibrary:2.0.3'
 ```
 
 After installing, you can initialize the library in the **MainActivity** with following instruction:
