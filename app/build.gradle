@@ -40,7 +40,7 @@ dependencies {
     implementation "androidx.constraintlayout:constraintlayout:2.1.2"
     implementation "androidx.multidex:multidex:2.0.1"
     implementation "com.google.android.material:material:1.4.0"
-    implementation "com.google.firebase:firebase-messaging:22.0.0"
+    implementation "com.google.firebase:firebase-messaging:23.0.0"
     implementation 'com.egoiapp.egoipushlibrary:egoipushlibrary:2.0.3'
 //    implementation project(':EgoiPushLibrary')
 }
