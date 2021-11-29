@@ -20,6 +20,7 @@ class MainActivity : EgoiPushActivity() {
             activityContext = this,
             appId = "abc",
             apiKey = "abc",
+            launchAppAction = "abc",
             deepLinkCallback = fun (link: EgoiNotification) {
                 Log.d("DEEP_LINK", link.toString())
             }

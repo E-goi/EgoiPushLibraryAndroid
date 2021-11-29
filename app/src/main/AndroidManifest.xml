@@ -34,7 +34,7 @@
 
                 <!-- Add this two lines do the intent filter of the activity that you want to launch
                 when the notification is clicked -->
-                <action android:name="com.egoiapp.action.LAUNCH_APP" />
+                <action android:name="abc" />
                 <category android:name="android.intent.category.DEFAULT" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
