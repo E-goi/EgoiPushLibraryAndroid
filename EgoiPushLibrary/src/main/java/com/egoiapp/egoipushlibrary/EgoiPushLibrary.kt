@@ -2,7 +2,6 @@ package com.egoiapp.egoipushlibrary
 
 import android.app.ActivityManager
 import android.app.ActivityManager.RunningAppProcessInfo
-import android.content.ComponentCallbacks
 import android.content.Context
 import android.content.pm.PackageManager
 import androidx.work.WorkManager
@@ -85,6 +84,8 @@ class EgoiPushLibrary {
         this.deepLinkCallback = deepLinkCallback
 
         setDSData(appId, apiKey)
+
+        IS_INITIALIZED = true
     }
 
     private fun setDSData(appId: String, apiKey: String) = runBlocking {
@@ -178,6 +179,8 @@ class EgoiPushLibrary {
     }
 
     companion object {
+        var IS_INITIALIZED: Boolean = false
+
         private val library = EgoiPushLibrary()
 
         /**
