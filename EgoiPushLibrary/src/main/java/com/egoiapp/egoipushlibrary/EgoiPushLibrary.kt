@@ -27,7 +27,7 @@ class EgoiPushLibrary {
     // [handlers]
     lateinit var dataStore: DataStoreHandler
     lateinit var location: LocationHandler
-    lateinit var geofence: GeofenceHandler
+    private lateinit var geofence: GeofenceHandler
     lateinit var firebase: FirebaseHandler
     // [end_handlers]
 

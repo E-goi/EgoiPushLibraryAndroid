@@ -70,6 +70,11 @@ class GeofenceHandler(
             geofencingClient.addGeofences(geofencingRequest, geofencePendingIntent).run {
                 addOnSuccessListener {
                     pendingNotifications[message.data.messageHash] = message
+
+                    if (instance.dataStore.getDSConfigs()?.locationUpdates == false) {
+                        instance.location.requestLocationUpdates()
+                    }
+
                     Log.d("GEOFENCE", "CREATED")
                 }
 
@@ -119,6 +124,10 @@ class GeofenceHandler(
 
                     geofencingClient.removeGeofences(list)
                     pendingNotifications.remove(id)
+
+                    if (pendingNotifications.isEmpty()) {
+                        instance.location.removeLocationUpdates()
+                    }
                 }
             }
         }
