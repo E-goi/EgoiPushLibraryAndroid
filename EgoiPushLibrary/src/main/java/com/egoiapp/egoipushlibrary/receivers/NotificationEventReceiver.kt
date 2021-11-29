@@ -147,7 +147,7 @@ class NotificationEventReceiver : BroadcastReceiver() {
         const val NOTIFICATION_OPEN: String = "com.egoiapp.action.NOTIFICATION_OPEN"
         const val NOTIFICATION_EVENT_VIEW: String = "com.egoiapp.action.NOTIFICATION_EVENT_VIEW"
         const val NOTIFICATION_EVENT_CLOSE: String = "com.egoiapp.action.NOTIFICATION_EVENT_CLOSE"
-        const val LAUNCH_APP: String = "com.egoiapp.action.LAUNCH_APP"
+        var LAUNCH_APP: String = "com.egoiapp.action.LAUNCH_APP"
     }
 
 }

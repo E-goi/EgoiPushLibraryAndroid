@@ -11,6 +11,7 @@ import com.egoiapp.egoipushlibrary.handlers.DataStoreHandler
 import com.egoiapp.egoipushlibrary.handlers.FirebaseHandler
 import com.egoiapp.egoipushlibrary.handlers.GeofenceHandler
 import com.egoiapp.egoipushlibrary.handlers.LocationHandler
+import com.egoiapp.egoipushlibrary.receivers.NotificationEventReceiver
 import com.egoiapp.egoipushlibrary.structures.EGoiMessage
 import com.egoiapp.egoipushlibrary.structures.EgoiNotification
 import com.egoiapp.egoipushlibrary.structures.EgoiPreferences
@@ -44,7 +45,7 @@ class EgoiPushLibrary {
 
     // [strings]
     var locationUpdatedLabel: Int = 0
-    var launchActivityLabel: Int = 0
+    private var launchActivityLabel: Int = 0
     var stopLocationUpdatesLabel: Int = 0
     var applicationUsingLocationLabel: Int = 0
     // [end_strings]
@@ -76,6 +77,7 @@ class EgoiPushLibrary {
         activityContext: Context,
         appId: String,
         apiKey: String,
+        launchAppAction: String,
         dialogCallback: ((EgoiNotification) -> Unit)? = null,
         deepLinkCallback: ((EgoiNotification) -> Unit)? = null
     ) {
@@ -84,6 +86,7 @@ class EgoiPushLibrary {
         this.dialogCallback = dialogCallback
         this.deepLinkCallback = deepLinkCallback
 
+        NotificationEventReceiver.LAUNCH_APP = launchAppAction
         setDSData(appId, apiKey)
     }
 
@@ -145,7 +148,7 @@ class EgoiPushLibrary {
     /**
      * Read the properties of the metadata
      */
-    fun readMetadata() {
+    private fun readMetadata() {
         context.packageManager.getApplicationInfo(
             context.packageName,
             PackageManager.GET_META_DATA
