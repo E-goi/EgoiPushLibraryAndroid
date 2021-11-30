@@ -45,76 +45,84 @@ class NotificationEventReceiver : BroadcastReceiver() {
                     }
                 }
 
-                egoiNotification = EgoiNotification(
-                    title = extras.getString("title") ?: "",
-                    body = extras.getString("body") ?: "",
-                    actionType = extras.getString("actionType") ?: "",
-                    actionText = extras.getString("actionText") ?: "",
-                    actionUrl = extras.getString("actionUrl") ?: "",
-                    actionTextCancel = extras.getString("actionTextCancel") ?: "",
-                    apiKey = extras.getString("apiKey") ?: "",
-                    appId = extras.getString("appId") ?: "",
-                    contactId = extras.getString("contactId") ?: "",
-                    messageHash = extras.getString("messageHash") ?: "",
-                    deviceId = extras.getInt("deviceId", 0),
-                    messageId = extras.getInt("messageId", 0)
-                )
+                val thread = Thread {
+                    while (!EgoiPushLibrary.IS_INITIALIZED) {
+                        Thread.sleep(300)
+                    }
 
-                if (intent.action == NOTIFICATION_OPEN) {
-                    if (EgoiPushLibrary.getInstance(context).dialogCallback != null) {
-                        EgoiPushLibrary.getInstance(context).dialogCallback?.let {
-                            it(egoiNotification)
-                        }
-                    } else {
-                        EgoiPushLibrary.getInstance(context).requestWork(
-                            workRequest = OneTimeWorkRequestBuilder<FireDialogWorker>()
-                                .setInitialDelay(1, TimeUnit.SECONDS)
-                                .setInputData(
-                                    workDataOf(
-                                        /* Dialog Data */
-                                        "title" to egoiNotification.title,
-                                        "body" to egoiNotification.body,
-                                        "actionType" to egoiNotification.actionType,
-                                        "actionText" to egoiNotification.actionText,
-                                        "actionUrl" to egoiNotification.actionUrl,
-                                        "actionTextCancel" to egoiNotification.actionTextCancel,
-                                        /* Event Data*/
-                                        "apiKey" to egoiNotification.apiKey,
-                                        "appId" to egoiNotification.appId,
-                                        "contactId" to egoiNotification.contactId,
-                                        "messageHash" to egoiNotification.messageHash,
-                                        "deviceId" to egoiNotification.deviceId,
-                                        "messageId" to egoiNotification.messageId
+                    egoiNotification = EgoiNotification(
+                        title = extras.getString("title") ?: "",
+                        body = extras.getString("body") ?: "",
+                        actionType = extras.getString("actionType") ?: "",
+                        actionText = extras.getString("actionText") ?: "",
+                        actionUrl = extras.getString("actionUrl") ?: "",
+                        actionTextCancel = extras.getString("actionTextCancel") ?: "",
+                        apiKey = extras.getString("apiKey") ?: "",
+                        appId = extras.getString("appId") ?: "",
+                        contactId = extras.getString("contactId") ?: "",
+                        messageHash = extras.getString("messageHash") ?: "",
+                        deviceId = extras.getInt("deviceId", 0),
+                        messageId = extras.getInt("messageId", 0)
+                    )
+
+                    if (intent.action == NOTIFICATION_OPEN) {
+                        if (EgoiPushLibrary.getInstance(context.applicationContext).dialogCallback != null) {
+                            EgoiPushLibrary.getInstance(context.applicationContext).dialogCallback?.let {
+                                it(egoiNotification)
+                            }
+                        } else {
+                            EgoiPushLibrary.getInstance(context.applicationContext).requestWork(
+                                workRequest = OneTimeWorkRequestBuilder<FireDialogWorker>()
+                                    .setInitialDelay(1, TimeUnit.SECONDS)
+                                    .setInputData(
+                                        workDataOf(
+                                            /* Dialog Data */
+                                            "title" to egoiNotification.title,
+                                            "body" to egoiNotification.body,
+                                            "actionType" to egoiNotification.actionType,
+                                            "actionText" to egoiNotification.actionText,
+                                            "actionUrl" to egoiNotification.actionUrl,
+                                            "actionTextCancel" to egoiNotification.actionTextCancel,
+                                            /* Event Data*/
+                                            "apiKey" to egoiNotification.apiKey,
+                                            "appId" to egoiNotification.appId,
+                                            "contactId" to egoiNotification.contactId,
+                                            "messageHash" to egoiNotification.messageHash,
+                                            "deviceId" to egoiNotification.deviceId,
+                                            "messageId" to egoiNotification.messageId
+                                        )
                                     )
-                                )
-                                .build()
-                        )
-                    }
-                }
-
-                if (intent.action === NOTIFICATION_EVENT_VIEW) {
-                    registerEvent(context, "open")
-
-                    if (egoiNotification.actionType === "deeplink") {
-                        EgoiPushLibrary.getInstance(context).deepLinkCallback?.let {
-                            it(egoiNotification)
+                                    .build()
+                            )
                         }
-                    } else {
-                        val uriIntent =
-                            Intent(Intent.ACTION_VIEW, Uri.parse(egoiNotification.actionUrl))
-                        uriIntent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                    }
 
-                        context.startActivity(uriIntent)
+                    if (intent.action === NOTIFICATION_EVENT_VIEW) {
+                        registerEvent(context.applicationContext, "open")
+
+                        if (egoiNotification.actionType == "deeplink") {
+                            EgoiPushLibrary.getInstance(context.applicationContext).deepLinkCallback?.let {
+                                it(egoiNotification)
+                            }
+                        } else {
+                            val uriIntent =
+                                Intent(Intent.ACTION_VIEW, Uri.parse(egoiNotification.actionUrl))
+                            uriIntent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
+
+                            context.applicationContext.startActivity(uriIntent)
+                        }
+                    }
+
+                    if (intent.action === NOTIFICATION_EVENT_CLOSE) {
+                        registerEvent(context.applicationContext, "canceled")
+                    }
+
+                    if (intent.action === NOTIFICATION_EVENT_VIEW || intent.action === NOTIFICATION_EVENT_CLOSE) {
+                        dismissNotification(context.applicationContext)
                     }
                 }
 
-                if (intent.action === NOTIFICATION_EVENT_CLOSE) {
-                    registerEvent(context, "canceled")
-                }
-
-                if (intent.action === NOTIFICATION_EVENT_VIEW || intent.action === NOTIFICATION_EVENT_CLOSE) {
-                    dismissNotification(context)
-                }
+                thread.start()
             }
         }
     }
@@ -147,7 +155,7 @@ class NotificationEventReceiver : BroadcastReceiver() {
         const val NOTIFICATION_OPEN: String = "com.egoiapp.action.NOTIFICATION_OPEN"
         const val NOTIFICATION_EVENT_VIEW: String = "com.egoiapp.action.NOTIFICATION_EVENT_VIEW"
         const val NOTIFICATION_EVENT_CLOSE: String = "com.egoiapp.action.NOTIFICATION_EVENT_CLOSE"
-        const val LAUNCH_APP: String = "com.egoiapp.action.LAUNCH_APP"
+        var LAUNCH_APP: String = "com.egoiapp.action.LAUNCH_APP"
     }
 
 }

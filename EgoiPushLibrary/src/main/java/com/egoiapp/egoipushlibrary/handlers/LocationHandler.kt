@@ -31,17 +31,12 @@ class LocationHandler(
         priority = LocationRequest.PRIORITY_HIGH_ACCURACY
     }
 
-    init {
-        if (checkPermissions() && EgoiPushLibrary.getInstance(instance.context).dataStore.getDSConfigs()?.locationUpdates == true) {
-            requestLocationUpdates()
-        }
-    }
-
-    private fun requestLocationUpdates() {
+    fun requestLocationUpdates() {
         try {
             Log.d(TAG, "Starting location updates...")
 
             fusedLocationClient.requestLocationUpdates(locationRequest, getPendingIntent())
+            instance.dataStore.setDSLocationUpdates(status = true)
         } catch (e: SecurityException) {
             e.printStackTrace()
         }
@@ -54,11 +49,11 @@ class LocationHandler(
 
         fusedLocationClient.removeLocationUpdates(getPendingIntent())
 
-        EgoiPushLibrary.getInstance(instance.context).dataStore.setDSLocationUpdates(false)
+        instance.dataStore.setDSLocationUpdates(status = false)
     }
 
     fun startService() {
-        if (checkPermissions() && EgoiPushLibrary.getInstance(instance.context).dataStore.getDSConfigs()?.locationUpdates == true) {
+        if (checkPermissions() && instance.dataStore.getDSConfigs()?.locationUpdates == true) {
             instance.context.startService(
                 Intent(
                     instance.context,
@@ -69,7 +64,7 @@ class LocationHandler(
     }
 
     fun stopService() {
-        if (checkPermissions() && EgoiPushLibrary.getInstance(instance.context).dataStore.getDSConfigs()?.locationUpdates == true) {
+        if (checkPermissions() && instance.dataStore.getDSConfigs()?.locationUpdates == true) {
             instance.context.stopService(
                 Intent(
                     instance.context,
@@ -95,18 +90,10 @@ class LocationHandler(
      * Request access to the location when the app is in foreground.
      */
     fun requestForegroundAccess() {
-        if (!checkPermissions()) {
-            if (!hasPermission(Manifest.permission.ACCESS_FINE_LOCATION)) {
-                val permissions = arrayOf(Manifest.permission.ACCESS_FINE_LOCATION)
+        if (!checkPermissions() && !hasPermission(Manifest.permission.ACCESS_FINE_LOCATION)) {
+            val permissions = arrayOf(Manifest.permission.ACCESS_FINE_LOCATION)
 
-                requestAccess(permissions, 1)
-            } else {
-                instance.dataStore.setDSLocationUpdates(status = true)
-                requestLocationUpdates()
-            }
-        } else {
-            instance.dataStore.setDSLocationUpdates(status = true)
-            requestLocationUpdates()
+            requestAccess(permissions, 1)
         }
     }
 
@@ -116,18 +103,10 @@ class LocationHandler(
      */
     @RequiresApi(Build.VERSION_CODES.Q)
     fun requestBackgroundAccess() {
-        if (!checkPermissions()) {
-            if (!hasPermission(Manifest.permission.ACCESS_BACKGROUND_LOCATION)) {
-                val permissions = arrayOf(Manifest.permission.ACCESS_BACKGROUND_LOCATION)
+        if (!checkPermissions() && !hasPermission(Manifest.permission.ACCESS_BACKGROUND_LOCATION)) {
+            val permissions = arrayOf(Manifest.permission.ACCESS_BACKGROUND_LOCATION)
 
-                requestAccess(permissions, 2)
-            } else {
-                instance.dataStore.setDSLocationUpdates(status = true)
-                requestLocationUpdates()
-            }
-        } else {
-            instance.dataStore.setDSLocationUpdates(status = true)
-            requestLocationUpdates()
+            requestAccess(permissions, 2)
         }
     }
 
@@ -149,8 +128,6 @@ class LocationHandler(
             permissions.contains(Manifest.permission.ACCESS_FINE_LOCATION) ||
             permissions.contains(Manifest.permission.ACCESS_BACKGROUND_LOCATION)
         ) {
-            instance.dataStore.setDSLocationUpdates(status = true)
-
             return true
         }
 

@@ -2,7 +2,6 @@ package com.egoiapp.egoipushlibrary
 
 import android.app.ActivityManager
 import android.app.ActivityManager.RunningAppProcessInfo
-import android.content.ComponentCallbacks
 import android.content.Context
 import android.content.pm.PackageManager
 import androidx.work.WorkManager
@@ -11,6 +10,7 @@ import com.egoiapp.egoipushlibrary.handlers.DataStoreHandler
 import com.egoiapp.egoipushlibrary.handlers.FirebaseHandler
 import com.egoiapp.egoipushlibrary.handlers.GeofenceHandler
 import com.egoiapp.egoipushlibrary.handlers.LocationHandler
+import com.egoiapp.egoipushlibrary.receivers.NotificationEventReceiver
 import com.egoiapp.egoipushlibrary.structures.EGoiMessage
 import com.egoiapp.egoipushlibrary.structures.EgoiNotification
 import com.egoiapp.egoipushlibrary.structures.EgoiPreferences
@@ -27,7 +27,7 @@ class EgoiPushLibrary {
     // [handlers]
     lateinit var dataStore: DataStoreHandler
     lateinit var location: LocationHandler
-    lateinit var geofence: GeofenceHandler
+    private lateinit var geofence: GeofenceHandler
     lateinit var firebase: FirebaseHandler
     // [end_handlers]
 
@@ -44,7 +44,7 @@ class EgoiPushLibrary {
 
     // [strings]
     var locationUpdatedLabel: Int = 0
-    var launchActivityLabel: Int = 0
+    private var launchActivityLabel: Int = 0
     var stopLocationUpdatesLabel: Int = 0
     var applicationUsingLocationLabel: Int = 0
     // [end_strings]
@@ -68,6 +68,7 @@ class EgoiPushLibrary {
      * Library initializer
      * @param appId The ID of the E-goi's push app
      * @param apiKey The API key of the E-goi's account
+     * @param launchAppAction The action to listen for when the user clicks the notification
      * @param dialogCallback Callback to be invoked in the place of the pop-up
      * @param deepLinkCallback Callback to be invoked when the action type of the notification is a
      * deeplink
@@ -76,6 +77,7 @@ class EgoiPushLibrary {
         activityContext: Context,
         appId: String,
         apiKey: String,
+        launchAppAction: String,
         dialogCallback: ((EgoiNotification) -> Unit)? = null,
         deepLinkCallback: ((EgoiNotification) -> Unit)? = null
     ) {
@@ -84,7 +86,10 @@ class EgoiPushLibrary {
         this.dialogCallback = dialogCallback
         this.deepLinkCallback = deepLinkCallback
 
+        NotificationEventReceiver.LAUNCH_APP = launchAppAction
         setDSData(appId, apiKey)
+
+        IS_INITIALIZED = true
     }
 
     private fun setDSData(appId: String, apiKey: String) = runBlocking {
@@ -145,7 +150,7 @@ class EgoiPushLibrary {
     /**
      * Read the properties of the metadata
      */
-    fun readMetadata() {
+    private fun readMetadata() {
         context.packageManager.getApplicationInfo(
             context.packageName,
             PackageManager.GET_META_DATA
@@ -178,6 +183,8 @@ class EgoiPushLibrary {
     }
 
     companion object {
+        var IS_INITIALIZED: Boolean = false
+
         private val library = EgoiPushLibrary()
 
         /**
