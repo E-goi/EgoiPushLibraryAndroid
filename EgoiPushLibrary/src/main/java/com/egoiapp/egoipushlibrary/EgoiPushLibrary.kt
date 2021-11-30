@@ -68,6 +68,7 @@ class EgoiPushLibrary {
      * Library initializer
      * @param appId The ID of the E-goi's push app
      * @param apiKey The API key of the E-goi's account
+     * @param launchAppAction The action to listen for when the user clicks the notification
      * @param dialogCallback Callback to be invoked in the place of the pop-up
      * @param deepLinkCallback Callback to be invoked when the action type of the notification is a
      * deeplink

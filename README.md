@@ -1,14 +1,22 @@
-# What's new in version 2.0.3?
+# What's new in version 3.0.0?
 
-### PATCH:
+### MAJOR:
 
-#### Update dependencies:
+#### Unique "Launch App" action:
 
-The dependencies used in this SDK were updated to the latest versions.
+Due to a vulnerability found, you must now define your own "Launch App" action in the manifest and send it in the SDK initialization so we can listen to it.
 
-#### Compatibility with test campaigns:
+### MINOR:
 
-Add compatibility with test campaigns from E-goi by not sending the campaign events to E-goi.
+#### Limit location tracking:
+
+Now, the SDK only tracks the location of the user when there is a pending geo notification.
+
+### PATCH
+
+#### Wait for the init of the SDK before calling the callbacks:
+
+A problem was fixed were the callbacks defined in the config of the SDK were being called before the SDK was initialized.
 
 # EgoiPushLibraryAndroid
 
@@ -37,7 +45,7 @@ There are a few things you must configure in your app in order for the library t
 This library is available through Maven Central. To install it, simply add the following line to your Podfile:
 
 ```gradle
-implementation 'com.egoiapp.egoipushlibrary:egoipushlibrary:2.0.3'
+implementation 'com.egoiapp.egoipushlibrary:egoipushlibrary:3.0.0'
 ```
 
 After installing, you can initialize the library in the **MainActivity** with following instruction:
@@ -56,6 +64,7 @@ class MainActivity : EgoiPushActivity() {
             activityContext = this,
             appId = "abc",
             apiKey = "abc",
+            launchAppAction = "abc",
             dialogCallback = fun (link: EgoiNotification) {
                 Log.d("DIALOG", link.toString())
             },
@@ -73,13 +82,13 @@ the user to the location access requests.
 
 ## Target launch Activity
 
-To define what activity you want to launch when a notification is clicked, you just need to add following lines to the 
-intent filter of the desired activity:
+To define what activity you want to launch when a notification is clicked, you need to add an action to the 
+intent filter of the desired activity. You should than send this action as a parameter in the SDK initialization so we can listen to it:
 
 ```xml
 <intent-filter>
    ...
-   <action android:name="com.egoiapp.action.LAUNCH_APP" />
+   <action android:name="abc" />
    <category android:name="android.intent.category.DEFAULT" />
    ...
 </intent-filter>
@@ -219,6 +228,13 @@ Responsible for initializing the library. The call of this method is required.
    <td>apiKey</td>
    <td>String</td>
    <td>The API key of your E-goi account.</td>
+   <td>true</td>
+   <td>---</td>
+</tr>
+<tr>
+   <td>launchAppAction</td>
+   <td>String</td>
+   <td>The action to listen for when the user clicks the notification</td>
    <td>true</td>
    <td>---</td>
 </tr>
