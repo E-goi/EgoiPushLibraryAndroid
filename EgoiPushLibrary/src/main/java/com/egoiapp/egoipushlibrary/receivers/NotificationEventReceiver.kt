@@ -37,7 +37,13 @@ class NotificationEventReceiver : BroadcastReceiver() {
                             EgoiPushLibrary.getInstance(context).dataStore.getDSPreferences()
 
                         if (preferences != null) {
-                            val activityIntent = Intent(LAUNCH_APP)
+                            var action = LAUNCH_APP
+
+                            if (preferences.openAppAction != "") {
+                                action = preferences.openAppAction
+                            }
+
+                            val activityIntent = Intent(action)
                             activityIntent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
 
                             context.startActivity(activityIntent)
