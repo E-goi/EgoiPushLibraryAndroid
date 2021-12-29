@@ -66,34 +66,38 @@ class NotificationEventReceiver : BroadcastReceiver() {
                     )
 
                     if (intent.action == NOTIFICATION_OPEN) {
-                        if (EgoiPushLibrary.getInstance(context.applicationContext).dialogCallback != null) {
-                            EgoiPushLibrary.getInstance(context.applicationContext).dialogCallback?.let {
-                                it(egoiNotification)
+                        if (egoiNotification.actionType != "" && egoiNotification.actionText != "" && egoiNotification.actionUrl != "" && egoiNotification.actionTextCancel != "") {
+                            if (EgoiPushLibrary.getInstance(context.applicationContext).dialogCallback != null) {
+                                EgoiPushLibrary.getInstance(context.applicationContext).dialogCallback?.let {
+                                    it(egoiNotification)
+                                }
+                            } else {
+                                EgoiPushLibrary.getInstance(context.applicationContext).requestWork(
+                                    workRequest = OneTimeWorkRequestBuilder<FireDialogWorker>()
+                                        .setInitialDelay(1, TimeUnit.SECONDS)
+                                        .setInputData(
+                                            workDataOf(
+                                                /* Dialog Data */
+                                                "title" to egoiNotification.title,
+                                                "body" to egoiNotification.body,
+                                                "actionType" to egoiNotification.actionType,
+                                                "actionText" to egoiNotification.actionText,
+                                                "actionUrl" to egoiNotification.actionUrl,
+                                                "actionTextCancel" to egoiNotification.actionTextCancel,
+                                                /* Event Data*/
+                                                "apiKey" to egoiNotification.apiKey,
+                                                "appId" to egoiNotification.appId,
+                                                "contactId" to egoiNotification.contactId,
+                                                "messageHash" to egoiNotification.messageHash,
+                                                "deviceId" to egoiNotification.deviceId,
+                                                "messageId" to egoiNotification.messageId
+                                            )
+                                        )
+                                        .build()
+                                )
                             }
                         } else {
-                            EgoiPushLibrary.getInstance(context.applicationContext).requestWork(
-                                workRequest = OneTimeWorkRequestBuilder<FireDialogWorker>()
-                                    .setInitialDelay(1, TimeUnit.SECONDS)
-                                    .setInputData(
-                                        workDataOf(
-                                            /* Dialog Data */
-                                            "title" to egoiNotification.title,
-                                            "body" to egoiNotification.body,
-                                            "actionType" to egoiNotification.actionType,
-                                            "actionText" to egoiNotification.actionText,
-                                            "actionUrl" to egoiNotification.actionUrl,
-                                            "actionTextCancel" to egoiNotification.actionTextCancel,
-                                            /* Event Data*/
-                                            "apiKey" to egoiNotification.apiKey,
-                                            "appId" to egoiNotification.appId,
-                                            "contactId" to egoiNotification.contactId,
-                                            "messageHash" to egoiNotification.messageHash,
-                                            "deviceId" to egoiNotification.deviceId,
-                                            "messageId" to egoiNotification.messageId
-                                        )
-                                    )
-                                    .build()
-                            )
+                            registerEvent(context.applicationContext, "open")
                         }
                     }
 
