@@ -1,22 +1,18 @@
-# What's new in version 3.0.0?
-
-### MAJOR:
-
-#### Unique "Launch App" action:
-
-Due to a vulnerability found, you must now define your own "Launch App" action in the manifest and send it in the SDK initialization so we can listen to it.
+# What's new in version 3.1.0?
 
 ### MINOR:
 
-#### Limit location tracking:
+#### Send "open" event when there is no actions:
 
-Now, the SDK only tracks the location of the user when there is a pending geo notification.
+Now, when the notifications don't have an action defined and the user taps the notification, the
+"open" event is sent to E-goi.
 
 ### PATCH
 
-#### Wait for the init of the SDK before calling the callbacks:
+#### Save launch app action in preferences:
 
-A problem was fixed were the callbacks defined in the config of the SDK were being called before the SDK was initialized.
+The launch action defined in the config method, is now saved in datastore so it can be read before
+the SDK is initialized
 
 # EgoiPushLibraryAndroid
 
@@ -45,7 +41,7 @@ There are a few things you must configure in your app in order for the library t
 This library is available through Maven Central. To install it, simply add the following line to your Podfile:
 
 ```gradle
-implementation 'com.egoiapp.egoipushlibrary:egoipushlibrary:3.0.0'
+implementation 'com.egoiapp.egoipushlibrary:egoipushlibrary:3.1.0'
 ```
 
 After installing, you can initialize the library in the **MainActivity** with following instruction:

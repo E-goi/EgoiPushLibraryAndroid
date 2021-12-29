@@ -63,7 +63,7 @@ afterEvaluate {
 
                 groupId = 'com.egoiapp.egoipushlibrary'
                 artifactId = 'egoipushlibrary'
-                version = '3.0.0'
+                version = '3.1.0'
 
                 pom {
                     name = "EgoiPushLibrary"
@@ -120,5 +120,5 @@ dependencies {
     implementation 'androidx.datastore:datastore-preferences:1.0.0'
     implementation 'androidx.localbroadcastmanager:localbroadcastmanager:1.0.0'
     implementation 'com.google.android.material:material:1.4.0'
-    implementation 'com.google.android.gms:play-services-location:18.0.0'
+    implementation 'com.google.android.gms:play-services-location:19.0.0'
 }

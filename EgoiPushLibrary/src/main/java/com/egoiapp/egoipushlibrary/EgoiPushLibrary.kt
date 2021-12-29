@@ -86,16 +86,16 @@ class EgoiPushLibrary {
         this.dialogCallback = dialogCallback
         this.deepLinkCallback = deepLinkCallback
 
-        NotificationEventReceiver.LAUNCH_APP = launchAppAction
-        setDSData(appId, apiKey)
+        setDSData(appId, apiKey, launchAppAction)
 
         IS_INITIALIZED = true
     }
 
-    private fun setDSData(appId: String, apiKey: String) = runBlocking {
+    private fun setDSData(appId: String, apiKey: String, openAppAction: String) = runBlocking {
         val egoiPreferences = EgoiPreferences(
             appId = appId,
-            apiKey = apiKey
+            apiKey = apiKey,
+            openAppAction = openAppAction
         )
 
         egoiPreferences.encode()?.let {
