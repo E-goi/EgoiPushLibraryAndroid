@@ -63,7 +63,7 @@ afterEvaluate {
 
                 groupId = 'com.egoiapp.egoipushlibrary'
                 artifactId = 'egoipushlibrary'
-                version = '3.1.0'
+                version = '3.1.1'
 
                 pom {
                     name = "EgoiPushLibrary"
