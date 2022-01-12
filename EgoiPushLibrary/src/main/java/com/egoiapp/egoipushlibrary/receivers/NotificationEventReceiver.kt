@@ -51,25 +51,31 @@ class NotificationEventReceiver : BroadcastReceiver() {
                     }
                 }
 
+                egoiNotification = EgoiNotification(
+                    title = extras.getString("title") ?: "",
+                    body = extras.getString("body") ?: "",
+                    actionType = extras.getString("actionType") ?: "",
+                    actionText = extras.getString("actionText") ?: "",
+                    actionUrl = extras.getString("actionUrl") ?: "",
+                    actionTextCancel = extras.getString("actionTextCancel") ?: "",
+                    apiKey = extras.getString("apiKey") ?: "",
+                    appId = extras.getString("appId") ?: "",
+                    contactId = extras.getString("contactId") ?: "",
+                    messageHash = extras.getString("messageHash") ?: "",
+                    deviceId = extras.getInt("deviceId", 0),
+                    messageId = extras.getInt("messageId", 0)
+                )
+
+                if (intent.action === NOTIFICATION_EVENT_CLOSE) {
+                    registerEvent(context.applicationContext, "canceled")
+                    dismissNotification(context.applicationContext)
+                    return
+                }
+
                 val thread = Thread {
                     while (!EgoiPushLibrary.IS_INITIALIZED) {
                         Thread.sleep(300)
                     }
-
-                    egoiNotification = EgoiNotification(
-                        title = extras.getString("title") ?: "",
-                        body = extras.getString("body") ?: "",
-                        actionType = extras.getString("actionType") ?: "",
-                        actionText = extras.getString("actionText") ?: "",
-                        actionUrl = extras.getString("actionUrl") ?: "",
-                        actionTextCancel = extras.getString("actionTextCancel") ?: "",
-                        apiKey = extras.getString("apiKey") ?: "",
-                        appId = extras.getString("appId") ?: "",
-                        contactId = extras.getString("contactId") ?: "",
-                        messageHash = extras.getString("messageHash") ?: "",
-                        deviceId = extras.getInt("deviceId", 0),
-                        messageId = extras.getInt("messageId", 0)
-                    )
 
                     if (intent.action == NOTIFICATION_OPEN) {
                         if (egoiNotification.actionType != "" && egoiNotification.actionText != "" && egoiNotification.actionUrl != "" && egoiNotification.actionTextCancel != "") {
@@ -121,13 +127,7 @@ class NotificationEventReceiver : BroadcastReceiver() {
 
                             context.applicationContext.startActivity(uriIntent)
                         }
-                    }
 
-                    if (intent.action === NOTIFICATION_EVENT_CLOSE) {
-                        registerEvent(context.applicationContext, "canceled")
-                    }
-
-                    if (intent.action === NOTIFICATION_EVENT_VIEW || intent.action === NOTIFICATION_EVENT_CLOSE) {
                         dismissNotification(context.applicationContext)
                     }
                 }
