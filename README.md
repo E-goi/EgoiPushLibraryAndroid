@@ -1,18 +1,10 @@
-# What's new in version 3.1.0?
-
-### MINOR:
-
-#### Send "open" event when there is no actions:
-
-Now, when the notifications don't have an action defined and the user taps the notification, the
-"open" event is sent to E-goi.
+# What's new in version 3.1.1?
 
 ### PATCH
 
-#### Save launch app action in preferences:
+#### Close action not working:
 
-The launch action defined in the config method, is now saved in datastore so it can be read before
-the SDK is initialized
+Fix a bug where when pressing the close action of a notification when the app is closed, notification is not dismissed.
 
 # EgoiPushLibraryAndroid
 
@@ -41,7 +33,7 @@ There are a few things you must configure in your app in order for the library t
 This library is available through Maven Central. To install it, simply add the following line to your Podfile:
 
 ```gradle
-implementation 'com.egoiapp.egoipushlibrary:egoipushlibrary:3.1.0'
+implementation 'com.egoiapp.egoipushlibrary:egoipushlibrary:3.1.1'
 ```
 
 After installing, you can initialize the library in the **MainActivity** with following instruction:

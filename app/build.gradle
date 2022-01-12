@@ -41,6 +41,6 @@ dependencies {
     implementation "androidx.multidex:multidex:2.0.1"
     implementation "com.google.android.material:material:1.4.0"
     implementation "com.google.firebase:firebase-messaging:23.0.0"
-    implementation 'com.egoiapp.egoipushlibrary:egoipushlibrary:3.1.0'
+    implementation 'com.egoiapp.egoipushlibrary:egoipushlibrary:3.1.1'
 //    implementation project(':EgoiPushLibrary')
 }
