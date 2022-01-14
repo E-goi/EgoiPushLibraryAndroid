@@ -1,6 +1,7 @@
 package com.egoiapp.egoipushlibrary.handlers
 
 import android.content.Intent
+import androidx.work.OneTimeWorkRequest
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.workDataOf
 import com.egoiapp.egoipushlibrary.EgoiPushLibrary
@@ -37,7 +38,7 @@ class FirebaseHandler(
      * @param field The column in E-goi's list that will be written in (optional)
      * @param value The value to be written in the field defined above (optional)
      */
-    fun registerToken(token: String, field: String = "", value: String = "") {
+    fun registerToken(token: String, field: String = "", value: String = ""): OneTimeWorkRequest? {
         Companion.token = token
 
         if (field != "" && value != "") {
@@ -53,25 +54,25 @@ class FirebaseHandler(
             twoStepsData.put("value", value)
         }
 
-        runBlocking {
-            val preferences: EgoiPreferences? =
-                instance.dataStore.getDSPreferences()
+        val preferences: EgoiPreferences? =
+            instance.dataStore.getDSPreferences()
 
-            if (preferences != null) {
-                instance.requestWork(
-                    workRequest = OneTimeWorkRequestBuilder<RegisterTokenWorker>()
-                        .setInputData(
-                            workDataOf(
-                                "apiKey" to preferences.apiKey,
-                                "appId" to preferences.appId,
-                                "token" to token,
-                                "twoStepsData" to twoStepsData.toString()
-                            )
-                        )
-                        .build()
+        if (preferences != null) {
+            val workRequest = OneTimeWorkRequestBuilder<RegisterTokenWorker>()
+                .setInputData(
+                    workDataOf(
+                        "apiKey" to preferences.apiKey,
+                        "appId" to preferences.appId,
+                        "token" to token,
+                        "twoStepsData" to twoStepsData.toString()
+                    )
                 )
-            }
+                .build()
+            instance.requestWork(workRequest)
+            return workRequest;
         }
+
+        return null;
     }
 
     /**
