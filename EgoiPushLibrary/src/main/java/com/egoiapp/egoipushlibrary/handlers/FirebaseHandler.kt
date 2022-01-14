@@ -21,6 +21,7 @@ class FirebaseHandler(
     private lateinit var message: EGoiMessage
 
     private var geoPush: Boolean = false
+    private var canShow: Boolean = true
 
     /**
      * Update the token saved in the library
@@ -80,7 +81,7 @@ class FirebaseHandler(
      * that will trigger the notification. Otherwise, displays a dialog to the user.
      */
     fun messageReceived() {
-        if (this::message.isInitialized) {
+        if (this::message.isInitialized && canShow) {
             if (!geoPush) {
                 fireNotification()
             } else {
@@ -131,19 +132,24 @@ class FirebaseHandler(
 
             // [Handle geolocation]
             if (
-                instance.location.checkPermissions() &&
                 extras.containsKey("latitude") && extras.getString("latitude") != "" &&
                 extras.containsKey("longitude") && extras.getString("longitude") != "" &&
                 extras.containsKey("radius") && extras.getString("radius") != ""
             ) {
+                this.geoPush = true;
+                if(!instance.location.checkPermissions()) {
+                    this.canShow = false;
+                    return;
+                }
                 this.message.data.geo.latitude =
                     extras.getString("latitude")?.toDouble() ?: Double.NaN
                 this.message.data.geo.longitude =
                     extras.getString("longitude")?.toDouble() ?: Double.NaN
                 this.message.data.geo.radius = extras.getString("radius")?.toFloat() ?: 0.0.toFloat()
                 this.message.data.geo.duration = extras.getString("duration")?.toLong() ?: 0
-
-                this.geoPush = true
+            } else {
+                this.canShow = true;
+                this.geoPush = false;
             }
         }
     }
