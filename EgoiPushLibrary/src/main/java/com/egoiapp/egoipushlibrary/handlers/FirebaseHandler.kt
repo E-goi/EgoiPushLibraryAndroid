@@ -1,9 +1,7 @@
 package com.egoiapp.egoipushlibrary.handlers
 
 import android.content.Intent
-import androidx.work.OneTimeWorkRequest
-import androidx.work.OneTimeWorkRequestBuilder
-import androidx.work.workDataOf
+import androidx.work.*
 import com.egoiapp.egoipushlibrary.EgoiPushLibrary
 import com.egoiapp.egoipushlibrary.structures.*
 import com.egoiapp.egoipushlibrary.workers.FireDialogWorker
@@ -18,10 +16,9 @@ import org.json.JSONObject
 class FirebaseHandler(
     private val instance: EgoiPushLibrary
 ) {
-    private lateinit var message: EGoiMessage
+    private var message: EGoiMessage? = null
 
     private var geoPush: Boolean = false
-    private var canShow: Boolean = true
 
     /**
      * Update the token saved in the library
@@ -81,12 +78,14 @@ class FirebaseHandler(
      * that will trigger the notification. Otherwise, displays a dialog to the user.
      */
     fun messageReceived() {
-        if (this::message.isInitialized && canShow) {
+        message?.let {
             if (!geoPush) {
                 fireNotification()
             } else {
-                instance.addGeofence(message)
+                instance.addGeofence(it)
+                geoPush = false
             }
+            message = null
         }
     }
 
@@ -98,6 +97,12 @@ class FirebaseHandler(
         val extras = intent.extras
 
         if (extras != null && extras.getString("key") == "E-GOI_PUSH") {
+
+            if(!instance.location.checkPermissions() &&
+                extras.containsKey("latitude") && extras.getString("latitude") != "") {
+                return;
+            }
+
             this.message = EGoiMessage(
                 notification = EGoiMessageNotification(
                     title = extras.getString("title") ?: "",
@@ -116,40 +121,36 @@ class FirebaseHandler(
                 )
             )
 
-            // [Assign action to notification]
-            val actionsJson = extras.getString("actions")
+            message?.let {
+                // [Assign action to notification]
+                val actionsJson = extras.getString("actions")
 
-            if (actionsJson != null) {
-                val actions = JSONObject(actionsJson)
+                if (actionsJson != null) {
+                    val actions = JSONObject(actionsJson)
 
-                if (actions.has("type") && actions.has("text") && actions.has("url") && actions.has("text-cancel")) {
-                    this.message.data.actions.type = actions.getString("type")
-                    this.message.data.actions.text = actions.getString("text")
-                    this.message.data.actions.url = actions.getString("url")
-                    this.message.data.actions.textCancel = actions.getString("text-cancel")
+                    if (actions.has("type") && actions.has("text") && actions.has("url") && actions.has("text-cancel")) {
+                        it.data.actions.type = actions.getString("type")
+                        it.data.actions.text = actions.getString("text")
+                        it.data.actions.url = actions.getString("url")
+                        it.data.actions.textCancel = actions.getString("text-cancel")
+                    }
                 }
-            }
 
-            // [Handle geolocation]
-            if (
-                extras.containsKey("latitude") && extras.getString("latitude") != "" &&
-                extras.containsKey("longitude") && extras.getString("longitude") != "" &&
-                extras.containsKey("radius") && extras.getString("radius") != ""
-            ) {
-                this.geoPush = true;
-                if(!instance.location.checkPermissions()) {
-                    this.canShow = false;
-                    return;
+                // [Handle geolocation]
+                if (
+                    instance.location.checkPermissions() &&
+                    extras.containsKey("latitude") && extras.getString("latitude") != "" &&
+                    extras.containsKey("longitude") && extras.getString("longitude") != "" &&
+                    extras.containsKey("radius") && extras.getString("radius") != ""
+                ) {
+                    this.geoPush = true;
+                    it.data.geo.latitude =
+                        extras.getString("latitude")?.toDouble() ?: Double.NaN
+                    it.data.geo.longitude =
+                        extras.getString("longitude")?.toDouble() ?: Double.NaN
+                    it.data.geo.radius = extras.getString("radius")?.toFloat() ?: 0.0.toFloat()
+                    it.data.geo.duration = extras.getString("duration")?.toLong() ?: 0
                 }
-                this.message.data.geo.latitude =
-                    extras.getString("latitude")?.toDouble() ?: Double.NaN
-                this.message.data.geo.longitude =
-                    extras.getString("longitude")?.toDouble() ?: Double.NaN
-                this.message.data.geo.radius = extras.getString("radius")?.toFloat() ?: 0.0.toFloat()
-                this.message.data.geo.duration = extras.getString("duration")?.toLong() ?: 0
-            } else {
-                this.canShow = true;
-                this.geoPush = false;
             }
         }
     }
@@ -161,30 +162,32 @@ class FirebaseHandler(
      */
     fun showDialog(intent: Intent) {
         if (
-            intent.action == "com.google.firebase.messaging.NOTIFICATION_OPEN" &&
-            this::message.isInitialized
+            intent.action == "com.google.firebase.messaging.NOTIFICATION_OPEN"
         ) {
             if (instance.dialogCallback != null) {
                 runBlocking {
                     val preferences: EgoiPreferences? =
                         instance.dataStore.getDSPreferences()
 
-                    val egoiNotification = EgoiNotification(
-                        title = message.notification.title,
-                        body = message.notification.body,
-                        actionType = message.data.actions.type,
-                        actionText = message.data.actions.text,
-                        actionUrl = message.data.actions.url,
-                        actionTextCancel = message.data.actions.textCancel,
-                        apiKey = preferences!!.apiKey,
-                        appId = preferences.appId,
-                        contactId = message.data.contactId,
-                        messageHash = message.data.messageHash,
-                        deviceId = message.data.deviceId,
-                        messageId = message.data.messageId
-                    )
-                    instance.dialogCallback?.let {
-                        it(egoiNotification)
+                    message?.let {
+                        val egoiNotification = EgoiNotification(
+                            title = it.notification.title,
+                            body = it.notification.body,
+                            actionType = it.data.actions.type,
+                            actionText = it.data.actions.text,
+                            actionUrl = it.data.actions.url,
+                            actionTextCancel = it.data.actions.textCancel,
+                            apiKey = preferences!!.apiKey,
+                            appId = preferences.appId,
+                            contactId = it.data.contactId,
+                            messageHash = it.data.messageHash,
+                            deviceId = it.data.deviceId,
+                            messageId = it.data.messageId
+                        )
+
+                        instance.dialogCallback?.let {
+                            it(egoiNotification)
+                        }
                     }
                 }
             } else {
@@ -203,28 +206,30 @@ class FirebaseHandler(
                 instance.dataStore.getDSPreferences()
 
             if (preferences != null) {
-                instance.requestWork(
-                    workRequest = OneTimeWorkRequestBuilder<FireDialogWorker>()
-                        .setInputData(
-                            workDataOf(
-                                /* Dialog Data */
-                                "title" to message.notification.title,
-                                "body" to message.notification.body,
-                                "actionType" to message.data.actions.type,
-                                "actionText" to message.data.actions.text,
-                                "actionUrl" to message.data.actions.url,
-                                "actionTextCancel" to message.data.actions.textCancel,
-                                /* Event Data*/
-                                "apiKey" to preferences.apiKey,
-                                "appId" to preferences.appId,
-                                "contactId" to message.data.contactId,
-                                "messageHash" to message.data.messageHash,
-                                "deviceId" to message.data.deviceId,
-                                "messageId" to message.data.messageId
+                message?.let {
+                    instance.requestWork(
+                        workRequest = OneTimeWorkRequestBuilder<FireDialogWorker>()
+                            .setInputData(
+                                workDataOf(
+                                    /* Dialog Data */
+                                    "title" to it.notification.title,
+                                    "body" to it.notification.body,
+                                    "actionType" to it.data.actions.type,
+                                    "actionText" to it.data.actions.text,
+                                    "actionUrl" to it.data.actions.url,
+                                    "actionTextCancel" to it.data.actions.textCancel,
+                                    /* Event Data*/
+                                    "apiKey" to preferences.apiKey,
+                                    "appId" to preferences.appId,
+                                    "contactId" to it.data.contactId,
+                                    "messageHash" to it.data.messageHash,
+                                    "deviceId" to it.data.deviceId,
+                                    "messageId" to it.data.messageId
+                                )
                             )
-                        )
-                        .build()
-                )
+                            .build()
+                    )
+                }
             }
         }
     }
@@ -235,27 +240,30 @@ class FirebaseHandler(
                 instance.dataStore.getDSPreferences()
 
             if (preferences != null) {
-                instance.requestWork(
-                    workRequest = OneTimeWorkRequestBuilder<FireNotificationWorker>()
-                        .setInputData(
-                            workDataOf(
-                                "title" to message.notification.title,
-                                "text" to message.notification.body,
-                                "image" to message.notification.image,
-                                "actionType" to message.data.actions.type,
-                                "actionText" to message.data.actions.text,
-                                "actionUrl" to message.data.actions.url,
-                                "actionTextCancel" to message.data.actions.textCancel,
-                                "apiKey" to preferences.apiKey,
-                                "appId" to preferences.appId,
-                                "contactId" to message.data.contactId,
-                                "messageHash" to message.data.messageHash,
-                                "deviceId" to message.data.deviceId,
-                                "messageId" to message.data.messageId
+                message?.let {
+                    instance.requestWork(
+                        workRequest = OneTimeWorkRequestBuilder<FireNotificationWorker>()
+                            .setInputData(
+                                workDataOf(
+                                    "title" to it.notification.title,
+                                    "text" to it.notification.body,
+                                    "image" to it.notification.image,
+                                    "actionType" to it.data.actions.type,
+                                    "actionText" to it.data.actions.text,
+                                    "actionUrl" to it.data.actions.url,
+                                    "actionTextCancel" to it.data.actions.textCancel,
+                                    "apiKey" to preferences.apiKey,
+                                    "appId" to preferences.appId,
+                                    "contactId" to it.data.contactId,
+                                    "messageHash" to it.data.messageHash,
+                                    "deviceId" to it.data.deviceId,
+                                    "messageId" to it.data.messageId
+                                )
                             )
-                        )
-                        .build()
-                )
+                            .build()
+                    )
+                }
+
             }
         }
     }
