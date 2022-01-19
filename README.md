@@ -56,6 +56,7 @@ class MainActivity : EgoiPushActivity() {
             activityContext = this,
             appId = "abc",
             apiKey = "abc",
+            geoEnabled = true,
             launchAppAction = "abc",
             dialogCallback = fun (link: EgoiNotification) {
                 Log.d("DIALOG", link.toString())
@@ -229,6 +230,13 @@ Responsible for initializing the library. The call of this method is required.
    <td>The action to listen for when the user clicks the notification</td>
    <td>true</td>
    <td>---</td>
+</tr>
+<tr>
+   <td>geoEnabled</td>
+   <td>Boolean</td>
+   <td>Flag that enables or disabled location related functionalities.</td>
+   <td>false</td>
+   <td>true</td>
 </tr>
 <tr>
    <td>dialogCallback</td>

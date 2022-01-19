@@ -7,6 +7,7 @@ data class EgoiPreferences(
     var appId: String = "",
     var apiKey: String = "",
     var openAppAction: String = "",
+    var geoEnabled: Boolean = true,
     var locationUpdates: Boolean = false
 ) {
     fun encode(): String? {
@@ -14,6 +15,7 @@ data class EgoiPreferences(
             val json = JSONObject()
             json.put("app-id", appId)
             json.put("api-key", apiKey)
+            json.put("geo-enabled", geoEnabled)
             json.put("open-app-action", openAppAction)
             json.put("location-updates", locationUpdates)
 
@@ -30,6 +32,7 @@ data class EgoiPreferences(
             EgoiPreferences(
                 appId = json.getString("app-id"),
                 apiKey = json.getString("api-key"),
+                geoEnabled = json.getBoolean("geo-enabled"),
                 openAppAction = json.getString("open-app-action"),
                 locationUpdates = json.getBoolean("location-updates")
             )
