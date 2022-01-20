@@ -19,6 +19,8 @@ class FirebaseHandler(
     private var message: EGoiMessage? = null
 
     private var geoPush: Boolean = false
+    private val preferences: EgoiPreferences? =
+        instance.dataStore.getDSPreferences()
 
     /**
      * Update the token saved in the library
@@ -52,9 +54,6 @@ class FirebaseHandler(
             twoStepsData.put("value", value)
         }
 
-        val preferences: EgoiPreferences? =
-            instance.dataStore.getDSPreferences()
-
         if (preferences != null) {
             val workRequest = OneTimeWorkRequestBuilder<RegisterTokenWorker>()
                 .setInputData(
@@ -81,7 +80,7 @@ class FirebaseHandler(
         message?.let {
             if (!geoPush) {
                 fireNotification()
-            } else {
+            } else if(preferences!!.geoEnabled){
                 instance.addGeofence(it)
                 geoPush = false
             }
@@ -98,8 +97,9 @@ class FirebaseHandler(
 
         if (extras != null && extras.getString("key") == "E-GOI_PUSH") {
 
-            if(!instance.location.checkPermissions() &&
-                extras.containsKey("latitude") && extras.getString("latitude") != "") {
+            if((preferences!!.geoEnabled && !instance.location.checkPermissions() &&
+                extras.containsKey("latitude") && extras.getString("latitude") != "")
+                || (!preferences!!.geoEnabled && extras.containsKey("latitude") && extras.getString("latitude") != "")) {
                 return;
             }
 
@@ -138,6 +138,7 @@ class FirebaseHandler(
 
                 // [Handle geolocation]
                 if (
+                    preferences!!.geoEnabled &&
                     instance.location.checkPermissions() &&
                     extras.containsKey("latitude") && extras.getString("latitude") != "" &&
                     extras.containsKey("longitude") && extras.getString("longitude") != "" &&
@@ -166,8 +167,6 @@ class FirebaseHandler(
         ) {
             if (instance.dialogCallback != null) {
                 runBlocking {
-                    val preferences: EgoiPreferences? =
-                        instance.dataStore.getDSPreferences()
 
                     message?.let {
                         val egoiNotification = EgoiNotification(
@@ -202,8 +201,6 @@ class FirebaseHandler(
      */
     private fun fireDialog() {
         runBlocking {
-            val preferences: EgoiPreferences? =
-                instance.dataStore.getDSPreferences()
 
             if (preferences != null) {
                 message?.let {
@@ -236,8 +233,6 @@ class FirebaseHandler(
 
     private fun fireNotification() {
         runBlocking {
-            val preferences: EgoiPreferences? =
-                instance.dataStore.getDSPreferences()
 
             if (preferences != null) {
                 message?.let {
