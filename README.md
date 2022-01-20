@@ -1,14 +1,8 @@
-# What's new in version 3.1.2?
+# What's new in version 3.1.3?
 
-### PATCH
+### MINOR
 
-#### Add result return from register token request:
-
-Added the possibility to have the response to the register token request result.
-
-#### Validate if have geolocation is active:
-
-Fix a bug where when receive a notification with geolocation and the app don't have permission to fetch the geolocation of the user dismiss the notification and don't show to the user.
+#### Add geoEnabled flag who enables or disabled location related functionalities
 
 # EgoiPushLibraryAndroid
 
@@ -37,7 +31,7 @@ There are a few things you must configure in your app in order for the library t
 This library is available through Maven Central. To install it, simply add the following line to your Podfile:
 
 ```gradle
-implementation 'com.egoiapp.egoipushlibrary:egoipushlibrary:3.1.2'
+implementation 'com.egoiapp.egoipushlibrary:egoipushlibrary:3.1.3'
 ```
 
 After installing, you can initialize the library in the **MainActivity** with following instruction:
