@@ -25,7 +25,6 @@ class MainActivity : EgoiPushActivity() {
             appId = "abc",
             apiKey = "abc",
             launchAppAction = "abc",
-            geoEnabled = true,
             deepLinkCallback = fun (link: EgoiNotification) {
                 Log.d("DEEP_LINK", link.toString())
             }
