@@ -6,13 +6,11 @@ import android.util.Log
 import android.view.View
 import androidx.annotation.RequiresApi
 import androidx.work.WorkManager
-import androidx.lifecycle.Observer
 import androidx.work.WorkInfo
 import com.egoiapp.egoipushlibrary.EgoiPushActivity
 import com.egoiapp.egoipushlibrary.EgoiPushLibrary
 import com.egoiapp.egoipushlibrary.structures.EgoiNotification
 import com.google.firebase.messaging.FirebaseMessaging
-import java.util.*
 
 class MainActivity : EgoiPushActivity() {
 
