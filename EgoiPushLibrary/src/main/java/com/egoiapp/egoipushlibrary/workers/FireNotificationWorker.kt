@@ -187,6 +187,7 @@ class FireNotificationWorker(
                 .setContentIntent(pendingIntent)
                 .setDeleteIntent(closePendingIntent)
                 .setAutoCancel(true)
+                .setStyle(NotificationCompat.BigTextStyle())
 
         if (actionType !== "" && actionText !== "" && actionUrl !== "" && actionTextCancel !== "") {
             builder

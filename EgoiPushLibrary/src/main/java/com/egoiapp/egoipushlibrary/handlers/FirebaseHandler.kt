@@ -96,11 +96,14 @@ class FirebaseHandler(
         val extras = intent.extras
 
         if (extras != null && extras.getString("key") == "E-GOI_PUSH") {
+            if (preferences === null) {
+                return
+            }
 
-            if((preferences!!.geoEnabled && !instance.location.checkPermissions() &&
+            if ((preferences.geoEnabled && !instance.location.checkPermissions() &&
                 extras.containsKey("latitude") && extras.getString("latitude") != "")
-                || (!preferences!!.geoEnabled && extras.containsKey("latitude") && extras.getString("latitude") != "")) {
-                return;
+                || (!preferences.geoEnabled && extras.containsKey("latitude") && extras.getString("latitude") != "")) {
+                return
             }
 
             this.message = EGoiMessage(
@@ -138,13 +141,13 @@ class FirebaseHandler(
 
                 // [Handle geolocation]
                 if (
-                    preferences!!.geoEnabled &&
+                    preferences.geoEnabled &&
                     instance.location.checkPermissions() &&
                     extras.containsKey("latitude") && extras.getString("latitude") != "" &&
                     extras.containsKey("longitude") && extras.getString("longitude") != "" &&
                     extras.containsKey("radius") && extras.getString("radius") != ""
                 ) {
-                    this.geoPush = true;
+                    this.geoPush = true
                     it.data.geo.latitude =
                         extras.getString("latitude")?.toDouble() ?: Double.NaN
                     it.data.geo.longitude =

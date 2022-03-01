@@ -10,7 +10,6 @@ import com.egoiapp.egoipushlibrary.handlers.DataStoreHandler
 import com.egoiapp.egoipushlibrary.handlers.FirebaseHandler
 import com.egoiapp.egoipushlibrary.handlers.GeofenceHandler
 import com.egoiapp.egoipushlibrary.handlers.LocationHandler
-import com.egoiapp.egoipushlibrary.receivers.NotificationEventReceiver
 import com.egoiapp.egoipushlibrary.structures.EGoiMessage
 import com.egoiapp.egoipushlibrary.structures.EgoiNotification
 import com.egoiapp.egoipushlibrary.structures.EgoiPreferences
