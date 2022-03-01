@@ -66,10 +66,10 @@ class FirebaseHandler(
                 )
                 .build()
             instance.requestWork(workRequest)
-            return workRequest;
+            return workRequest
         }
 
-        return null;
+        return null
     }
 
     /**
