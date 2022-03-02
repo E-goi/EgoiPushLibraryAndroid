@@ -32,21 +32,19 @@ class NotificationEventReceiver : BroadcastReceiver() {
                         .isAppOnForeground() && intent.action !== NOTIFICATION_EVENT_CLOSE
                 ) {
                     runBlocking {
-                        val preferences: EgoiPreferences? =
+                        val preferences: EgoiPreferences =
                             EgoiPushLibrary.getInstance(context).dataStore.getDSPreferences()
 
-                        if (preferences != null) {
-                            var action = LAUNCH_APP
+                        var action = LAUNCH_APP
 
-                            if (preferences.openAppAction != "") {
-                                action = preferences.openAppAction
-                            }
-
-                            val activityIntent = Intent(action)
-                            activityIntent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
-
-                            context.startActivity(activityIntent)
+                        if (preferences.openAppAction != "") {
+                            action = preferences.openAppAction
                         }
+
+                        val activityIntent = Intent(action)
+                        activityIntent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
+
+                        context.startActivity(activityIntent)
                     }
                 }
 

@@ -37,6 +37,10 @@ class LocationHandler(
 
             fusedLocationClient.requestLocationUpdates(locationRequest, getPendingIntent())
             instance.dataStore.setDSLocationUpdates(status = true)
+
+            if (!instance.isAppOnForeground()) {
+                startService()
+            }
         } catch (e: SecurityException) {
             e.printStackTrace()
         }
@@ -53,7 +57,7 @@ class LocationHandler(
     }
 
     fun startService() {
-        if (checkPermissions() && instance.dataStore.getDSConfigs()?.locationUpdates == true) {
+        if (checkPermissions() && instance.dataStore.getDSConfigs().locationUpdates) {
             instance.context.startService(
                 Intent(
                     instance.context,
@@ -64,7 +68,7 @@ class LocationHandler(
     }
 
     fun stopService() {
-        if (checkPermissions() && instance.dataStore.getDSConfigs()?.locationUpdates == true) {
+        if (checkPermissions() && instance.dataStore.getDSConfigs().locationUpdates) {
             instance.context.stopService(
                 Intent(
                     instance.context,

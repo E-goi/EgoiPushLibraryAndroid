@@ -12,6 +12,7 @@ import com.egoiapp.egoipushlibrary.R
 import com.egoiapp.egoipushlibrary.handlers.LocationHandler
 import com.egoiapp.egoipushlibrary.receivers.LocationBroadcastReceiver
 import com.egoiapp.egoipushlibrary.receivers.NotificationEventReceiver
+import com.egoiapp.egoipushlibrary.structures.EgoiPreferences
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.LocationServices
@@ -95,7 +96,16 @@ class LocationUpdatesIntentService : Service() {
     }
 
     private fun createActivityPendingIntent(): PendingIntent {
-        val activityIntent = Intent(NotificationEventReceiver.LAUNCH_APP)
+        val preferences: EgoiPreferences =
+            EgoiPushLibrary.getInstance(applicationContext).dataStore.getDSPreferences()
+
+        var action = NotificationEventReceiver.LAUNCH_APP
+
+        if (preferences.openAppAction != "") {
+            action = preferences.openAppAction
+        }
+
+        val activityIntent = Intent(action)
         activityIntent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
 
         return PendingIntent.getActivity(

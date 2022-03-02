@@ -103,9 +103,7 @@ class EgoiPushLibrary {
             geoEnabled = geoEnabled
         )
 
-        egoiPreferences.encode()?.let {
-            dataStore.setDSData(category = DataStoreHandler.PREFERENCES, data = it)
-        }
+        dataStore.setDSData(DataStoreHandler.PREFERENCES, egoiPreferences.encode())
     }
 
     fun isAppOnForeground(): Boolean {

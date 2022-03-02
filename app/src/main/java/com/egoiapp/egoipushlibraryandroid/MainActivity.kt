@@ -56,22 +56,20 @@ class MainActivity : EgoiPushActivity() {
                 value = "email@email.com"
             )
 
-            if(request !== null) {
-                WorkManager.getInstance(this).getWorkInfoByIdLiveData(request.id)
-                    .observe(this) { workInfo ->
-                        if (workInfo != null && workInfo.state.isFinished) {
-                            // validate if state is equal to SUCCEEDED when token registered
-                            if (workInfo.state == WorkInfo.State.FAILED) {
-                                Log.d("TOKEN", "failed")
-                            }
-                            if (workInfo.state == WorkInfo.State.SUCCEEDED) {
-                                Log.d("TOKEN", "success")
-                            }
-                            WorkManager.getInstance(this).getWorkInfoByIdLiveData(request.id)
-                                .removeObservers(this)
+            WorkManager.getInstance(this).getWorkInfoByIdLiveData(request.id)
+                .observe(this) { workInfo ->
+                    if (workInfo != null && workInfo.state.isFinished) {
+                        // validate if state is equal to SUCCEEDED when token registered
+                        if (workInfo.state == WorkInfo.State.FAILED) {
+                            Log.d("TOKEN", "failed")
                         }
+                        if (workInfo.state == WorkInfo.State.SUCCEEDED) {
+                            Log.d("TOKEN", "success")
+                        }
+                        WorkManager.getInstance(this).getWorkInfoByIdLiveData(request.id)
+                            .removeObservers(this)
                     }
-            }
+                }
         }
     }
 }

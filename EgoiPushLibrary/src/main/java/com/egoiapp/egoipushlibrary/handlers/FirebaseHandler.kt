@@ -1,7 +1,9 @@
 package com.egoiapp.egoipushlibrary.handlers
 
 import android.content.Intent
-import androidx.work.*
+import androidx.work.OneTimeWorkRequest
+import androidx.work.OneTimeWorkRequestBuilder
+import androidx.work.workDataOf
 import com.egoiapp.egoipushlibrary.EgoiPushLibrary
 import com.egoiapp.egoipushlibrary.structures.*
 import com.egoiapp.egoipushlibrary.workers.FireDialogWorker
@@ -19,7 +21,7 @@ class FirebaseHandler(
     private var message: EGoiMessage? = null
 
     private var geoPush: Boolean = false
-    private val preferences: EgoiPreferences? =
+    private val preferences: EgoiPreferences =
         instance.dataStore.getDSPreferences()
 
     /**
@@ -38,7 +40,7 @@ class FirebaseHandler(
      * @param field The column in E-goi's list that will be written in (optional)
      * @param value The value to be written in the field defined above (optional)
      */
-    fun registerToken(token: String, field: String = "", value: String = ""): OneTimeWorkRequest? {
+    fun registerToken(token: String, field: String = "", value: String = ""): OneTimeWorkRequest {
         Companion.token = token
 
         if (field != "" && value != "") {
@@ -54,22 +56,20 @@ class FirebaseHandler(
             twoStepsData.put("value", value)
         }
 
-        if (preferences != null) {
-            val workRequest = OneTimeWorkRequestBuilder<RegisterTokenWorker>()
-                .setInputData(
-                    workDataOf(
-                        "apiKey" to preferences.apiKey,
-                        "appId" to preferences.appId,
-                        "token" to token,
-                        "twoStepsData" to twoStepsData.toString()
-                    )
+        val workRequest = OneTimeWorkRequestBuilder<RegisterTokenWorker>()
+            .setInputData(
+                workDataOf(
+                    "apiKey" to preferences.apiKey,
+                    "appId" to preferences.appId,
+                    "token" to token,
+                    "twoStepsData" to twoStepsData.toString()
                 )
-                .build()
-            instance.requestWork(workRequest)
-            return workRequest
-        }
+            )
+            .build()
 
-        return null
+        instance.requestWork(workRequest)
+
+        return workRequest
     }
 
     /**
@@ -80,7 +80,7 @@ class FirebaseHandler(
         message?.let {
             if (!geoPush) {
                 fireNotification()
-            } else if(preferences!!.geoEnabled){
+            } else if (preferences.geoEnabled){
                 instance.addGeofence(it)
                 geoPush = false
             }
@@ -96,10 +96,6 @@ class FirebaseHandler(
         val extras = intent.extras
 
         if (extras != null && extras.getString("key") == "E-GOI_PUSH") {
-            if (preferences === null) {
-                return
-            }
-
             if ((preferences.geoEnabled && !instance.location.checkPermissions() &&
                 extras.containsKey("latitude") && extras.getString("latitude") != "")
                 || (!preferences.geoEnabled && extras.containsKey("latitude") && extras.getString("latitude") != "")) {
@@ -115,12 +111,16 @@ class FirebaseHandler(
                 data = EGoiMessageData(
                     os = extras.getString("os") ?: "android",
                     messageHash = extras.getString("message-hash") ?: "",
-                    listId = if (extras.getString("list-id", "0") != "") extras.getString("list-id", "0").toInt() else 0,
+                    listId = if (extras.getString("list-id", "0") != "")
+                        extras.getString("list-id", "0").toInt() else 0,
                     contactId = extras.getString("contact-id") ?: "",
-                    accountId = if (extras.getString("account-id", "0") != "") extras.getString("account-id", "0").toInt() else 0,
+                    accountId = if (extras.getString("account-id", "0") != "")
+                        extras.getString("account-id", "0").toInt() else 0,
                     applicationId = extras.getString("application-id") ?: "",
-                    messageId = if (extras.getString("message-id", "0") != "") extras.getString("message-id", "0").toInt() else 0,
-                    deviceId = if (extras.getString("device-id", "0") != "") extras.getString("device-id", "0").toInt() else 0,
+                    messageId = if (extras.getString("message-id", "0") != "")
+                        extras.getString("message-id", "0").toInt() else 0,
+                    deviceId = if (extras.getString("device-id", "0") != "")
+                        extras.getString("device-id", "0").toInt() else 0,
                 )
             )
 
@@ -131,7 +131,12 @@ class FirebaseHandler(
                 if (actionsJson != null) {
                     val actions = JSONObject(actionsJson)
 
-                    if (actions.has("type") && actions.has("text") && actions.has("url") && actions.has("text-cancel")) {
+                    if (
+                        actions.has("type") &&
+                        actions.has("text") &&
+                        actions.has("url") &&
+                        actions.has("text-cancel")
+                    ) {
                         it.data.actions.type = actions.getString("type")
                         it.data.actions.text = actions.getString("text")
                         it.data.actions.url = actions.getString("url")
@@ -179,7 +184,7 @@ class FirebaseHandler(
                             actionText = it.data.actions.text,
                             actionUrl = it.data.actions.url,
                             actionTextCancel = it.data.actions.textCancel,
-                            apiKey = preferences!!.apiKey,
+                            apiKey = preferences.apiKey,
                             appId = preferences.appId,
                             contactId = it.data.contactId,
                             messageHash = it.data.messageHash,
@@ -204,64 +209,57 @@ class FirebaseHandler(
      */
     private fun fireDialog() {
         runBlocking {
-
-            if (preferences != null) {
-                message?.let {
-                    instance.requestWork(
-                        workRequest = OneTimeWorkRequestBuilder<FireDialogWorker>()
-                            .setInputData(
-                                workDataOf(
-                                    /* Dialog Data */
-                                    "title" to it.notification.title,
-                                    "body" to it.notification.body,
-                                    "actionType" to it.data.actions.type,
-                                    "actionText" to it.data.actions.text,
-                                    "actionUrl" to it.data.actions.url,
-                                    "actionTextCancel" to it.data.actions.textCancel,
-                                    /* Event Data*/
-                                    "apiKey" to preferences.apiKey,
-                                    "appId" to preferences.appId,
-                                    "contactId" to it.data.contactId,
-                                    "messageHash" to it.data.messageHash,
-                                    "deviceId" to it.data.deviceId,
-                                    "messageId" to it.data.messageId
-                                )
+            message?.let {
+                instance.requestWork(
+                    workRequest = OneTimeWorkRequestBuilder<FireDialogWorker>()
+                        .setInputData(
+                            workDataOf(
+                                /* Dialog Data */
+                                "title" to it.notification.title,
+                                "body" to it.notification.body,
+                                "actionType" to it.data.actions.type,
+                                "actionText" to it.data.actions.text,
+                                "actionUrl" to it.data.actions.url,
+                                "actionTextCancel" to it.data.actions.textCancel,
+                                /* Event Data*/
+                                "apiKey" to preferences.apiKey,
+                                "appId" to preferences.appId,
+                                "contactId" to it.data.contactId,
+                                "messageHash" to it.data.messageHash,
+                                "deviceId" to it.data.deviceId,
+                                "messageId" to it.data.messageId
                             )
-                            .build()
-                    )
-                }
+                        )
+                        .build()
+                )
             }
         }
     }
 
     private fun fireNotification() {
         runBlocking {
-
-            if (preferences != null) {
-                message?.let {
-                    instance.requestWork(
-                        workRequest = OneTimeWorkRequestBuilder<FireNotificationWorker>()
-                            .setInputData(
-                                workDataOf(
-                                    "title" to it.notification.title,
-                                    "text" to it.notification.body,
-                                    "image" to it.notification.image,
-                                    "actionType" to it.data.actions.type,
-                                    "actionText" to it.data.actions.text,
-                                    "actionUrl" to it.data.actions.url,
-                                    "actionTextCancel" to it.data.actions.textCancel,
-                                    "apiKey" to preferences.apiKey,
-                                    "appId" to preferences.appId,
-                                    "contactId" to it.data.contactId,
-                                    "messageHash" to it.data.messageHash,
-                                    "deviceId" to it.data.deviceId,
-                                    "messageId" to it.data.messageId
-                                )
+            message?.let {
+                instance.requestWork(
+                    workRequest = OneTimeWorkRequestBuilder<FireNotificationWorker>()
+                        .setInputData(
+                            workDataOf(
+                                "title" to it.notification.title,
+                                "text" to it.notification.body,
+                                "image" to it.notification.image,
+                                "actionType" to it.data.actions.type,
+                                "actionText" to it.data.actions.text,
+                                "actionUrl" to it.data.actions.url,
+                                "actionTextCancel" to it.data.actions.textCancel,
+                                "apiKey" to preferences.apiKey,
+                                "appId" to preferences.appId,
+                                "contactId" to it.data.contactId,
+                                "messageHash" to it.data.messageHash,
+                                "deviceId" to it.data.deviceId,
+                                "messageId" to it.data.messageId
                             )
-                            .build()
-                    )
-                }
-
+                        )
+                        .build()
+                )
             }
         }
     }
