@@ -302,6 +302,38 @@ user is already registered on your E-goi list, updates the token automatically.
 </tbody>
 </table>
 
+#### EgoiPushLibrary.getInstance().registerEvent()
+
+Call this method when you want to send an event to E-goi.
+
+<table>
+<thead>
+<tr>
+   <th>Property</th>
+   <th>Type</th>
+   <th>Description</th>
+   <th>Required</th>
+   <th>Default</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+   <td>event</td>
+   <td>String</td>
+   <td>The event you want to send (received, open, canceled).</td>
+   <td>true</td>
+   <td>---</td>
+</tr>
+<tr>
+   <td>notification</td>
+   <td>EgoiNotification</td>
+   <td>The notification associated to the event.</td>
+   <td>true</td>
+   <td>---</td>
+</tr>
+</tbody>
+</table>
+
 ## Author
 
 E-goi, integrations@e-goi.com

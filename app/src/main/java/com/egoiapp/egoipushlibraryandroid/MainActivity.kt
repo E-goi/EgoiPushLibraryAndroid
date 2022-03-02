@@ -5,8 +5,8 @@ import android.os.Bundle
 import android.util.Log
 import android.view.View
 import androidx.annotation.RequiresApi
-import androidx.work.WorkManager
 import androidx.work.WorkInfo
+import androidx.work.WorkManager
 import com.egoiapp.egoipushlibrary.EgoiPushActivity
 import com.egoiapp.egoipushlibrary.EgoiPushLibrary
 import com.egoiapp.egoipushlibrary.structures.EgoiNotification

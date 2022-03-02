@@ -102,7 +102,7 @@ class LocationUpdatesIntentService : Service() {
             this,
             0,
             activityIntent,
-            0
+            PendingIntent.FLAG_IMMUTABLE
         )
     }
 
@@ -114,7 +114,7 @@ class LocationUpdatesIntentService : Service() {
             this,
             0,
             stopLocationIntent,
-            0
+            PendingIntent.FLAG_IMMUTABLE
         )
     }
 

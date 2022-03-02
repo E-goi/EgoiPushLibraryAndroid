@@ -11,12 +11,11 @@ import android.graphics.BitmapFactory
 import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.core.app.NotificationCompat
-import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.Worker
 import androidx.work.WorkerParameters
-import androidx.work.workDataOf
 import com.egoiapp.egoipushlibrary.EgoiPushLibrary
 import com.egoiapp.egoipushlibrary.receivers.NotificationEventReceiver
+import com.egoiapp.egoipushlibrary.structures.EgoiNotification
 import kotlinx.coroutines.runBlocking
 import java.net.URL
 
@@ -233,23 +232,16 @@ class FireNotificationWorker(
      */
     private fun sendNotification() {
         notificationManager.notify(messageId.toInt(), notification)
-        registerEvent()
-    }
 
-    private fun registerEvent() {
-        EgoiPushLibrary.getInstance(context).requestWork(
-            workRequest = OneTimeWorkRequestBuilder<RegisterEventWorker>()
-                .setInputData(
-                    workDataOf(
-                        "apiKey" to apiKey,
-                        "appId" to appId,
-                        "contactId" to contactId,
-                        "messageHash" to messageHash,
-                        "event" to "received",
-                        "deviceId" to deviceId
-                    )
-                )
-                .build()
+        val egoiNotification = EgoiNotification(
+            apiKey = apiKey,
+            appId = appId,
+            contactId = contactId,
+            messageHash = messageHash,
+            deviceId = deviceId.toInt()
         )
+
+        EgoiPushLibrary.getInstance(context.applicationContext)
+            .registerEvent(EgoiPushLibrary.RECEIVED_EVENT, egoiNotification)
     }
 }
