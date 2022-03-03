@@ -108,24 +108,42 @@ class LocationUpdatesIntentService : Service() {
         val activityIntent = Intent(action)
         activityIntent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
 
-        return PendingIntent.getActivity(
-            this,
-            0,
-            activityIntent,
-            PendingIntent.FLAG_IMMUTABLE
-        )
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            PendingIntent.getActivity(
+                this,
+                0,
+                activityIntent,
+                PendingIntent.FLAG_IMMUTABLE
+            )
+        } else {
+            PendingIntent.getActivity(
+                this,
+                0,
+                activityIntent,
+                0
+            )
+        }
     }
 
     private fun createStopLocationPendingIntent(): PendingIntent {
         val stopLocationIntent = Intent(this, LocationBroadcastReceiver::class.java)
         stopLocationIntent.action = LocationBroadcastReceiver.ACTION_STOP_LOCATION_UPDATES
 
-        return PendingIntent.getBroadcast(
-            this,
-            0,
-            stopLocationIntent,
-            PendingIntent.FLAG_IMMUTABLE
-        )
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            PendingIntent.getBroadcast(
+                this,
+                0,
+                stopLocationIntent,
+                PendingIntent.FLAG_IMMUTABLE
+            )
+        } else {
+            PendingIntent.getBroadcast(
+                this,
+                0,
+                stopLocationIntent,
+                0
+            )
+        }
     }
 
     private fun getLocationTitle(context: Context): String {

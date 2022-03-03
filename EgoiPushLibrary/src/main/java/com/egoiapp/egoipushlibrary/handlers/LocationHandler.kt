@@ -82,12 +82,21 @@ class LocationHandler(
         val intent = Intent(instance.context, LocationBroadcastReceiver::class.java)
         intent.action = LocationBroadcastReceiver.ACTION_PROCESS_UPDATES
 
-        return PendingIntent.getBroadcast(
-            instance.context,
-            0,
-            intent,
-            PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
-        )
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            PendingIntent.getBroadcast(
+                instance.context,
+                0,
+                intent,
+                PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
+            )
+        } else {
+            PendingIntent.getBroadcast(
+                instance.context,
+                0,
+                intent,
+                PendingIntent.FLAG_UPDATE_CURRENT
+            )
+        }
     }
 
     /**
