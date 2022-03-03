@@ -60,7 +60,7 @@ class RegisterEventWorker(
 
             val resultJson = JSONObject(result)
 
-            if (resultJson.get("success") == true) {
+            if (resultJson.getBoolean("success")) {
                 success = true
             }
         } catch (e: Exception) {

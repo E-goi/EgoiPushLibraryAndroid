@@ -4,16 +4,18 @@ import android.app.ActivityManager
 import android.app.ActivityManager.RunningAppProcessInfo
 import android.content.Context
 import android.content.pm.PackageManager
+import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
 import androidx.work.WorkRequest
+import androidx.work.workDataOf
 import com.egoiapp.egoipushlibrary.handlers.DataStoreHandler
 import com.egoiapp.egoipushlibrary.handlers.FirebaseHandler
 import com.egoiapp.egoipushlibrary.handlers.GeofenceHandler
 import com.egoiapp.egoipushlibrary.handlers.LocationHandler
-import com.egoiapp.egoipushlibrary.receivers.NotificationEventReceiver
 import com.egoiapp.egoipushlibrary.structures.EGoiMessage
 import com.egoiapp.egoipushlibrary.structures.EgoiNotification
 import com.egoiapp.egoipushlibrary.structures.EgoiPreferences
+import com.egoiapp.egoipushlibrary.workers.RegisterEventWorker
 import kotlinx.coroutines.runBlocking
 
 
@@ -101,9 +103,7 @@ class EgoiPushLibrary {
             geoEnabled = geoEnabled
         )
 
-        egoiPreferences.encode()?.let {
-            dataStore.setDSData(category = DataStoreHandler.PREFERENCES, data = it)
-        }
+        dataStore.setDSData(DataStoreHandler.PREFERENCES, egoiPreferences.encode())
     }
 
     fun isAppOnForeground(): Boolean {
@@ -151,6 +151,36 @@ class EgoiPushLibrary {
     }
 
     /**
+     * Send event to E-goi
+     * @param event The event to send to E-goi
+     * @param notification The notification associated to the event
+     */
+    fun registerEvent(event: String, notification: EgoiNotification): String? {
+        val allowedEvents: Array<String> = arrayOf(OPEN_EVENT, CANCEL_EVENT, RECEIVED_EVENT)
+
+        if (event !in allowedEvents) {
+            return "Invalid event"
+        }
+
+        requestWork(
+            workRequest = OneTimeWorkRequestBuilder<RegisterEventWorker>()
+                .setInputData(
+                    workDataOf(
+                        "apiKey" to notification.apiKey,
+                        "appId" to notification.appId,
+                        "contactId" to notification.contactId,
+                        "messageHash" to notification.messageHash,
+                        "event" to event,
+                        "deviceId" to notification.deviceId
+                    )
+                )
+                .build()
+        )
+
+        return null
+    }
+
+    /**
      * Read the properties of the metadata
      */
     private fun readMetadata() {
@@ -187,6 +217,9 @@ class EgoiPushLibrary {
 
     companion object {
         var IS_INITIALIZED: Boolean = false
+        const val OPEN_EVENT = "open"
+        const val CANCEL_EVENT = "canceled"
+        const val RECEIVED_EVENT = "received"
 
         private val library = EgoiPushLibrary()
 

@@ -4,6 +4,7 @@ import android.Manifest
 import android.app.PendingIntent
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.os.Build
 import android.util.Log
 import androidx.core.app.ActivityCompat
 import androidx.work.OneTimeWorkRequestBuilder
@@ -32,12 +33,21 @@ class GeofenceHandler(
         val intent = Intent(instance.context, GeofenceService::class.java)
         intent.action = "com.egoiapp.actions.ACTION_GEOFENCE_EVENT"
 
-        PendingIntent.getService(
-            instance.context,
-            0,
-            intent,
-            PendingIntent.FLAG_UPDATE_CURRENT
-        )
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            PendingIntent.getService(
+                instance.context,
+                0,
+                intent,
+                PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
+            )
+        } else {
+            PendingIntent.getService(
+                instance.context,
+                0,
+                intent,
+                PendingIntent.FLAG_UPDATE_CURRENT
+            )
+        }
     }
 
     /**
@@ -71,7 +81,7 @@ class GeofenceHandler(
                 addOnSuccessListener {
                     pendingNotifications[message.data.messageHash] = message
 
-                    if (instance.dataStore.getDSConfigs()?.locationUpdates == false) {
+                    if (!instance.dataStore.getDSConfigs().locationUpdates) {
                         instance.location.requestLocationUpdates()
                     }
 
@@ -94,40 +104,38 @@ class GeofenceHandler(
 
         if (message != null) {
             runBlocking {
-                val preferences: EgoiPreferences? =
+                val preferences: EgoiPreferences =
                     instance.dataStore.getDSPreferences()
 
-                if (preferences != null) {
-                    instance.requestWork(
-                        workRequest = OneTimeWorkRequestBuilder<FireNotificationWorker>()
-                            .setInputData(
-                                workDataOf(
-                                    "title" to message.notification.title,
-                                    "text" to message.notification.body,
-                                    "image" to message.notification.image,
-                                    "actionType" to message.data.actions.type,
-                                    "actionText" to message.data.actions.text,
-                                    "actionUrl" to message.data.actions.url,
-                                    "actionTextCancel" to message.data.actions.textCancel,
-                                    "apiKey" to preferences.apiKey,
-                                    "appId" to preferences.appId,
-                                    "contactId" to message.data.contactId,
-                                    "messageHash" to message.data.messageHash,
-                                    "deviceId" to message.data.deviceId,
-                                    "messageId" to message.data.messageId
-                                )
+                instance.requestWork(
+                    workRequest = OneTimeWorkRequestBuilder<FireNotificationWorker>()
+                        .setInputData(
+                            workDataOf(
+                                "title" to message.notification.title,
+                                "text" to message.notification.body,
+                                "image" to message.notification.image,
+                                "actionType" to message.data.actions.type,
+                                "actionText" to message.data.actions.text,
+                                "actionUrl" to message.data.actions.url,
+                                "actionTextCancel" to message.data.actions.textCancel,
+                                "apiKey" to preferences.apiKey,
+                                "appId" to preferences.appId,
+                                "contactId" to message.data.contactId,
+                                "messageHash" to message.data.messageHash,
+                                "deviceId" to message.data.deviceId,
+                                "messageId" to message.data.messageId
                             )
-                            .build()
-                    )
+                        )
+                        .build()
+                )
 
-                    val list: List<String> = mutableListOf(id)
+                val list: List<String> = mutableListOf(id)
 
-                    geofencingClient.removeGeofences(list)
-                    pendingNotifications.remove(id)
+                geofencingClient.removeGeofences(list)
+                pendingNotifications.remove(id)
 
-                    if (pendingNotifications.isEmpty()) {
-                        instance.location.removeLocationUpdates()
-                    }
+                if (pendingNotifications.isEmpty()) {
+                    instance.location.removeLocationUpdates()
                 }
             }
         }

@@ -7,26 +7,24 @@ data class EgoiConfigs(
     var serviceBound: Boolean = false,
     var locationUpdates: Boolean = false
 ) {
-    fun encode(): String? {
-        return try {
-            val json = JSONObject()
-            json.put("location-updates", locationUpdates)
+    /**
+     * @throws JSONException
+     */
+    fun encode(): String {
+        val json = JSONObject()
+        json.put("location-updates", locationUpdates)
 
-            json.toString()
-        } catch (exception: JSONException) {
-            null
-        }
+        return json.toString()
     }
 
-    fun decode(data: String): EgoiConfigs? {
-        return try {
-            val json = JSONObject(data)
+    /**
+     * @throws JSONException
+     */
+    fun decode(data: String): EgoiConfigs {
+        val json = JSONObject(data)
 
-            EgoiConfigs(
-                locationUpdates = json.getBoolean("location-updates")
-            )
-        } catch (exception: JSONException) {
-            null
-        }
+        return EgoiConfigs(
+            locationUpdates = json.getBoolean("location-updates")
+        )
     }
 }

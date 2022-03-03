@@ -5,10 +5,8 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Handler
-import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.Worker
 import androidx.work.WorkerParameters
-import androidx.work.workDataOf
 import com.egoiapp.egoipushlibrary.EgoiPushLibrary
 import com.egoiapp.egoipushlibrary.structures.EgoiNotification
 
@@ -43,10 +41,16 @@ class FireDialogWorker(
         builder.setTitle(egoiNotification.title)
         builder.setMessage(egoiNotification.body)
 
-        if (egoiNotification.actionType != "" && egoiNotification.actionText != "" && egoiNotification.actionUrl != "" && egoiNotification.actionTextCancel != "") {
+        if (
+            egoiNotification.actionType != "" &&
+            egoiNotification.actionText != "" &&
+            egoiNotification.actionUrl != "" &&
+            egoiNotification.actionTextCancel != ""
+        ) {
             builder.setPositiveButton(egoiNotification.actionText)
             { _, _ ->
-                registerEvent(event = "open")
+                EgoiPushLibrary.getInstance(context.applicationContext)
+                    .registerEvent(EgoiPushLibrary.OPEN_EVENT, egoiNotification)
 
                 if (egoiNotification.actionType == "deeplink") {
                     EgoiPushLibrary.getInstance(context).deepLinkCallback?.let {
@@ -64,7 +68,8 @@ class FireDialogWorker(
 
             builder.setNegativeButton(egoiNotification.actionTextCancel)
             { _, _ ->
-                registerEvent(event = "canceled")
+                EgoiPushLibrary.getInstance(context.applicationContext)
+                    .registerEvent(EgoiPushLibrary.CANCEL_EVENT, egoiNotification)
             }
         }
 
@@ -77,22 +82,5 @@ class FireDialogWorker(
         mainHandler.post(runnable)
 
         return Result.success()
-    }
-
-    private fun registerEvent(event: String) {
-        EgoiPushLibrary.getInstance(context).requestWork(
-            workRequest = OneTimeWorkRequestBuilder<RegisterEventWorker>()
-                .setInputData(
-                    workDataOf(
-                        "apiKey" to egoiNotification.apiKey,
-                        "appId" to egoiNotification.appId,
-                        "contactId" to egoiNotification.contactId,
-                        "messageHash" to egoiNotification.messageHash,
-                        "event" to event,
-                        "deviceId" to egoiNotification.deviceId
-                    )
-                )
-                .build()
-        )
     }
 }

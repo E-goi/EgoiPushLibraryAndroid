@@ -7,11 +7,13 @@ import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import com.egoiapp.egoipushlibrary.EgoiPushLibrary
+import com.egoiapp.egoipushlibrary.exceptions.InvalidCategoryException
 import com.egoiapp.egoipushlibrary.structures.EgoiConfigs
 import com.egoiapp.egoipushlibrary.structures.EgoiPreferences
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
+import org.json.JSONException
 
 class DataStoreHandler(
     private val instance: EgoiPushLibrary
@@ -23,98 +25,78 @@ class DataStoreHandler(
     private val configsKey = stringPreferencesKey("configurations")
     // [end_data_store_keys]
 
-    private suspend fun main() {
-        if (getDSData(CONFIGS) === null) {
-            val configs = EgoiConfigs()
-            configs.locationUpdates = false
-
-            configs.encode()?.let {
-                setDSData(CONFIGS, it)
-            }
-        }
-    }
-
-    init {
-        runBlocking {
-            main()
-        }
-    }
-
+    /**
+     * @throws InvalidCategoryException
+     */
     suspend fun setDSData(category: String, data: String) {
-        val key = getKey(category)
+        if (category !in arrayOf(PREFERENCES, CONFIGS)) {
+            throw InvalidCategoryException()
+        }
 
-        if (key != null) {
-            instance.context.dataStore.edit {
-                settings -> settings[key] = data
-            }
+        instance.context.dataStore.edit {
+                settings -> settings[getKey(category)] = data
         }
     }
 
-    fun getDSPreferences(): EgoiPreferences? {
-        var preferences: EgoiPreferences?
+    fun getDSPreferences(): EgoiPreferences {
+        var preferences: EgoiPreferences
 
         runBlocking {
-            preferences = getDSData(PREFERENCES) as EgoiPreferences?
+            try {
+                preferences = getDSData(PREFERENCES) as EgoiPreferences
+            } catch (_: JSONException) {
+                preferences = EgoiPreferences()
+                setDSData(PREFERENCES, preferences.encode())
+            }
         }
 
         return preferences
     }
 
-    fun getDSConfigs(): EgoiConfigs? = runBlocking {
-        val deferred = async {
-            getDSData(CONFIGS) as EgoiConfigs?
+    fun getDSConfigs(): EgoiConfigs {
+        var configs: EgoiConfigs
+
+        runBlocking {
+            try {
+                configs = getDSData(CONFIGS) as EgoiConfigs
+            } catch (_: JSONException) {
+                configs = EgoiConfigs(locationUpdates = false)
+                setDSData(CONFIGS, configs.encode())
+            }
         }
 
-        return@runBlocking deferred.await()
+        return configs
     }
 
     fun setDSLocationUpdates(status: Boolean) = runBlocking {
-        val configs: EgoiConfigs? = getDSConfigs()
+        val configs: EgoiConfigs = getDSConfigs()
 
-        if (configs !== null && configs.locationUpdates != status) {
+        if (configs.locationUpdates != status) {
             configs.locationUpdates = status
-
-            configs.encode()?.let {
-                setDSData(category = CONFIGS, data = it)
-            }
+            setDSData(CONFIGS, configs.encode())
         }
     }
 
-    private fun getKey(category: String): Preferences.Key<String>? {
-
-        return when {
-            category === PREFERENCES -> {
-                preferencesKey
-            }
-            category === CONFIGS -> {
-                configsKey
-            }
-            else -> {
-                null
-            }
-        }
+    private fun getKey(category: String): Preferences.Key<String> {
+        return if (category === PREFERENCES) preferencesKey else configsKey
     }
 
-    private suspend fun getDSData(category: String): Any? {
-        val key = getKey(category)
-
-        if (key != null) {
-            val data: String = instance.context.dataStore.data.map { settings ->
-                settings[key] ?: ""
-            }.first()
-
-            var dsData: Any? = null
-
-            if (category === PREFERENCES) {
-                dsData = EgoiPreferences().decode(data)
-            } else if (category === CONFIGS) {
-                dsData = EgoiConfigs().decode(data)
-            }
-
-            return dsData
+    /**
+     * @throws InvalidCategoryException
+     */
+    private suspend fun getDSData(category: String): Any {
+        if (category !in arrayOf(PREFERENCES, CONFIGS)) {
+            throw InvalidCategoryException()
         }
 
-        return null
+        val data: String = instance.context.dataStore.data.map { settings ->
+            settings[getKey(category)] ?: ""
+        }.first()
+
+        return if (category === PREFERENCES)
+            EgoiPreferences().decode(data)
+        else
+            EgoiConfigs().decode(data)
     }
 
     companion object {
