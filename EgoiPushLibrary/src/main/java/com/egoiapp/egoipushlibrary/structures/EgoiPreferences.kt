@@ -7,37 +7,33 @@ data class EgoiPreferences(
     var appId: String = "",
     var apiKey: String = "",
     var openAppAction: String = "",
-    var geoEnabled: Boolean = true,
-    var locationUpdates: Boolean = false
+    var geoEnabled: Boolean = true
 ) {
-    fun encode(): String? {
-        return try {
-            val json = JSONObject()
-            json.put("app-id", appId)
-            json.put("api-key", apiKey)
-            json.put("geo-enabled", geoEnabled)
-            json.put("open-app-action", openAppAction)
-            json.put("location-updates", locationUpdates)
+    /**
+     * @throws JSONException
+     */
+    fun encode(): String {
+        val json = JSONObject()
 
-            json.toString()
-        } catch (exception: JSONException) {
-            null
-        }
+        json.put("app-id", appId)
+        json.put("api-key", apiKey)
+        json.put("geo-enabled", geoEnabled)
+        json.put("open-app-action", openAppAction)
+
+        return json.toString()
     }
 
-    fun decode(data: String): EgoiPreferences? {
-        return try {
-            val json = JSONObject(data)
+    /**
+     * @throws JSONException
+     */
+    fun decode(data: String): EgoiPreferences {
+        val json = JSONObject(data)
 
-            EgoiPreferences(
-                appId = json.getString("app-id"),
-                apiKey = json.getString("api-key"),
-                geoEnabled = json.getBoolean("geo-enabled"),
-                openAppAction = json.getString("open-app-action"),
-                locationUpdates = json.getBoolean("location-updates")
-            )
-        } catch (exception: JSONException) {
-            null
-        }
+        return EgoiPreferences(
+            appId = json.getString("app-id"),
+            apiKey = json.getString("api-key"),
+            geoEnabled = json.getBoolean("geo-enabled"),
+            openAppAction = json.getString("open-app-action"),
+        )
     }
 }

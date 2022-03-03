@@ -5,14 +5,12 @@ import android.os.Bundle
 import android.util.Log
 import android.view.View
 import androidx.annotation.RequiresApi
-import androidx.work.WorkManager
-import androidx.lifecycle.Observer
 import androidx.work.WorkInfo
+import androidx.work.WorkManager
 import com.egoiapp.egoipushlibrary.EgoiPushActivity
 import com.egoiapp.egoipushlibrary.EgoiPushLibrary
 import com.egoiapp.egoipushlibrary.structures.EgoiNotification
 import com.google.firebase.messaging.FirebaseMessaging
-import java.util.*
 
 class MainActivity : EgoiPushActivity() {
 
@@ -58,21 +56,20 @@ class MainActivity : EgoiPushActivity() {
                 value = "email@email.com"
             )
 
-            if(request !== null) {
-                WorkManager.getInstance(this).getWorkInfoByIdLiveData(request.id)
-                    .observe(this, { workInfo ->
-                        if (workInfo != null && workInfo.state.isFinished) {
-                            // validate if state is equal to SUCCEEDED when token registered
-                            if(workInfo.state == WorkInfo.State.FAILED) {
-                                Log.d("TOKEN", "failed");
-                            }
-                            if(workInfo.state == WorkInfo.State.SUCCEEDED) {
-                                Log.d("TOKEN", "success");
-                            }
-                            WorkManager.getInstance(this).getWorkInfoByIdLiveData(request.id).removeObservers(this);
+            WorkManager.getInstance(this).getWorkInfoByIdLiveData(request.id)
+                .observe(this) { workInfo ->
+                    if (workInfo != null && workInfo.state.isFinished) {
+                        // validate if state is equal to SUCCEEDED when token registered
+                        if (workInfo.state == WorkInfo.State.FAILED) {
+                            Log.d("TOKEN", "failed")
                         }
-                    })
-            }
+                        if (workInfo.state == WorkInfo.State.SUCCEEDED) {
+                            Log.d("TOKEN", "success")
+                        }
+                        WorkManager.getInstance(this).getWorkInfoByIdLiveData(request.id)
+                            .removeObservers(this)
+                    }
+                }
         }
     }
 }

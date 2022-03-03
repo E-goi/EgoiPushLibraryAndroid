@@ -11,7 +11,6 @@ import com.egoiapp.egoipushlibrary.EgoiPushLibrary
 import com.egoiapp.egoipushlibrary.structures.EgoiNotification
 import com.egoiapp.egoipushlibrary.structures.EgoiPreferences
 import com.egoiapp.egoipushlibrary.workers.FireDialogWorker
-import com.egoiapp.egoipushlibrary.workers.RegisterEventWorker
 import kotlinx.coroutines.runBlocking
 import java.util.concurrent.TimeUnit
 
@@ -33,21 +32,19 @@ class NotificationEventReceiver : BroadcastReceiver() {
                         .isAppOnForeground() && intent.action !== NOTIFICATION_EVENT_CLOSE
                 ) {
                     runBlocking {
-                        val preferences: EgoiPreferences? =
+                        val preferences: EgoiPreferences =
                             EgoiPushLibrary.getInstance(context).dataStore.getDSPreferences()
 
-                        if (preferences != null) {
-                            var action = LAUNCH_APP
+                        var action = LAUNCH_APP
 
-                            if (preferences.openAppAction != "") {
-                                action = preferences.openAppAction
-                            }
-
-                            val activityIntent = Intent(action)
-                            activityIntent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
-
-                            context.startActivity(activityIntent)
+                        if (preferences.openAppAction != "") {
+                            action = preferences.openAppAction
                         }
+
+                        val activityIntent = Intent(action)
+                        activityIntent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
+
+                        context.startActivity(activityIntent)
                     }
                 }
 
@@ -67,7 +64,8 @@ class NotificationEventReceiver : BroadcastReceiver() {
                 )
 
                 if (intent.action === NOTIFICATION_EVENT_CLOSE) {
-                    registerEvent(context.applicationContext, "canceled")
+                    EgoiPushLibrary.getInstance(context.applicationContext)
+                        .registerEvent(EgoiPushLibrary.CANCEL_EVENT, egoiNotification)
                     dismissNotification(context.applicationContext)
                     return
                 }
@@ -109,12 +107,14 @@ class NotificationEventReceiver : BroadcastReceiver() {
                                 )
                             }
                         } else {
-                            registerEvent(context.applicationContext, "open")
+                            EgoiPushLibrary.getInstance(context.applicationContext)
+                                .registerEvent(EgoiPushLibrary.OPEN_EVENT, egoiNotification)
                         }
                     }
 
                     if (intent.action === NOTIFICATION_EVENT_VIEW) {
-                        registerEvent(context.applicationContext, "open")
+                        EgoiPushLibrary.getInstance(context.applicationContext)
+                            .registerEvent(EgoiPushLibrary.OPEN_EVENT, egoiNotification)
 
                         if (egoiNotification.actionType == "deeplink") {
                             EgoiPushLibrary.getInstance(context.applicationContext).deepLinkCallback?.let {
@@ -135,23 +135,6 @@ class NotificationEventReceiver : BroadcastReceiver() {
                 thread.start()
             }
         }
-    }
-
-    private fun registerEvent(context: Context, event: String) {
-        EgoiPushLibrary.getInstance(context).requestWork(
-            workRequest = OneTimeWorkRequestBuilder<RegisterEventWorker>()
-                .setInputData(
-                    workDataOf(
-                        "apiKey" to egoiNotification.apiKey,
-                        "appId" to egoiNotification.appId,
-                        "contactId" to egoiNotification.contactId,
-                        "messageHash" to egoiNotification.messageHash,
-                        "event" to event,
-                        "deviceId" to egoiNotification.deviceId
-                    )
-                )
-                .build()
-        )
     }
 
     private fun dismissNotification(context: Context) {

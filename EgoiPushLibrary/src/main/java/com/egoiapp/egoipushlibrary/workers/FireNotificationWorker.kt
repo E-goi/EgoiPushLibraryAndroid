@@ -11,12 +11,11 @@ import android.graphics.BitmapFactory
 import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.core.app.NotificationCompat
-import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.Worker
 import androidx.work.WorkerParameters
-import androidx.work.workDataOf
 import com.egoiapp.egoipushlibrary.EgoiPushLibrary
 import com.egoiapp.egoipushlibrary.receivers.NotificationEventReceiver
+import com.egoiapp.egoipushlibrary.structures.EgoiNotification
 import kotlinx.coroutines.runBlocking
 import java.net.URL
 
@@ -123,12 +122,21 @@ class FireNotificationWorker(
         intent.putExtra("messageHash", messageHash)
         intent.putExtra("deviceId", deviceId)
 
-        val pendingIntent: PendingIntent = PendingIntent.getBroadcast(
-            context,
-            0,
-            intent,
-            PendingIntent.FLAG_UPDATE_CURRENT
-        )
+        val pendingIntent: PendingIntent = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            PendingIntent.getBroadcast(
+                context,
+                0,
+                intent,
+                PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
+            )
+        } else {
+            PendingIntent.getBroadcast(
+                context,
+                0,
+                intent,
+                PendingIntent.FLAG_UPDATE_CURRENT
+            )
+        }
 
         val viewIntent = Intent(context, NotificationEventReceiver::class.java)
         viewIntent.action = NotificationEventReceiver.NOTIFICATION_EVENT_VIEW
@@ -147,12 +155,21 @@ class FireNotificationWorker(
         viewIntent.putExtra("deviceId", deviceId)
         viewIntent.putExtra("messageId", messageId)
 
-        val viewPendingIntent = PendingIntent.getBroadcast(
-            context,
-            0,
-            viewIntent,
-            PendingIntent.FLAG_UPDATE_CURRENT
-        )
+        val viewPendingIntent = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            PendingIntent.getBroadcast(
+                context,
+                0,
+                viewIntent,
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+            )
+        } else {
+            PendingIntent.getBroadcast(
+                context,
+                0,
+                viewIntent,
+                PendingIntent.FLAG_UPDATE_CURRENT
+            )
+        }
 
         val closeIntent = Intent(context, NotificationEventReceiver::class.java)
         closeIntent.action = NotificationEventReceiver.NOTIFICATION_EVENT_CLOSE
@@ -171,12 +188,21 @@ class FireNotificationWorker(
         closeIntent.putExtra("deviceId", deviceId)
         closeIntent.putExtra("messageId", messageId)
 
-        val closePendingIntent = PendingIntent.getBroadcast(
-            context,
-            0,
-            closeIntent,
-            PendingIntent.FLAG_UPDATE_CURRENT
-        )
+        val closePendingIntent = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            PendingIntent.getBroadcast(
+                context,
+                0,
+                closeIntent,
+                PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
+            )
+        } else {
+            PendingIntent.getBroadcast(
+                context,
+                0,
+                closeIntent,
+                PendingIntent.FLAG_UPDATE_CURRENT
+            )
+        }
 
         val builder =
             NotificationCompat.Builder(context, "egoi_channel")
@@ -187,6 +213,14 @@ class FireNotificationWorker(
                 .setContentIntent(pendingIntent)
                 .setDeleteIntent(closePendingIntent)
                 .setAutoCancel(true)
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            builder
+                .setStyle(NotificationCompat.BigTextStyle())
+        } else {
+            builder
+                .setStyle(NotificationCompat.BigTextStyle().bigText(text))
+        }
 
         if (actionType !== "" && actionText !== "" && actionUrl !== "" && actionTextCancel !== "") {
             builder
@@ -232,23 +266,16 @@ class FireNotificationWorker(
      */
     private fun sendNotification() {
         notificationManager.notify(messageId.toInt(), notification)
-        registerEvent()
-    }
 
-    private fun registerEvent() {
-        EgoiPushLibrary.getInstance(context).requestWork(
-            workRequest = OneTimeWorkRequestBuilder<RegisterEventWorker>()
-                .setInputData(
-                    workDataOf(
-                        "apiKey" to apiKey,
-                        "appId" to appId,
-                        "contactId" to contactId,
-                        "messageHash" to messageHash,
-                        "event" to "received",
-                        "deviceId" to deviceId
-                    )
-                )
-                .build()
+        val egoiNotification = EgoiNotification(
+            apiKey = apiKey,
+            appId = appId,
+            contactId = contactId,
+            messageHash = messageHash,
+            deviceId = deviceId.toInt()
         )
+
+        EgoiPushLibrary.getInstance(context.applicationContext)
+            .registerEvent(EgoiPushLibrary.RECEIVED_EVENT, egoiNotification)
     }
 }

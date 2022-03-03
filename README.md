@@ -1,8 +1,19 @@
-# What's new in version 3.1.3?
+# What's new in version 3.1.4?
 
-### MINOR
+### PATCH
 
-#### Add geoEnabled flag who enables or disabled location related functionalities
+#### Refactor Datastore logic:
+
+Refactored the logic related to Datastore to prevent NullPointerExceptions when accessing the preferences.
+
+#### Text truncated in notifications:
+
+Fixed a bug where the content of a notification was being truncated the the text was too big.
+
+#### registerEvent method is now public
+
+The registerEvent method is now public so that you can call it when implementing custom logic in the
+callbacks.
 
 # EgoiPushLibraryAndroid
 
@@ -31,7 +42,7 @@ There are a few things you must configure in your app in order for the library t
 This library is available through Maven Central. To install it, simply add the following line to your Podfile:
 
 ```gradle
-implementation 'com.egoiapp.egoipushlibrary:egoipushlibrary:3.1.3'
+implementation 'com.egoiapp.egoipushlibrary:egoipushlibrary:3.1.4'
 ```
 
 After installing, you can initialize the library in the **MainActivity** with following instruction:
@@ -298,6 +309,38 @@ user is already registered on your E-goi list, updates the token automatically.
    <td>The value that will be used to register on the field defined above.</td>
    <td>false</td>
    <td>nil</td>
+</tr>
+</tbody>
+</table>
+
+#### EgoiPushLibrary.getInstance().registerEvent()
+
+Call this method when you want to send an event to E-goi.
+
+<table>
+<thead>
+<tr>
+   <th>Property</th>
+   <th>Type</th>
+   <th>Description</th>
+   <th>Required</th>
+   <th>Default</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+   <td>event</td>
+   <td>String</td>
+   <td>The event you want to send (received, open, canceled).</td>
+   <td>true</td>
+   <td>---</td>
+</tr>
+<tr>
+   <td>notification</td>
+   <td>EgoiNotification</td>
+   <td>The notification associated to the event.</td>
+   <td>true</td>
+   <td>---</td>
 </tr>
 </tbody>
 </table>

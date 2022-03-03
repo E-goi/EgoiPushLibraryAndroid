@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.Intent
 import com.egoiapp.egoipushlibrary.EgoiPushLibrary
 import com.google.android.gms.location.LocationResult
+import java.lang.NullPointerException
 
 class LocationBroadcastReceiver : BroadcastReceiver() {
 
@@ -14,9 +15,11 @@ class LocationBroadcastReceiver : BroadcastReceiver() {
         val action: String = intent.action ?: ""
 
         if (action === ACTION_PROCESS_UPDATES) {
-            val result: LocationResult? = LocationResult.extractResult(intent)
-
-            result ?: return
+            try {
+                LocationResult.extractResult(intent)
+            } catch (e: NullPointerException) {
+                return
+            }
         }
 
         if (action === ACTION_STOP_LOCATION_UPDATES) {
