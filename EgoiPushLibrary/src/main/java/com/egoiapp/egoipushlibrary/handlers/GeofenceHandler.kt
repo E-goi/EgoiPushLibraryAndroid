@@ -100,13 +100,11 @@ class GeofenceHandler(
      * @param id The id of the notification that will be displayed
      */
     fun sendGeoNotification(id: String) {
+        val preferences: EgoiPreferences = instance.dataStore.getDSPreferences()
         val message: EGoiMessage? = pendingNotifications[id]
 
         if (message != null) {
             runBlocking {
-                val preferences: EgoiPreferences =
-                    instance.dataStore.getDSPreferences()
-
                 instance.requestWork(
                     workRequest = OneTimeWorkRequestBuilder<FireNotificationWorker>()
                         .setInputData(
