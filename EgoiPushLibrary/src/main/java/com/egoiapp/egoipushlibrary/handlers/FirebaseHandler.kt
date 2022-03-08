@@ -19,10 +19,7 @@ class FirebaseHandler(
     private val instance: EgoiPushLibrary
 ) {
     private var message: EGoiMessage? = null
-
     private var geoPush: Boolean = false
-    private val preferences: EgoiPreferences =
-        instance.dataStore.getDSPreferences()
 
     /**
      * Update the token saved in the library
@@ -41,6 +38,8 @@ class FirebaseHandler(
      * @param value The value to be written in the field defined above (optional)
      */
     fun registerToken(token: String, field: String = "", value: String = ""): OneTimeWorkRequest {
+        val preferences: EgoiPreferences = instance.dataStore.getDSPreferences()
+
         Companion.token = token
 
         if (field != "" && value != "") {
@@ -77,6 +76,8 @@ class FirebaseHandler(
      * that will trigger the notification. Otherwise, displays a dialog to the user.
      */
     fun messageReceived() {
+        val preferences: EgoiPreferences = instance.dataStore.getDSPreferences()
+
         message?.let {
             if (!geoPush) {
                 fireNotification()
@@ -93,6 +94,8 @@ class FirebaseHandler(
      * @param intent The intent of the notification received
      */
     fun processMessage(intent: Intent) {
+        val preferences: EgoiPreferences = instance.dataStore.getDSPreferences()
+
         val extras = intent.extras
 
         if (extras != null && extras.getString("key") == "E-GOI_PUSH") {
@@ -170,6 +173,8 @@ class FirebaseHandler(
      * @param intent The intent of the notification received
      */
     fun showDialog(intent: Intent) {
+        val preferences: EgoiPreferences = instance.dataStore.getDSPreferences()
+
         if (
             intent.action == "com.google.firebase.messaging.NOTIFICATION_OPEN"
         ) {
@@ -208,6 +213,8 @@ class FirebaseHandler(
      * pressed in the notification bar.
      */
     private fun fireDialog() {
+        val preferences: EgoiPreferences = instance.dataStore.getDSPreferences()
+
         runBlocking {
             message?.let {
                 instance.requestWork(
@@ -237,6 +244,8 @@ class FirebaseHandler(
     }
 
     private fun fireNotification() {
+        val preferences: EgoiPreferences = instance.dataStore.getDSPreferences()
+
         runBlocking {
             message?.let {
                 instance.requestWork(
