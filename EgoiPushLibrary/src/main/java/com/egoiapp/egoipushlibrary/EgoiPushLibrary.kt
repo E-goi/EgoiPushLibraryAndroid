@@ -70,7 +70,6 @@ class EgoiPushLibrary {
      * Library initializer
      * @param appId The ID of the E-goi's push app
      * @param apiKey The API key of the E-goi's account
-     * @param launchAppAction The action to listen for when the user clicks the notification
      * @param geoEnabled Flag that enables or disabled location related functionalities
      * @param dialogCallback Callback to be invoked in the place of the pop-up
      * @param deepLinkCallback Callback to be invoked when the action type of the notification is a
@@ -80,7 +79,6 @@ class EgoiPushLibrary {
         activityContext: Context,
         appId: String,
         apiKey: String,
-        launchAppAction: String,
         geoEnabled: Boolean = true,
         dialogCallback: ((EgoiNotification) -> Unit)? = null,
         deepLinkCallback: ((EgoiNotification) -> Unit)? = null
@@ -90,16 +88,15 @@ class EgoiPushLibrary {
         this.dialogCallback = dialogCallback
         this.deepLinkCallback = deepLinkCallback
 
-        setDSData(appId, apiKey, launchAppAction, geoEnabled)
+        setDSData(appId, apiKey, geoEnabled)
 
         IS_INITIALIZED = true
     }
 
-    private fun setDSData(appId: String, apiKey: String, openAppAction: String, geoEnabled: Boolean) = runBlocking {
+    private fun setDSData(appId: String, apiKey: String, geoEnabled: Boolean) = runBlocking {
         val egoiPreferences = EgoiPreferences(
             appId = appId,
             apiKey = apiKey,
-            openAppAction = openAppAction,
             geoEnabled = geoEnabled
         )
 

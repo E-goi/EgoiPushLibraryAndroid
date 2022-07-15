@@ -6,7 +6,6 @@ import org.json.JSONObject
 data class EgoiPreferences(
     var appId: String = "",
     var apiKey: String = "",
-    var openAppAction: String = "",
     var geoEnabled: Boolean = true
 ) {
     /**
@@ -18,7 +17,6 @@ data class EgoiPreferences(
         json.put("app-id", appId)
         json.put("api-key", apiKey)
         json.put("geo-enabled", geoEnabled)
-        json.put("open-app-action", openAppAction)
 
         return json.toString()
     }
@@ -33,7 +31,6 @@ data class EgoiPreferences(
             appId = json.getString("app-id"),
             apiKey = json.getString("api-key"),
             geoEnabled = json.getBoolean("geo-enabled"),
-            openAppAction = json.getString("open-app-action"),
         )
     }
 }
