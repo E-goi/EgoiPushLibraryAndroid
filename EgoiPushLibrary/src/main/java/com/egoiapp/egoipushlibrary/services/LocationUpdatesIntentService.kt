@@ -47,7 +47,7 @@ class LocationUpdatesIntentService : Service() {
         locationRequest = LocationRequest.create().apply {
             interval = LocationHandler.UPDATE_INTERVAL_IN_MILLISECONDS
             fastestInterval = LocationHandler.FASTEST_UPDATE_INTERVAL_IN_MILLISECONDS
-            priority = Priority.PRIORITY_HIGH_ACCURACY
+            priority = Priority.PRIORITY_BALANCED_POWER_ACCURACY
         }
     }
 
