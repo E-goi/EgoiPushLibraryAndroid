@@ -4,15 +4,9 @@ import android.app.NotificationManager
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
-import android.net.Uri
-import androidx.work.OneTimeWorkRequestBuilder
-import androidx.work.workDataOf
 import com.egoiapp.egoipushlibrary.EgoiPushLibrary
 import com.egoiapp.egoipushlibrary.structures.EgoiNotification
-import com.egoiapp.egoipushlibrary.structures.EgoiPreferences
-import com.egoiapp.egoipushlibrary.workers.FireDialogWorker
-import kotlinx.coroutines.runBlocking
-import java.util.concurrent.TimeUnit
+import kotlin.concurrent.thread
 
 /**
  * Receiver responsible for handling the clicks on notifications triggered by a geofence
@@ -24,7 +18,10 @@ class NotificationEventReceiver : BroadcastReceiver() {
      * Check if the action is a notification click and displays a dialog to the user
      */
     override fun onReceive(context: Context?, intent: Intent?) {
-        if (context != null && intent != null && intent.action == NOTIFICATION_CLOSE) {
+        if (
+            context != null && intent != null &&
+            (intent.action == context.applicationContext.packageName + NOTIFICATION_OPEN || intent.action == context.applicationContext.packageName + NOTIFICATION_CLOSE)
+        ) {
             val extras = intent.extras
 
             egoiNotification = EgoiNotification(
@@ -42,19 +39,35 @@ class NotificationEventReceiver : BroadcastReceiver() {
                 messageId = extras?.getInt("messageId", 0) ?: 0
             )
 
-            EgoiPushLibrary.getInstance(context.applicationContext)
-                .registerEvent(EgoiPushLibrary.CANCEL_EVENT, egoiNotification)
+            if (intent.action == context.applicationContext.packageName + NOTIFICATION_OPEN) {
+                thread {
+                    while (!EgoiPushLibrary.IS_INITIALIZED) {
+                        Thread.sleep(500)
+                    }
 
-            val notificationManager =
-                context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+                    if (EgoiPushLibrary.getInstance(context.applicationContext).dialogCallback != null) {
+                        EgoiPushLibrary.getInstance(context.applicationContext).dialogCallback?.let {
+                            it(egoiNotification)
+                        }
+                    }
+                }
+            }
 
-            notificationManager.cancel(egoiNotification.messageId)
+            if (intent.action == context.applicationContext.packageName + NOTIFICATION_CLOSE) {
+                EgoiPushLibrary.getInstance(context.applicationContext)
+                    .registerEvent(EgoiPushLibrary.CANCEL_EVENT, egoiNotification)
+
+                val notificationManager =
+                    context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+
+                notificationManager.cancel(egoiNotification.messageId)
+            }
         }
     }
 
     companion object {
-        const val NOTIFICATION_CLOSE: String = "EGOI_NOTIFICATION_CLOSE"
-        var LAUNCH_APP: String = "com.egoiapp.action.LAUNCH_APP"
+        const val NOTIFICATION_OPEN: String = ".EGOI_NOTIFICATION_OPEN"
+        const val NOTIFICATION_CLOSE: String = ".EGOI_NOTIFICATION_CLOSE"
     }
 
 }

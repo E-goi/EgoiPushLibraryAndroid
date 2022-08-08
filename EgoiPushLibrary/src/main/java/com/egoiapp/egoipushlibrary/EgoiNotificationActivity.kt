@@ -8,6 +8,7 @@ import android.net.Uri
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.os.Handler
+import com.egoiapp.egoipushlibrary.receivers.NotificationEventReceiver
 import com.egoiapp.egoipushlibrary.structures.EgoiNotification
 
 class EgoiNotificationActivity : AppCompatActivity() {
@@ -55,13 +56,25 @@ class EgoiNotificationActivity : AppCompatActivity() {
 
             if (intent.action == NOTIFICATION_OPEN) {
                 if (egoiNotification.actionType != "" && egoiNotification.actionText != "" && egoiNotification.actionUrl != "" && egoiNotification.actionTextCancel != "") {
-                    if (EgoiPushLibrary.getInstance(applicationContext).dialogCallback != null) {
-                        EgoiPushLibrary.getInstance(applicationContext).dialogCallback?.let {
-                            it(egoiNotification)
-                        }
+                    if (!EgoiPushLibrary.IS_INITIALIZED) {
+                        var intent = Intent(applicationContext, NotificationEventReceiver::class.java)
+                        intent.action = applicationContext.packageName + NotificationEventReceiver.NOTIFICATION_CLOSE
+
+                        sendBroadcast(intent)
+
+                        intent = packageManager.getLaunchIntentForPackage(packageName)!!
+                        startActivity(intent)
+
                         finishActivity()
                     } else {
-                        fireDialog(egoiNotification)
+                        if (EgoiPushLibrary.getInstance(applicationContext).dialogCallback != null) {
+                            EgoiPushLibrary.getInstance(applicationContext).dialogCallback?.let {
+                                it(egoiNotification)
+                            }
+                            finishActivity()
+                        } else {
+                            fireDialog(egoiNotification)
+                        }
                     }
                 } else {
                     EgoiPushLibrary.getInstance(applicationContext)

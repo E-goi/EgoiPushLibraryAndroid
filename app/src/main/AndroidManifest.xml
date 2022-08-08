@@ -30,11 +30,6 @@
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
-                <!-- Add this two lines do the intent filter of the activity that you want to launch
-                when the notification is clicked -->
-                <action android:name="abc" />
-                <category android:name="android.intent.category.DEFAULT" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>

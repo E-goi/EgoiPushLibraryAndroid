@@ -175,7 +175,7 @@ class FireNotificationWorker(
         }
 
         val closeIntent = Intent(context, NotificationEventReceiver::class.java)
-        closeIntent.action = NotificationEventReceiver.NOTIFICATION_CLOSE
+        closeIntent.action = context.applicationContext.packageName + NotificationEventReceiver.NOTIFICATION_CLOSE
         // Dialog Data
         closeIntent.putExtra("title", title)
         closeIntent.putExtra("body", text)
