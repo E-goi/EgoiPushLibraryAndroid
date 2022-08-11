@@ -58,7 +58,7 @@ class EgoiNotificationActivity : AppCompatActivity() {
                 if (egoiNotification.actionType != "" && egoiNotification.actionText != "" && egoiNotification.actionUrl != "" && egoiNotification.actionTextCancel != "") {
                     if (!EgoiPushLibrary.IS_INITIALIZED) {
                         var intent = Intent(applicationContext, NotificationEventReceiver::class.java)
-                        intent.action = applicationContext.packageName + NotificationEventReceiver.NOTIFICATION_CLOSE
+                        intent.action = applicationContext.packageName + NotificationEventReceiver.NOTIFICATION_OPEN
 
                         sendBroadcast(intent)
 
