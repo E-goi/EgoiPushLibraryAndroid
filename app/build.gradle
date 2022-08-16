@@ -36,12 +36,12 @@ dependencies {
 
     implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
     implementation "androidx.core:core-ktx:1.8.0"
-    implementation "androidx.appcompat:appcompat:1.4.2"
+    implementation "androidx.appcompat:appcompat:1.5.0"
     implementation "androidx.constraintlayout:constraintlayout:2.1.4"
     implementation "androidx.multidex:multidex:2.0.1"
     implementation "com.google.android.material:material:1.6.1"
-    implementation "com.google.firebase:firebase-messaging:23.0.6"
+    implementation "com.google.firebase:firebase-messaging:23.0.7"
     implementation 'androidx.work:work-runtime-ktx:2.7.1'
-//    implementation 'com.egoiapp.egoipushlibrary:egoipushlibrary:3.1.5'
-    implementation project(':EgoiPushLibrary')
+    implementation 'com.egoiapp.egoipushlibrary:egoipushlibrary:3.1.5'
+//    implementation project(':EgoiPushLibrary')
 }
