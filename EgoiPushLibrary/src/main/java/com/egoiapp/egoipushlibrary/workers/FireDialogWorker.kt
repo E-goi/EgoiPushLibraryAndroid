@@ -20,9 +20,6 @@ class FireDialogWorker(
     private lateinit var egoiNotification: EgoiNotification
 
     override fun doWork(): Result {
-        val builder: AlertDialog.Builder =
-            AlertDialog.Builder(EgoiPushLibrary.getInstance(context).activityContext)
-
         egoiNotification = EgoiNotification(
             title = inputData.getString("title") ?: "",
             body = inputData.getString("body") ?: "",
@@ -38,6 +35,9 @@ class FireDialogWorker(
             messageId = inputData.getInt("messageId", 0)
         )
 
+        val builder: AlertDialog.Builder =
+            AlertDialog.Builder(context)
+
         builder.setTitle(egoiNotification.title)
         builder.setMessage(egoiNotification.body)
 
@@ -49,7 +49,7 @@ class FireDialogWorker(
         ) {
             builder.setPositiveButton(egoiNotification.actionText)
             { _, _ ->
-                EgoiPushLibrary.getInstance(context.applicationContext)
+                EgoiPushLibrary.getInstance(context)
                     .registerEvent(EgoiPushLibrary.OPEN_EVENT, egoiNotification)
 
                 if (egoiNotification.actionType == "deeplink") {
@@ -68,12 +68,12 @@ class FireDialogWorker(
 
             builder.setNegativeButton(egoiNotification.actionTextCancel)
             { _, _ ->
-                EgoiPushLibrary.getInstance(context.applicationContext)
+                EgoiPushLibrary.getInstance(context)
                     .registerEvent(EgoiPushLibrary.CANCEL_EVENT, egoiNotification)
             }
         }
 
-        val mainHandler = Handler(EgoiPushLibrary.getInstance(context).activityContext.mainLooper)
+        val mainHandler = Handler(context.applicationContext.mainLooper)
 
         val runnable = Runnable {
             builder.show()

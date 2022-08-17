@@ -5,4 +5,5 @@
     <string name="launch_activity">Launch activity</string>
     <string name="stop_location_updates">Stop location updates</string>
     <string name="application_using_location">This application is using your location</string>
+    <string name="title_activity_egoi_notification">EgoiNotificationActivity</string>
 </resources>

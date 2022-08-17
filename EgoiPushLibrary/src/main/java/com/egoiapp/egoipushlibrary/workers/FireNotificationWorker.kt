@@ -13,6 +13,7 @@ import androidx.annotation.RequiresApi
 import androidx.core.app.NotificationCompat
 import androidx.work.Worker
 import androidx.work.WorkerParameters
+import com.egoiapp.egoipushlibrary.EgoiNotificationActivity
 import com.egoiapp.egoipushlibrary.EgoiPushLibrary
 import com.egoiapp.egoipushlibrary.receivers.NotificationEventReceiver
 import com.egoiapp.egoipushlibrary.structures.EgoiNotification
@@ -106,8 +107,10 @@ class FireNotificationWorker(
      * @return Local notification
      */
     private fun buildNotification(): Notification {
-        val intent = Intent(context, NotificationEventReceiver::class.java)
-        intent.action = NotificationEventReceiver.NOTIFICATION_OPEN
+        val intent = Intent(context, EgoiNotificationActivity::class.java)
+        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
+        intent.action = EgoiNotificationActivity.NOTIFICATION_OPEN
+
         // Dialog Data
         intent.putExtra("title", title)
         intent.putExtra("body", text)
@@ -123,23 +126,23 @@ class FireNotificationWorker(
         intent.putExtra("deviceId", deviceId)
 
         val pendingIntent: PendingIntent = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            PendingIntent.getBroadcast(
+            PendingIntent.getActivity(
                 context,
-                0,
+                ACTIVITY_REQUEST_CODE,
                 intent,
-                PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
             )
         } else {
-            PendingIntent.getBroadcast(
+            PendingIntent.getActivity(
                 context,
-                0,
+                ACTIVITY_REQUEST_CODE,
                 intent,
                 PendingIntent.FLAG_UPDATE_CURRENT
             )
         }
 
-        val viewIntent = Intent(context, NotificationEventReceiver::class.java)
-        viewIntent.action = NotificationEventReceiver.NOTIFICATION_EVENT_VIEW
+        val viewIntent = Intent(context, EgoiNotificationActivity::class.java)
+        viewIntent.action = EgoiNotificationActivity.NOTIFICATION_ACTION_VIEW
         // Dialog Data
         viewIntent.putExtra("title", title)
         viewIntent.putExtra("body", text)
@@ -156,23 +159,23 @@ class FireNotificationWorker(
         viewIntent.putExtra("messageId", messageId)
 
         val viewPendingIntent = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            PendingIntent.getBroadcast(
+            PendingIntent.getActivity(
                 context,
-                0,
+                ACTIVITY_REQUEST_CODE,
                 viewIntent,
                 PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
             )
         } else {
-            PendingIntent.getBroadcast(
+            PendingIntent.getActivity(
                 context,
-                0,
+                ACTIVITY_REQUEST_CODE,
                 viewIntent,
                 PendingIntent.FLAG_UPDATE_CURRENT
             )
         }
 
         val closeIntent = Intent(context, NotificationEventReceiver::class.java)
-        closeIntent.action = NotificationEventReceiver.NOTIFICATION_EVENT_CLOSE
+        closeIntent.action = context.applicationContext.packageName + NotificationEventReceiver.NOTIFICATION_CLOSE
         // Dialog Data
         closeIntent.putExtra("title", title)
         closeIntent.putExtra("body", text)
@@ -193,7 +196,7 @@ class FireNotificationWorker(
                 context,
                 0,
                 closeIntent,
-                PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
             )
         } else {
             PendingIntent.getBroadcast(
@@ -277,5 +280,9 @@ class FireNotificationWorker(
 
         EgoiPushLibrary.getInstance(context.applicationContext)
             .registerEvent(EgoiPushLibrary.RECEIVED_EVENT, egoiNotification)
+    }
+
+    companion object {
+        const val ACTIVITY_REQUEST_CODE: Int = 873264872
     }
 }

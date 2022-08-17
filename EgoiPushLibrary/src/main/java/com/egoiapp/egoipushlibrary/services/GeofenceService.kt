@@ -18,22 +18,24 @@ class GeofenceService : Service() {
             Log.d(TAG, "Geofence service started...")
             val geofencingEvent = GeofencingEvent.fromIntent(intent)
 
-            if (geofencingEvent.hasError()) {
-                Log.e("GEO_EVENT", geofencingEvent.errorCode.toString())
-                return START_NOT_STICKY
-            }
+            if (geofencingEvent != null) {
+                if (geofencingEvent.hasError()) {
+                    Log.e("GEO_EVENT", geofencingEvent.errorCode.toString())
+                    return START_NOT_STICKY
+                }
 
-            if (geofencingEvent.geofenceTransition == Geofence.GEOFENCE_TRANSITION_ENTER) {
-                val fenceId = when {
-                    geofencingEvent.triggeringGeofences.isNotEmpty() ->
-                        geofencingEvent.triggeringGeofences[0].requestId
-                    else -> {
+                if (geofencingEvent.geofenceTransition == Geofence.GEOFENCE_TRANSITION_ENTER) {
+                    if (geofencingEvent.triggeringGeofences != null && geofencingEvent.triggeringGeofences!!.isNotEmpty()) {
+                        EgoiPushLibrary.getInstance(applicationContext)
+                            .sendGeoNotification(geofencingEvent.triggeringGeofences!![0].requestId)
+                    } else {
                         Log.e("GEO_EVENT", "No Geofence Trigger Found! Abort mission!")
                         return START_NOT_STICKY
                     }
                 }
-
-                EgoiPushLibrary.getInstance(applicationContext).sendGeoNotification(fenceId)
+            } else {
+                Log.e("GEO_EVENT", "Failed to get a GeofencingEvent objet from the current intent.")
+                return START_NOT_STICKY
             }
         }
 

@@ -7,6 +7,7 @@ import android.net.Uri
 import android.os.Build
 import android.os.IBinder
 import androidx.core.app.NotificationCompat
+import com.egoiapp.egoipushlibrary.EgoiNotificationActivity
 import com.egoiapp.egoipushlibrary.EgoiPushLibrary
 import com.egoiapp.egoipushlibrary.R
 import com.egoiapp.egoipushlibrary.handlers.LocationHandler
@@ -16,6 +17,7 @@ import com.egoiapp.egoipushlibrary.structures.EgoiPreferences
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.LocationServices
+import com.google.android.gms.location.Priority
 import java.text.DateFormat
 import java.util.*
 
@@ -45,7 +47,7 @@ class LocationUpdatesIntentService : Service() {
         locationRequest = LocationRequest.create().apply {
             interval = LocationHandler.UPDATE_INTERVAL_IN_MILLISECONDS
             fastestInterval = LocationHandler.FASTEST_UPDATE_INTERVAL_IN_MILLISECONDS
-            priority = LocationRequest.PRIORITY_HIGH_ACCURACY
+            priority = Priority.PRIORITY_BALANCED_POWER_ACCURACY
         }
     }
 
@@ -96,31 +98,22 @@ class LocationUpdatesIntentService : Service() {
     }
 
     private fun createActivityPendingIntent(): PendingIntent {
-        val preferences: EgoiPreferences =
-            EgoiPushLibrary.getInstance(applicationContext).dataStore.getDSPreferences()
-
-        var action = NotificationEventReceiver.LAUNCH_APP
-
-        if (preferences.openAppAction != "") {
-            action = preferences.openAppAction
-        }
-
-        val activityIntent = Intent(action)
-        activityIntent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
+        val activityIntent = Intent(applicationContext, EgoiNotificationActivity::class.java)
+        activityIntent.action = EgoiNotificationActivity.LOCATION_NOTIFICATION_OPEN
 
         return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             PendingIntent.getActivity(
                 this,
                 0,
                 activityIntent,
-                PendingIntent.FLAG_IMMUTABLE
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
             )
         } else {
             PendingIntent.getActivity(
                 this,
                 0,
                 activityIntent,
-                0
+                PendingIntent.FLAG_UPDATE_CURRENT
             )
         }
     }
