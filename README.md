@@ -1,19 +1,30 @@
-# What's new in version 3.1.5?
+# What's new in version 4.0.0?
+
+### MAJOR
+
+#### From a BroadcastReceiver to an Activity:
+
+With the release of Android 12, some changes were required to be made to the logic we were using to 
+process the interactions of the user with the notification. On this new version, it is not possible 
+to invoke an activity through an app component (receivers, services) when a notification is tapped.
+
+To solve this problem, we added a new activity that is called in every E-goi notification's 
+interaction. This activity is responsible for handling the events, dialogs and callbacks.
+
+With this new solution, some changes are required to be made in your code:
+
+1. You no longer need to declare the launch action on the intent filter of the desired activity in
+the manifest since it will always invoke the new activity. When closing the activity, we will 
+launch the initial activity configured on the app.
+
+2. You no longer have to declare the launchAppAction in the SDK initializer.
 
 ### PATCH
 
-#### Refactor Datastore logic:
+#### Update of dependencies:
 
-Refactored the logic related to Datastore to prevent NullPointerExceptions when accessing the preferences.
-
-#### Text truncated in notifications:
-
-Fixed a bug where the content of a notification was being truncated the the text was too big.
-
-#### registerEvent method is now public
-
-The registerEvent method is now public so that you can call it when implementing custom logic in the
-callbacks.
+We updated all the dependencies that the SDK uses to the latest versions and made the required 
+adjustments on our code.
 
 # EgoiPushLibraryAndroid
 
@@ -42,7 +53,7 @@ There are a few things you must configure in your app in order for the library t
 This library is available through Maven Central. To install it, simply add the following line to your Podfile:
 
 ```gradle
-implementation 'com.egoiapp.egoipushlibrary:egoipushlibrary:3.1.5'
+implementation 'com.egoiapp.egoipushlibrary:egoipushlibrary:4.0.0'
 ```
 
 After installing, you can initialize the library in the **MainActivity** with following instruction:
@@ -62,7 +73,6 @@ class MainActivity : EgoiPushActivity() {
             appId = "abc",
             apiKey = "abc",
             geoEnabled = true,
-            launchAppAction = "abc",
             dialogCallback = fun (link: EgoiNotification) {
                 Log.d("DIALOG", link.toString())
             },
@@ -77,20 +87,6 @@ class MainActivity : EgoiPushActivity() {
 **Note:** In the example above you can see that the MainActivity is extending our **EgoiPushActivity**. This is not
 required but recommended since this class handles the life cycle of our location service and handles the responses of
 the user to the location access requests.
-
-## Target launch Activity
-
-To define what activity you want to launch when a notification is clicked, you need to add an action to the 
-intent filter of the desired activity. You should than send this action as a parameter in the SDK initialization so we can listen to it:
-
-```xml
-<intent-filter>
-   ...
-   <action android:name="abc" />
-   <category android:name="android.intent.category.DEFAULT" />
-   ...
-</intent-filter>
-```
 
 ## Disable location services
 
@@ -226,13 +222,6 @@ Responsible for initializing the library. The call of this method is required.
    <td>apiKey</td>
    <td>String</td>
    <td>The API key of your E-goi account.</td>
-   <td>true</td>
-   <td>---</td>
-</tr>
-<tr>
-   <td>launchAppAction</td>
-   <td>String</td>
-   <td>The action to listen for when the user clicks the notification</td>
    <td>true</td>
    <td>---</td>
 </tr>
