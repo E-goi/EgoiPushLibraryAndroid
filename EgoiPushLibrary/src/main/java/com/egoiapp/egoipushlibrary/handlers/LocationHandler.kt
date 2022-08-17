@@ -15,6 +15,7 @@ import com.egoiapp.egoipushlibrary.services.LocationUpdatesIntentService
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.LocationServices
+import com.google.android.gms.location.Priority
 
 /**
  * Class responsible for handling operations related to the location
@@ -28,7 +29,7 @@ class LocationHandler(
     private val locationRequest: LocationRequest = LocationRequest.create().apply {
         interval = UPDATE_INTERVAL_IN_MILLISECONDS
         fastestInterval = FASTEST_UPDATE_INTERVAL_IN_MILLISECONDS
-        priority = LocationRequest.PRIORITY_HIGH_ACCURACY
+        priority = Priority.PRIORITY_HIGH_ACCURACY
     }
 
     fun requestLocationUpdates() {
