@@ -13,7 +13,6 @@ import androidx.annotation.RequiresApi
 import androidx.core.app.NotificationCompat
 import androidx.work.Worker
 import androidx.work.WorkerParameters
-import com.egoiapp.egoipushlibrary.EgoiNotificationActivity
 import com.egoiapp.egoipushlibrary.EgoiPushLibrary
 import com.egoiapp.egoipushlibrary.receivers.NotificationEventReceiver
 import com.egoiapp.egoipushlibrary.structures.EgoiNotification
@@ -107,9 +106,9 @@ class FireNotificationWorker(
      * @return Local notification
      */
     private fun buildNotification(): Notification {
-        val intent = Intent(context, EgoiNotificationActivity::class.java)
+        val intent = Intent(context, NotificationEventReceiver::class.java)
         intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
-        intent.action = EgoiNotificationActivity.NOTIFICATION_OPEN
+        intent.action = context.applicationContext.packageName + NotificationEventReceiver.NOTIFICATION_OPEN
 
         // Dialog Data
         intent.putExtra("title", title)
@@ -126,14 +125,14 @@ class FireNotificationWorker(
         intent.putExtra("deviceId", deviceId)
 
         val pendingIntent: PendingIntent = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            PendingIntent.getActivity(
+            PendingIntent.getBroadcast(
                 context,
                 ACTIVITY_REQUEST_CODE,
                 intent,
                 PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
             )
         } else {
-            PendingIntent.getActivity(
+            PendingIntent.getBroadcast(
                 context,
                 ACTIVITY_REQUEST_CODE,
                 intent,
@@ -141,8 +140,8 @@ class FireNotificationWorker(
             )
         }
 
-        val viewIntent = Intent(context, EgoiNotificationActivity::class.java)
-        viewIntent.action = EgoiNotificationActivity.NOTIFICATION_ACTION_VIEW
+        val viewIntent = Intent(context, NotificationEventReceiver::class.java)
+        viewIntent.action = context.applicationContext.packageName + NotificationEventReceiver.NOTIFICATION_ACTION_VIEW
         // Dialog Data
         viewIntent.putExtra("title", title)
         viewIntent.putExtra("body", text)
@@ -159,14 +158,14 @@ class FireNotificationWorker(
         viewIntent.putExtra("messageId", messageId)
 
         val viewPendingIntent = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            PendingIntent.getActivity(
+            PendingIntent.getBroadcast(
                 context,
                 ACTIVITY_REQUEST_CODE,
                 viewIntent,
                 PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
             )
         } else {
-            PendingIntent.getActivity(
+            PendingIntent.getBroadcast(
                 context,
                 ACTIVITY_REQUEST_CODE,
                 viewIntent,
