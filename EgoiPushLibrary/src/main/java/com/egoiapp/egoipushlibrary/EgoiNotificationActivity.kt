@@ -11,6 +11,7 @@ import android.os.Handler
 import android.os.Looper
 import com.egoiapp.egoipushlibrary.receivers.NotificationEventReceiver
 import com.egoiapp.egoipushlibrary.structures.EgoiNotification
+import kotlin.concurrent.thread
 
 class EgoiNotificationActivity : AppCompatActivity() {
     private var intentProcessed: Boolean = false
@@ -56,7 +57,20 @@ class EgoiNotificationActivity : AppCompatActivity() {
 
             if (intent.action == applicationContext.packageName + NotificationEventReceiver.NOTIFICATION_OPEN) {
                 if (egoiNotification.actionType != "" && egoiNotification.actionText != "" && egoiNotification.actionUrl != "" && egoiNotification.actionTextCancel != "") {
-                    fireDialog(egoiNotification)
+                    thread {
+                        while(!EgoiPushLibrary.IS_INITIALIZED) {
+                            Thread.sleep(500)
+                        }
+
+                        if (EgoiPushLibrary.getInstance(applicationContext).dialogCallback != null) {
+                            EgoiPushLibrary.getInstance(applicationContext).dialogCallback?.let {
+                                it(egoiNotification)
+                            }
+                            finishActivity()
+                        } else {
+                            fireDialog(egoiNotification)
+                        }
+                    }
                 } else {
                     EgoiPushLibrary.getInstance(applicationContext)
                         .registerEvent(EgoiPushLibrary.OPEN_EVENT, egoiNotification)
@@ -67,16 +81,16 @@ class EgoiNotificationActivity : AppCompatActivity() {
                     notificationManager.cancel(egoiNotification.messageId)
                 }
             } else if (intent.action == applicationContext.packageName + NotificationEventReceiver.NOTIFICATION_ACTION_VIEW) {
-                if (egoiNotification.actionType == "deeplink") {
-                    EgoiPushLibrary.getInstance(applicationContext).deepLinkCallback?.let {
-                        it(egoiNotification)
+                thread {
+                    while (!EgoiPushLibrary.IS_INITIALIZED) {
+                        Thread.sleep(500)
                     }
-                } else if(egoiNotification.actionType == "url"){
-                    if (EgoiPushLibrary.getInstance(applicationContext).dialogCallback != null) {
-                        EgoiPushLibrary.getInstance(applicationContext).dialogCallback?.let {
+
+                    if (egoiNotification.actionType == "deeplink") {
+                        EgoiPushLibrary.getInstance(applicationContext).deepLinkCallback?.let {
                             it(egoiNotification)
                         }
-                    } else {
+                    } else if (egoiNotification.actionType == "url") {
                         startActivity(
                             Intent(
                                 Intent.ACTION_VIEW,
@@ -84,12 +98,12 @@ class EgoiNotificationActivity : AppCompatActivity() {
                             )
                         )
                     }
+
+                    val notificationManager =
+                        getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+
+                    notificationManager.cancel(egoiNotification.messageId)
                 }
-
-                val notificationManager =
-                    getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-
-                notificationManager.cancel(egoiNotification.messageId)
             }
         }
     }
@@ -117,18 +131,12 @@ class EgoiNotificationActivity : AppCompatActivity() {
                     }
                     finishActivity()
                 } else if(egoiNotification.actionType == "url"){
-                    if (EgoiPushLibrary.getInstance(applicationContext).dialogCallback != null) {
-                        EgoiPushLibrary.getInstance(applicationContext).dialogCallback?.let {
-                            it(egoiNotification)
-                        }
-                    } else {
-                        startActivity(
-                            Intent(
-                                Intent.ACTION_VIEW,
-                                Uri.parse(egoiNotification.actionUrl)
-                            )
+                    startActivity(
+                        Intent(
+                            Intent.ACTION_VIEW,
+                            Uri.parse(egoiNotification.actionUrl)
                         )
-                    }
+                    )
                 }
             }
 
