@@ -8,8 +8,10 @@ import android.net.Uri
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.os.Handler
+import android.os.Looper
 import com.egoiapp.egoipushlibrary.receivers.NotificationEventReceiver
 import com.egoiapp.egoipushlibrary.structures.EgoiNotification
+import kotlin.concurrent.thread
 
 class EgoiNotificationActivity : AppCompatActivity() {
     private var intentProcessed: Boolean = false
@@ -34,10 +36,9 @@ class EgoiNotificationActivity : AppCompatActivity() {
 
     private fun processIntent() {
         intentProcessed = true
-
-        if (intent.action == LOCATION_NOTIFICATION_OPEN) {
+        if (intent.action == NotificationEventReceiver.LOCATION_NOTIFICATION_OPEN) {
             finishActivity()
-        } else if (intent.action in arrayOf(NOTIFICATION_OPEN, NOTIFICATION_ACTION_VIEW)) {
+        } else if (intent.action in arrayOf(applicationContext.packageName + NotificationEventReceiver.NOTIFICATION_OPEN, applicationContext.packageName + NotificationEventReceiver.NOTIFICATION_ACTION_VIEW)) {
 
             val egoiNotification = EgoiNotification(
                 title = intent.extras?.getString("title") ?: "",
@@ -54,19 +55,13 @@ class EgoiNotificationActivity : AppCompatActivity() {
                 messageId = intent.extras?.getInt("messageId", 0) ?: 0
             )
 
-            if (intent.action == NOTIFICATION_OPEN) {
+            if (intent.action == applicationContext.packageName + NotificationEventReceiver.NOTIFICATION_OPEN) {
                 if (egoiNotification.actionType != "" && egoiNotification.actionText != "" && egoiNotification.actionUrl != "" && egoiNotification.actionTextCancel != "") {
-                    if (!EgoiPushLibrary.IS_INITIALIZED) {
-                        var intent = Intent(applicationContext, NotificationEventReceiver::class.java)
-                        intent.action = applicationContext.packageName + NotificationEventReceiver.NOTIFICATION_OPEN
+                    thread {
+                        while(!EgoiPushLibrary.IS_INITIALIZED) {
+                            Thread.sleep(500)
+                        }
 
-                        sendBroadcast(intent)
-
-                        intent = packageManager.getLaunchIntentForPackage(packageName)!!
-                        startActivity(intent)
-
-                        finishActivity()
-                    } else {
                         if (EgoiPushLibrary.getInstance(applicationContext).dialogCallback != null) {
                             EgoiPushLibrary.getInstance(applicationContext).dialogCallback?.let {
                                 it(egoiNotification)
@@ -80,26 +75,35 @@ class EgoiNotificationActivity : AppCompatActivity() {
                     EgoiPushLibrary.getInstance(applicationContext)
                         .registerEvent(EgoiPushLibrary.OPEN_EVENT, egoiNotification)
                     finishActivity()
-                }
-            } else if (intent.action == NOTIFICATION_ACTION_VIEW) {
-                EgoiPushLibrary.getInstance(applicationContext)
-                    .registerEvent(EgoiPushLibrary.OPEN_EVENT, egoiNotification)
+                    val notificationManager =
+                        getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
-                if (egoiNotification.actionType == "deeplink") {
-                    EgoiPushLibrary.getInstance(applicationContext).deepLinkCallback?.let {
-                        it(egoiNotification)
+                    notificationManager.cancel(egoiNotification.messageId)
+                }
+            } else if (intent.action == applicationContext.packageName + NotificationEventReceiver.NOTIFICATION_ACTION_VIEW) {
+                thread {
+                    while (!EgoiPushLibrary.IS_INITIALIZED) {
+                        Thread.sleep(500)
                     }
-                    finishActivity()
-                } else {
-                    val uriIntent =
-                        Intent(Intent.ACTION_VIEW, Uri.parse(egoiNotification.actionUrl))
-                    startActivity(uriIntent)
+
+                    if (egoiNotification.actionType == "deeplink") {
+                        EgoiPushLibrary.getInstance(applicationContext).deepLinkCallback?.let {
+                            it(egoiNotification)
+                        }
+                    } else if (egoiNotification.actionType == "url") {
+                        startActivity(
+                            Intent(
+                                Intent.ACTION_VIEW,
+                                Uri.parse(egoiNotification.actionUrl)
+                            )
+                        )
+                    }
+
+                    val notificationManager =
+                        getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+
+                    notificationManager.cancel(egoiNotification.messageId)
                 }
-
-                val notificationManager =
-                    getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-
-                notificationManager.cancel(egoiNotification.messageId)
             }
         }
     }
@@ -121,13 +125,12 @@ class EgoiNotificationActivity : AppCompatActivity() {
             { _, _ ->
                 EgoiPushLibrary.getInstance(applicationContext)
                     .registerEvent(EgoiPushLibrary.OPEN_EVENT, egoiNotification)
-
                 if (egoiNotification.actionType == "deeplink") {
                     EgoiPushLibrary.getInstance(applicationContext).deepLinkCallback?.let {
                         it(egoiNotification)
                     }
                     finishActivity()
-                } else {
+                } else if(egoiNotification.actionType == "url"){
                     startActivity(
                         Intent(
                             Intent.ACTION_VIEW,
@@ -145,7 +148,7 @@ class EgoiNotificationActivity : AppCompatActivity() {
             }
         }
 
-        val mainHandler = Handler(applicationContext.mainLooper)
+        val mainHandler = Handler(Looper.getMainLooper())
 
         val runnable = Runnable {
             builder.show()
@@ -161,11 +164,5 @@ class EgoiNotificationActivity : AppCompatActivity() {
         }
 
         finish()
-    }
-
-    companion object {
-        const val NOTIFICATION_OPEN: String = "EGOI_NOTIFICATION_OPEN"
-        const val NOTIFICATION_ACTION_VIEW: String = "EGOI_NOTIFICATION_ACTION_VIEW"
-        const val LOCATION_NOTIFICATION_OPEN: String = "EGOI_LOCATION_NOTIFICATION_OPEN"
     }
 }
