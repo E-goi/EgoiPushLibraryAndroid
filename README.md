@@ -1,30 +1,15 @@
-# What's new in version 4.0.0?
-
-### MAJOR
-
-#### From a BroadcastReceiver to an Activity:
-
-With the release of Android 12, some changes were required to be made to the logic we were using to 
-process the interactions of the user with the notification. On this new version, it is not possible 
-to invoke an activity through an app component (receivers, services) when a notification is tapped.
-
-To solve this problem, we added a new activity that is called in every E-goi notification's 
-interaction. This activity is responsible for handling the events, dialogs and callbacks.
-
-With this new solution, some changes are required to be made in your code:
-
-1. You no longer need to declare the launch action on the intent filter of the desired activity in
-the manifest since it will always invoke the new activity. When closing the activity, we will 
-launch the initial activity configured on the app.
-
-2. You no longer have to declare the launchAppAction in the SDK initializer.
+# What's new in version 4.0.1?
 
 ### PATCH
 
-#### Update of dependencies:
+#### Interaction between Notifications and Activity:
 
-We updated all the dependencies that the SDK uses to the latest versions and made the required 
-adjustments on our code.
+With the release of Android 12, some changes were required to be made to the logic we were using to
+process the interactions of the user with the notification. On this new version, it is not possible
+to invoke an activity through an app component (receivers, services) when a notification is tapped with App closed.
+
+To solve this problem, we added a new activity that is called in every E-goi notification's
+interaction to communicate with Receiver for handling the events, dialogs and callbacks.
 
 # EgoiPushLibraryAndroid
 
@@ -53,7 +38,7 @@ There are a few things you must configure in your app in order for the library t
 This library is available through Maven Central. To install it, simply add the following line to your Podfile:
 
 ```gradle
-implementation 'com.egoiapp.egoipushlibrary:egoipushlibrary:4.0.0'
+implementation 'com.egoiapp.egoipushlibrary:egoipushlibrary:4.0.1'
 ```
 
 After installing, you can initialize the library in the **MainActivity** with following instruction:
