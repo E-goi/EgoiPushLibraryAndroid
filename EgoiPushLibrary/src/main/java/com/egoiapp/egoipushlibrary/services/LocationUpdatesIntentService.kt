@@ -99,7 +99,7 @@ class LocationUpdatesIntentService : Service() {
 
     private fun createActivityPendingIntent(): PendingIntent {
         val activityIntent = Intent(applicationContext, EgoiNotificationActivity::class.java)
-        activityIntent.action = EgoiNotificationActivity.LOCATION_NOTIFICATION_OPEN
+        activityIntent.action = NotificationEventReceiver.LOCATION_NOTIFICATION_OPEN
 
         return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             PendingIntent.getActivity(

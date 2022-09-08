@@ -107,9 +107,15 @@ class FireNotificationWorker(
      * @return Local notification
      */
     private fun buildNotification(): Notification {
-        val intent = Intent(context, EgoiNotificationActivity::class.java)
-        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
-        intent.action = EgoiNotificationActivity.NOTIFICATION_OPEN
+        var intent: Intent? = null;
+        if(EgoiPushLibrary.IS_INITIALIZED) {
+            intent = Intent(context, NotificationEventReceiver::class.java)
+        } else {
+            intent = Intent(context, EgoiNotificationActivity::class.java)
+        }
+
+        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+        intent.action = context.applicationContext.packageName + NotificationEventReceiver.NOTIFICATION_OPEN
 
         // Dialog Data
         intent.putExtra("title", title)
@@ -125,24 +131,43 @@ class FireNotificationWorker(
         intent.putExtra("messageHash", messageHash)
         intent.putExtra("deviceId", deviceId)
 
-        val pendingIntent: PendingIntent = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            PendingIntent.getActivity(
-                context,
-                ACTIVITY_REQUEST_CODE,
-                intent,
-                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-            )
+        var pendingIntent : PendingIntent? = null;
+        if(EgoiPushLibrary.IS_INITIALIZED) {
+            pendingIntent = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                PendingIntent.getBroadcast(
+                    context,
+                    ACTIVITY_REQUEST_CODE,
+                    intent,
+                    PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+                )
+            } else {
+                PendingIntent.getBroadcast(
+                    context,
+                    ACTIVITY_REQUEST_CODE,
+                    intent,
+                    PendingIntent.FLAG_UPDATE_CURRENT
+                )
+            }
         } else {
-            PendingIntent.getActivity(
-                context,
-                ACTIVITY_REQUEST_CODE,
-                intent,
-                PendingIntent.FLAG_UPDATE_CURRENT
-            )
+            pendingIntent = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                PendingIntent.getActivity(
+                    context,
+                    ACTIVITY_REQUEST_CODE,
+                    intent,
+                    PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+                )
+            } else {
+                PendingIntent.getBroadcast(
+                    context,
+                    ACTIVITY_REQUEST_CODE,
+                    intent,
+                    PendingIntent.FLAG_UPDATE_CURRENT
+                )
+            }
         }
 
         val viewIntent = Intent(context, EgoiNotificationActivity::class.java)
-        viewIntent.action = EgoiNotificationActivity.NOTIFICATION_ACTION_VIEW
+        viewIntent.action = context.applicationContext.packageName + NotificationEventReceiver.NOTIFICATION_ACTION_VIEW
         // Dialog Data
         viewIntent.putExtra("title", title)
         viewIntent.putExtra("body", text)
