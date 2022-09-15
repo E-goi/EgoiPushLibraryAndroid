@@ -20,8 +20,13 @@ class NotificationEventReceiver : BroadcastReceiver() {
      */
     override fun onReceive(context: Context?, intent: Intent?) {
         if (
-            context != null && intent != null &&
-            (intent.action == context.applicationContext.packageName + NOTIFICATION_OPEN || intent.action == context.applicationContext.packageName + NOTIFICATION_CLOSE)
+            context != null
+            && intent != null
+            && intent.action in listOf(
+                context.applicationContext.packageName + NOTIFICATION_OPEN,
+                context.applicationContext.packageName + NOTIFICATION_CLOSE,
+                context.applicationContext.packageName + NOTIFICATION_ACTION_VIEW
+            )
         ) {
             val extras = intent.extras
 
@@ -40,7 +45,10 @@ class NotificationEventReceiver : BroadcastReceiver() {
                 messageId = extras?.getInt("messageId", 0) ?: 0
             )
 
-            if (!EgoiPushLibrary.IS_INITIALIZED) {
+            if (
+                !EgoiPushLibrary.IS_INITIALIZED
+                && intent.action != context.applicationContext.packageName + NOTIFICATION_CLOSE
+            ) {
                 val intentActivity = context.packageManager.getLaunchIntentForPackage(context.packageName)!!
                 context.startActivity(intentActivity)
             }
@@ -74,12 +82,21 @@ class NotificationEventReceiver : BroadcastReceiver() {
 
                 notificationManager.cancel(egoiNotification.messageId)
             }
+
+            if (intent.action == context.applicationContext.packageName + NOTIFICATION_ACTION_VIEW) {
+                val intentActivity = Intent(context, EgoiNotificationActivity::class.java)
+                intentActivity.flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                intentActivity.action = EgoiNotificationActivity.NOTIFICATION_ACTION_VIEW
+                extras?.let { intentActivity.putExtras(it) }
+                context.startActivity(intentActivity)
+            }
         }
     }
 
     companion object {
         const val NOTIFICATION_OPEN: String = ".EGOI_NOTIFICATION_OPEN"
         const val NOTIFICATION_CLOSE: String = ".EGOI_NOTIFICATION_CLOSE"
+        const val NOTIFICATION_ACTION_VIEW: String = ".EGOI_NOTIFICATION_ACTION_VIEW"
     }
 
 }

@@ -94,11 +94,11 @@ class EgoiPushLibrary {
     }
 
     private fun setDSData(appId: String, apiKey: String, geoEnabled: Boolean) = runBlocking {
-        val egoiPreferences = EgoiPreferences(
-            appId = appId,
-            apiKey = apiKey,
-            geoEnabled = geoEnabled
-        )
+        val egoiPreferences: EgoiPreferences = dataStore.getDSPreferences()
+
+        egoiPreferences.appId = appId
+        egoiPreferences.apiKey = apiKey
+        egoiPreferences.geoEnabled = geoEnabled
 
         dataStore.setDSData(DataStoreHandler.PREFERENCES, egoiPreferences.encode())
     }

@@ -130,6 +130,7 @@ class FireNotificationWorker(
         intent.putExtra("contactId", contactId)
         intent.putExtra("messageHash", messageHash)
         intent.putExtra("deviceId", deviceId)
+        intent.putExtra("messageId", messageId)
 
         var pendingIntent : PendingIntent? = null;
         if(EgoiPushLibrary.IS_INITIALIZED) {

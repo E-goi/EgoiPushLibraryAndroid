@@ -5,12 +5,12 @@ plugins {
 }
 
 android {
-    compileSdkVersion 32
+    compileSdkVersion 33
 
     defaultConfig {
         applicationId "com.egoiapp.egoipushlibraryandroid"
         minSdkVersion 19
-        targetSdkVersion 32
+        targetSdkVersion 33
         versionCode 1
         versionName "1.0"
         multiDexEnabled true
@@ -35,12 +35,12 @@ android {
 dependencies {
 
     implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
-    implementation "androidx.core:core-ktx:1.8.0"
-    implementation "androidx.appcompat:appcompat:1.5.0"
+    implementation "androidx.core:core-ktx:1.9.0"
+    implementation "androidx.appcompat:appcompat:1.5.1"
     implementation "androidx.constraintlayout:constraintlayout:2.1.4"
     implementation "androidx.multidex:multidex:2.0.1"
     implementation "com.google.android.material:material:1.6.1"
-    implementation "com.google.firebase:firebase-messaging:23.0.7"
+    implementation "com.google.firebase:firebase-messaging:23.0.8"
     implementation 'androidx.work:work-runtime-ktx:2.7.1'
     implementation 'com.egoiapp.egoipushlibrary:egoipushlibrary:4.0.1'
 //    implementation project(':EgoiPushLibrary')
