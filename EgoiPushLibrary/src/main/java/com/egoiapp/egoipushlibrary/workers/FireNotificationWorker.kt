@@ -124,6 +124,7 @@ class FireNotificationWorker(
         intent.putExtra("contactId", contactId)
         intent.putExtra("messageHash", messageHash)
         intent.putExtra("deviceId", deviceId)
+        intent.putExtra("messageId", messageId)
 
         val pendingIntent: PendingIntent = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             PendingIntent.getActivity(

@@ -12,8 +12,6 @@ import com.egoiapp.egoipushlibrary.EgoiPushLibrary
 import com.egoiapp.egoipushlibrary.R
 import com.egoiapp.egoipushlibrary.handlers.LocationHandler
 import com.egoiapp.egoipushlibrary.receivers.LocationBroadcastReceiver
-import com.egoiapp.egoipushlibrary.receivers.NotificationEventReceiver
-import com.egoiapp.egoipushlibrary.structures.EgoiPreferences
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.LocationServices
