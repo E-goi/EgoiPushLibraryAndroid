@@ -27,8 +27,6 @@ class EgoiNotificationActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
 
-        EgoiPushLibrary.getInstance(this).location.stopService()
-
         preferences = EgoiPushLibrary.getInstance(applicationContext)
             .dataStore.getDSPreferences()
 

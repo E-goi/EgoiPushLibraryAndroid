@@ -3,7 +3,9 @@ package com.egoiapp.egoipushlibrary
 import android.app.ActivityManager
 import android.app.ActivityManager.RunningAppProcessInfo
 import android.content.Context
+import android.content.pm.ApplicationInfo
 import android.content.pm.PackageManager
+import android.os.Build
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
 import androidx.work.WorkRequest
@@ -91,6 +93,8 @@ class EgoiPushLibrary {
         setDSData(appId, apiKey, geoEnabled)
 
         IS_INITIALIZED = true
+
+        geofence.addTestGeofence()
     }
 
     private fun setDSData(appId: String, apiKey: String, geoEnabled: Boolean) = runBlocking {
@@ -122,9 +126,7 @@ class EgoiPushLibrary {
      * @param message The data of the notification received
      */
     fun addGeofence(message: EGoiMessage) {
-        if (location.checkPermissions()) {
-            geofence.addGeofence(message)
-        }
+        geofence.addGeofence(message)
     }
 
     /**
@@ -132,9 +134,7 @@ class EgoiPushLibrary {
      * @param id The ID of the notification to be sent
      */
     fun sendGeoNotification(id: String) {
-        if (location.checkPermissions()) {
-            geofence.sendGeoNotification(id)
-        }
+        geofence.sendGeoNotification(id)
     }
 
     /**
@@ -181,10 +181,20 @@ class EgoiPushLibrary {
      * Read the properties of the metadata
      */
     private fun readMetadata() {
-        context.packageManager.getApplicationInfo(
-            context.packageName,
-            PackageManager.GET_META_DATA
-        ).apply {
+
+        val info: ApplicationInfo = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            context.packageManager.getApplicationInfo(
+                context.packageName,
+                PackageManager.ApplicationInfoFlags.of(0)
+            )
+        } else {
+            context.packageManager.getApplicationInfo(
+                context.packageName,
+                PackageManager.GET_META_DATA
+            )
+        }
+
+        info.apply {
             notificationIcon = metaData.getInt(
                 "com.egoiapp.egoipushlibrary.notification_icon",
                 R.drawable.ic_launcher_foreground

@@ -99,9 +99,10 @@ class FirebaseHandler(
         val extras = intent.extras
 
         if (extras != null && extras.getString("key") == "E-GOI_PUSH") {
-            if ((preferences.geoEnabled && !instance.location.checkPermissions() &&
-                extras.containsKey("latitude") && extras.getString("latitude") != "")
-                || (!preferences.geoEnabled && extras.containsKey("latitude") && extras.getString("latitude") != "")) {
+            if ((preferences.geoEnabled && !instance.location.checkLocationPermissions() &&
+                        extras.containsKey("latitude") && extras.getString("latitude") != "")
+                || (!preferences.geoEnabled && extras.containsKey("latitude") && extras.getString("latitude") != "")
+            ) {
                 return
             }
 
@@ -150,7 +151,7 @@ class FirebaseHandler(
                 // [Handle geolocation]
                 if (
                     preferences.geoEnabled &&
-                    instance.location.checkPermissions() &&
+                    instance.location.checkLocationPermissions() &&
                     extras.containsKey("latitude") && extras.getString("latitude") != "" &&
                     extras.containsKey("longitude") && extras.getString("longitude") != "" &&
                     extras.containsKey("radius") && extras.getString("radius") != ""

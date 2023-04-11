@@ -10,7 +10,7 @@ import androidx.core.app.ActivityCompat
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.workDataOf
 import com.egoiapp.egoipushlibrary.EgoiPushLibrary
-import com.egoiapp.egoipushlibrary.services.GeofenceService
+import com.egoiapp.egoipushlibrary.receivers.GeofenceBroadcastReceiver
 import com.egoiapp.egoipushlibrary.structures.EGoiMessage
 import com.egoiapp.egoipushlibrary.structures.EgoiPreferences
 import com.egoiapp.egoipushlibrary.workers.FireNotificationWorker
@@ -26,22 +26,19 @@ import java.util.concurrent.TimeUnit
 class GeofenceHandler(
     private val instance: EgoiPushLibrary
 ) {
-    private val geofencingClient =
-        LocationServices.getGeofencingClient(instance.context)
     private val pendingNotifications: HashMap<String, EGoiMessage> = HashMap()
     private val geofencePendingIntent: PendingIntent by lazy {
-        val intent = Intent(instance.context, GeofenceService::class.java)
-        intent.action = "com.egoiapp.actions.ACTION_GEOFENCE_EVENT"
+        val intent = Intent(instance.context, GeofenceBroadcastReceiver::class.java)
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            PendingIntent.getService(
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            PendingIntent.getBroadcast(
                 instance.context,
                 0,
                 intent,
-                PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_MUTABLE
             )
         } else {
-            PendingIntent.getService(
+            PendingIntent.getBroadcast(
                 instance.context,
                 0,
                 intent,
@@ -50,42 +47,90 @@ class GeofenceHandler(
         }
     }
 
+    fun addTestGeofence() {
+        val geofenceList: MutableList<Geofence> = mutableListOf()
+        val geofencingClient =
+            LocationServices.getGeofencingClient(instance.context)
+
+        // Remove active test geofence
+        geofencingClient.removeGeofences(listOf("TEST")).run {
+            addOnSuccessListener {
+                Log.d(TAG, "Geofence removed!")
+
+                // Create test geofence
+                geofenceList.add(
+                    Geofence.Builder()
+                        .setRequestId("TEST")
+                        .setCircularRegion(41.178880, -8.682427, 100F)
+                        .setTransitionTypes(Geofence.GEOFENCE_TRANSITION_DWELL)
+                        .setLoiteringDelay(TimeUnit.SECONDS.toMillis(10).toInt())
+                        .setExpirationDuration(TimeUnit.MINUTES.toMillis(10))
+                        .build()
+                )
+
+                // Create geofence request
+                val geofenceRequest: GeofencingRequest = GeofencingRequest.Builder().apply {
+                    addGeofences(geofenceList)
+                }.build()
+
+                // Check if user granted necessary permission
+                if (ActivityCompat.checkSelfPermission(
+                        instance.context,
+                        Manifest.permission.ACCESS_FINE_LOCATION
+                    ) == PackageManager.PERMISSION_GRANTED
+                ) {
+                    // Add geofence
+                    geofencingClient.addGeofences(geofenceRequest, geofencePendingIntent).run {
+                        addOnSuccessListener {
+                            Log.d(TAG, "Geofence created!")
+                        }
+                        addOnFailureListener {
+                            Log.d(TAG, "Failed to create geofence!")
+                            Log.e(TAG, it.message.toString())
+                        }
+                    }
+                }
+            }
+            addOnFailureListener {
+                Log.d(TAG, "Failed to remove geofence!")
+                Log.e(TAG, it.message.toString())
+            }
+        }
+    }
+
     /**
      * Create a geofence that triggers a notification
      * @param message The data of teh notification to be displayed
      */
     fun addGeofence(message: EGoiMessage) {
-        val geofence = Geofence.Builder()
-            .setRequestId(message.data.messageHash)
-            .setCircularRegion(
-                message.data.geo.latitude,
-                message.data.geo.longitude,
-                message.data.geo.radius
-            )
-            .setExpirationDuration(message.data.geo.duration)
-            .setTransitionTypes(Geofence.GEOFENCE_TRANSITION_ENTER)
-            .setNotificationResponsiveness(TimeUnit.MINUTES.toMillis(5).toInt())
-            .build()
-
-        val geofencingRequest = GeofencingRequest.Builder()
-            .setInitialTrigger(GeofencingRequest.INITIAL_TRIGGER_ENTER)
-            .addGeofence(geofence)
-            .build()
-
         if (ActivityCompat.checkSelfPermission(
                 instance.context,
                 Manifest.permission.ACCESS_FINE_LOCATION
             ) == PackageManager.PERMISSION_GRANTED
         ) {
+            val geofencingClient =
+                LocationServices.getGeofencingClient(instance.activityContext)
+
+            val geofence = Geofence.Builder()
+                .setRequestId(message.data.messageHash)
+                .setCircularRegion(
+                    message.data.geo.latitude,
+                    message.data.geo.longitude,
+                    message.data.geo.radius
+                )
+                .setExpirationDuration(message.data.geo.duration)
+                .setTransitionTypes(Geofence.GEOFENCE_TRANSITION_DWELL)
+                .setLoiteringDelay(TimeUnit.MINUTES.toMillis(5).toInt())
+                .build()
+
+            val geofencingRequest = GeofencingRequest.Builder()
+                .setInitialTrigger(GeofencingRequest.INITIAL_TRIGGER_DWELL)
+                .addGeofence(geofence)
+                .build()
+
             geofencingClient.addGeofences(geofencingRequest, geofencePendingIntent).run {
                 addOnSuccessListener {
                     pendingNotifications[message.data.messageHash] = message
-
-                    if (!instance.dataStore.getDSConfigs().locationUpdates) {
-                        instance.location.requestLocationUpdates()
-                    }
-
-                    Log.d("GEOFENCE", "CREATED")
                 }
 
                 addOnFailureListener {
@@ -100,6 +145,9 @@ class GeofenceHandler(
      * @param id The id of the notification that will be displayed
      */
     fun sendGeoNotification(id: String) {
+        val geofencingClient =
+            LocationServices.getGeofencingClient(instance.activityContext)
+
         val preferences: EgoiPreferences = instance.dataStore.getDSPreferences()
         val message: EGoiMessage? = pendingNotifications[id]
 
@@ -131,11 +179,11 @@ class GeofenceHandler(
 
                 geofencingClient.removeGeofences(list)
                 pendingNotifications.remove(id)
-
-                if (pendingNotifications.isEmpty()) {
-                    instance.location.removeLocationUpdates()
-                }
             }
         }
+    }
+
+    companion object {
+        const val TAG = "GEOFENCE"
     }
 }
