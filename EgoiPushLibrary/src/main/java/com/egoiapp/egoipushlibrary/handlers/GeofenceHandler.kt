@@ -120,7 +120,7 @@ class GeofenceHandler(
                 )
                 .setExpirationDuration(message.data.geo.duration)
                 .setTransitionTypes(Geofence.GEOFENCE_TRANSITION_DWELL)
-                .setLoiteringDelay(TimeUnit.MINUTES.toMillis(5).toInt())
+                .setLoiteringDelay(TimeUnit.MINUTES.toMillis(3).toInt())
                 .build()
 
             val geofencingRequest = GeofencingRequest.Builder()
