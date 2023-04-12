@@ -102,15 +102,20 @@ class EgoiNotificationActivity : AppCompatActivity() {
                             fireDialog(egoiNotification)
                         }
                     } else {
-                        EgoiPushLibrary.getInstance(applicationContext)
-                            .registerEvent(EgoiPushLibrary.OPEN_EVENT, egoiNotification)
+                        if (egoiNotification.messageHash != "TEST") {
+                            EgoiPushLibrary.getInstance(applicationContext)
+                                .registerEvent(EgoiPushLibrary.OPEN_EVENT, egoiNotification)
+                        }
+
                         finish()
                     }
                 }
 
                 if (intent.action == NOTIFICATION_ACTION_VIEW) {
-                    EgoiPushLibrary.getInstance(applicationContext)
-                        .registerEvent(EgoiPushLibrary.OPEN_EVENT, egoiNotification)
+                    if (egoiNotification.messageHash != "TEST") {
+                        EgoiPushLibrary.getInstance(applicationContext)
+                            .registerEvent(EgoiPushLibrary.OPEN_EVENT, egoiNotification)
+                    }
 
                     if (egoiNotification.actionType == "deeplink") {
                         EgoiPushLibrary.getInstance(applicationContext).deepLinkCallback?.let {
@@ -147,8 +152,10 @@ class EgoiNotificationActivity : AppCompatActivity() {
         ) {
             builder.setPositiveButton(egoiNotification.actionText)
             { _, _ ->
-                EgoiPushLibrary.getInstance(applicationContext)
-                    .registerEvent(EgoiPushLibrary.OPEN_EVENT, egoiNotification)
+                if (egoiNotification.messageHash != "TEST") {
+                    EgoiPushLibrary.getInstance(applicationContext)
+                        .registerEvent(EgoiPushLibrary.OPEN_EVENT, egoiNotification)
+                }
 
                 if (egoiNotification.actionType == "deeplink") {
                     EgoiPushLibrary.getInstance(applicationContext).deepLinkCallback?.let {
@@ -167,8 +174,11 @@ class EgoiNotificationActivity : AppCompatActivity() {
 
             builder.setNegativeButton(egoiNotification.actionTextCancel)
             { _, _ ->
-                EgoiPushLibrary.getInstance(applicationContext)
-                    .registerEvent(EgoiPushLibrary.CANCEL_EVENT, egoiNotification)
+                if (egoiNotification.messageHash != "TEST") {
+                    EgoiPushLibrary.getInstance(applicationContext)
+                        .registerEvent(EgoiPushLibrary.CANCEL_EVENT, egoiNotification)
+                }
+
                 finish()
             }
 

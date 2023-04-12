@@ -1,8 +1,10 @@
 package com.egoiapp.egoipushlibraryandroid
 
+import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.widget.Button
+import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.work.WorkInfo
 import androidx.work.WorkManager
@@ -20,6 +22,22 @@ class MainActivity : AppCompatActivity() {
             .setOnClickListener {
                 requestLocationAccess()
             }
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            val button: Button = findViewById(R.id.location_background)
+            button.setOnClickListener {
+                requestLocationAccessInBackground()
+            }
+            button.visibility = Button.VISIBLE
+        }
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            val button: Button = findViewById(R.id.notifications)
+            button.setOnClickListener {
+                requestNotificationsAccess()
+            }
+            button.visibility = Button.VISIBLE
+        }
 
         findViewById<Button>(R.id.token)
             .setOnClickListener {
@@ -42,14 +60,24 @@ class MainActivity : AppCompatActivity() {
         grantResults: IntArray
     ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        EgoiPushLibrary.getInstance(applicationContext).location.handleLocationAccessResponse(
+        EgoiPushLibrary.getInstance(applicationContext).handleLocationAccessResponse(
             requestCode,
             grantResults
         )
     }
 
     private fun requestLocationAccess() {
-        EgoiPushLibrary.getInstance(applicationContext).location.requestLocationAccess()
+        EgoiPushLibrary.getInstance(applicationContext).requestLocationAccess()
+    }
+
+    @RequiresApi(Build.VERSION_CODES.Q)
+    private fun requestLocationAccessInBackground() {
+        EgoiPushLibrary.getInstance(applicationContext).requestLocationAccessInBackground()
+    }
+
+    @RequiresApi(Build.VERSION_CODES.TIRAMISU)
+    private fun requestNotificationsAccess() {
+        EgoiPushLibrary.getInstance(applicationContext).requestNotificationsAccess()
     }
 
     private fun registerToken() {

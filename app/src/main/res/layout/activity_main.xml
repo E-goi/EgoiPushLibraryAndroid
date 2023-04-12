@@ -23,6 +23,22 @@
             android:text="@string/location" />
 
         <Button
+            android:id="@+id/location_background"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:text="@string/location_background"
+            android:visibility="gone" />
+
+        <Button
+            android:id="@+id/notifications"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:text="@string/notifications"
+            android:visibility="gone" />
+
+        <Button
             android:id="@+id/token"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"

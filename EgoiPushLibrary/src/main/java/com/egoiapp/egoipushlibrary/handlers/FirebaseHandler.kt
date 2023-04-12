@@ -123,8 +123,6 @@ class FirebaseHandler(
                     applicationId = extras.getString("application-id") ?: "",
                     messageId = if (extras.getString("message-id", "0") != "")
                         extras.getString("message-id", "0").toInt() else 0,
-                    deviceId = if (extras.getString("device-id", "0") != "")
-                        extras.getString("device-id", "0").toInt() else 0,
                 )
             )
 
@@ -163,6 +161,8 @@ class FirebaseHandler(
                         extras.getString("longitude")?.toDouble() ?: Double.NaN
                     it.data.geo.radius = extras.getString("radius")?.toFloat() ?: 0.0.toFloat()
                     it.data.geo.duration = extras.getString("duration")?.toLong() ?: 0
+                    it.data.geo.periodStart = extras.getString("time-start")
+                    it.data.geo.periodEnd = extras.getString("time-end")
                 }
             }
         }
@@ -194,7 +194,6 @@ class FirebaseHandler(
                             appId = preferences.appId,
                             contactId = it.data.contactId,
                             messageHash = it.data.messageHash,
-                            deviceId = it.data.deviceId,
                             messageId = it.data.messageId
                         )
 
@@ -234,7 +233,6 @@ class FirebaseHandler(
                                 "appId" to preferences.appId,
                                 "contactId" to it.data.contactId,
                                 "messageHash" to it.data.messageHash,
-                                "deviceId" to it.data.deviceId,
                                 "messageId" to it.data.messageId
                             )
                         )
@@ -264,7 +262,6 @@ class FirebaseHandler(
                                 "appId" to preferences.appId,
                                 "contactId" to it.data.contactId,
                                 "messageHash" to it.data.messageHash,
-                                "deviceId" to it.data.deviceId,
                                 "messageId" to it.data.messageId
                             )
                         )

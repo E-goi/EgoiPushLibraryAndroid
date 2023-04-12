@@ -11,13 +11,13 @@ import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.workDataOf
 import com.egoiapp.egoipushlibrary.EgoiPushLibrary
 import com.egoiapp.egoipushlibrary.receivers.GeofenceBroadcastReceiver
-import com.egoiapp.egoipushlibrary.structures.EGoiMessage
-import com.egoiapp.egoipushlibrary.structures.EgoiPreferences
+import com.egoiapp.egoipushlibrary.structures.*
 import com.egoiapp.egoipushlibrary.workers.FireNotificationWorker
 import com.google.android.gms.location.Geofence
 import com.google.android.gms.location.GeofencingRequest
 import com.google.android.gms.location.LocationServices
 import kotlinx.coroutines.runBlocking
+import java.util.*
 import java.util.concurrent.TimeUnit
 
 /**
@@ -109,7 +109,7 @@ class GeofenceHandler(
             ) == PackageManager.PERMISSION_GRANTED
         ) {
             val geofencingClient =
-                LocationServices.getGeofencingClient(instance.activityContext)
+                LocationServices.getGeofencingClient(instance.context)
 
             val geofence = Geofence.Builder()
                 .setRequestId(message.data.messageHash)
@@ -146,12 +146,71 @@ class GeofenceHandler(
      */
     fun sendGeoNotification(id: String) {
         val geofencingClient =
-            LocationServices.getGeofencingClient(instance.activityContext)
+            LocationServices.getGeofencingClient(instance.context)
 
         val preferences: EgoiPreferences = instance.dataStore.getDSPreferences()
-        val message: EGoiMessage? = pendingNotifications[id]
+        val message: EGoiMessage?
+
+        if (id == "TEST") {
+            message = EGoiMessage(
+                notification = EGoiMessageNotification(
+                    title = "Geofence triggered!",
+                    body = "Geofence $id was triggered.",
+                    image = "https://media.licdn.com/dms/image/D4D0BAQG6xPl2tobmnQ/company-logo_200_200/0/1666870374567?e=2147483647&v=beta&t=TmR6lpk4262l4uEhh7uymckCcSsjF2sTZ5nB6ZRmlgs"
+                ),
+                data = EGoiMessageData(
+                    os = "android",
+                    messageHash = id,
+                    listId = 0,
+                    contactId = "",
+                    accountId = 0,
+                    applicationId = "egoipushlibrary",
+                    messageId = 0,
+                    geo = EGoiMessageDataGeo(
+                        periodStart = "9:00",
+                        periodEnd = "18:00"
+                    ),
+                    actions = EGoiMessageDataAction(
+                        type = "http",
+                        text = "View",
+                        url = "https://www.e-goi.com",
+                        textCancel = "Close",
+                    )
+                )
+            )
+        } else {
+            message = pendingNotifications[id]
+        }
 
         if (message != null) {
+            // region Validate if the current hours are inside the defined period
+            if (message.data.geo.periodStart != null && message.data.geo.periodEnd != null) {
+                val periodStart = message.data.geo.periodStart!!.split(":")
+                val periodEnd = message.data.geo.periodEnd!!.split(":")
+
+                val periodStartDateTime = Calendar.getInstance()
+                periodStartDateTime
+                    .set(Calendar.HOUR_OF_DAY, periodStart[0].toInt())
+                periodStartDateTime
+                    .set(Calendar.MINUTE, periodStart[1].toInt())
+
+                val periodEndDateTime = Calendar.getInstance()
+                periodEndDateTime
+                    .set(Calendar.HOUR_OF_DAY, periodEnd[0].toInt())
+                periodEndDateTime
+                    .set(Calendar.MINUTE, periodEnd[1].toInt())
+
+                val currentDateTime = Calendar.getInstance()
+
+                if (currentDateTime.before(periodStartDateTime) || currentDateTime.after(
+                        periodEndDateTime
+                    )
+                ) {
+                    return
+                }
+            }
+            // endregion
+
             runBlocking {
                 instance.requestWork(
                     workRequest = OneTimeWorkRequestBuilder<FireNotificationWorker>()
@@ -168,17 +227,18 @@ class GeofenceHandler(
                                 "appId" to preferences.appId,
                                 "contactId" to message.data.contactId,
                                 "messageHash" to message.data.messageHash,
-                                "deviceId" to message.data.deviceId,
                                 "messageId" to message.data.messageId
                             )
                         )
                         .build()
                 )
 
-                val list: List<String> = mutableListOf(id)
+                if (message.data.messageHash != "TEST") {
+                    val list: List<String> = mutableListOf(id)
 
-                geofencingClient.removeGeofences(list)
-                pendingNotifications.remove(id)
+                    geofencingClient.removeGeofences(list)
+                    pendingNotifications.remove(id)
+                }
             }
         }
     }

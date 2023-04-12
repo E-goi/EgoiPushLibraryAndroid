@@ -1,11 +1,13 @@
 package com.egoiapp.egoipushlibrary
 
-import android.app.ActivityManager
-import android.app.ActivityManager.RunningAppProcessInfo
+import android.Manifest
+import android.app.Activity
 import android.content.Context
 import android.content.pm.ApplicationInfo
 import android.content.pm.PackageManager
 import android.os.Build
+import androidx.annotation.RequiresApi
+import androidx.core.app.ActivityCompat
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
 import androidx.work.WorkRequest
@@ -94,7 +96,7 @@ class EgoiPushLibrary {
 
         IS_INITIALIZED = true
 
-        geofence.addTestGeofence()
+        addTestGeofence()
     }
 
     private fun setDSData(appId: String, apiKey: String, geoEnabled: Boolean) = runBlocking {
@@ -107,26 +109,19 @@ class EgoiPushLibrary {
         dataStore.setDSData(DataStoreHandler.PREFERENCES, egoiPreferences.encode())
     }
 
-    fun isAppOnForeground(): Boolean {
-        val activityManager = context.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
-        val appProcesses = activityManager.runningAppProcesses ?: return false
-        val packageName = context.packageName
-
-        for (appProcess in appProcesses) {
-            if (appProcess.importance == RunningAppProcessInfo.IMPORTANCE_FOREGROUND && appProcess.processName == packageName) {
-                return true
-            }
-        }
-
-        return false
-    }
-
     /**
      * Create a geofence from the data received from a remote notification
      * @param message The data of the notification received
      */
     fun addGeofence(message: EGoiMessage) {
         geofence.addGeofence(message)
+    }
+
+    /**
+     * Create a geofence for testing purposes
+     */
+    fun addTestGeofence() {
+        geofence.addTestGeofence()
     }
 
     /**
@@ -177,6 +172,53 @@ class EgoiPushLibrary {
         return null
     }
 
+    fun requestLocationAccess() {
+        val permissions: MutableList<String> = mutableListOf(
+            Manifest.permission.ACCESS_COARSE_LOCATION,
+            Manifest.permission.ACCESS_FINE_LOCATION
+        )
+
+        ActivityCompat.requestPermissions(
+            activityContext as Activity,
+            permissions.toTypedArray(),
+            REQUEST_CODE
+        )
+    }
+
+    @RequiresApi(Build.VERSION_CODES.Q)
+    fun requestLocationAccessInBackground() {
+        ActivityCompat.requestPermissions(
+            activityContext as Activity,
+            arrayOf(Manifest.permission.ACCESS_BACKGROUND_LOCATION),
+            REQUEST_CODE
+        )
+    }
+
+    @RequiresApi(Build.VERSION_CODES.TIRAMISU)
+    fun requestNotificationsAccess() {
+        ActivityCompat.requestPermissions(
+            activityContext as Activity,
+            arrayOf(Manifest.permission.POST_NOTIFICATIONS),
+            REQUEST_CODE
+        )
+    }
+
+    fun handleLocationAccessResponse(requestCode: Int, grantResults: IntArray): Boolean {
+        when (requestCode) {
+            REQUEST_CODE -> {
+                if (grantResults.contains(PackageManager.PERMISSION_DENIED)) {
+                    return false
+                }
+
+                addTestGeofence()
+
+                return true
+            }
+        }
+
+        return false
+    }
+
     /**
      * Read the properties of the metadata
      */
@@ -185,7 +227,7 @@ class EgoiPushLibrary {
         val info: ApplicationInfo = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             context.packageManager.getApplicationInfo(
                 context.packageName,
-                PackageManager.ApplicationInfoFlags.of(0)
+                PackageManager.ApplicationInfoFlags.of(PackageManager.GET_META_DATA.toLong())
             )
         } else {
             context.packageManager.getApplicationInfo(
@@ -227,6 +269,7 @@ class EgoiPushLibrary {
         const val OPEN_EVENT = "open"
         const val CANCEL_EVENT = "canceled"
         const val RECEIVED_EVENT = "received"
+        const val REQUEST_CODE: Int = 654
 
         private val library = EgoiPushLibrary()
 
