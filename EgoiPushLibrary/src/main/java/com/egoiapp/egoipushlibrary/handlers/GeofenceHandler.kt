@@ -11,13 +11,18 @@ import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.workDataOf
 import com.egoiapp.egoipushlibrary.EgoiPushLibrary
 import com.egoiapp.egoipushlibrary.receivers.GeofenceBroadcastReceiver
-import com.egoiapp.egoipushlibrary.structures.*
+import com.egoiapp.egoipushlibrary.structures.EGoiMessage
+import com.egoiapp.egoipushlibrary.structures.EGoiMessageData
+import com.egoiapp.egoipushlibrary.structures.EGoiMessageDataAction
+import com.egoiapp.egoipushlibrary.structures.EGoiMessageDataGeo
+import com.egoiapp.egoipushlibrary.structures.EGoiMessageNotification
+import com.egoiapp.egoipushlibrary.structures.EgoiPreferences
 import com.egoiapp.egoipushlibrary.workers.FireNotificationWorker
 import com.google.android.gms.location.Geofence
 import com.google.android.gms.location.GeofencingRequest
 import com.google.android.gms.location.LocationServices
 import kotlinx.coroutines.runBlocking
-import java.util.*
+import java.util.Calendar
 import java.util.concurrent.TimeUnit
 
 /**
@@ -119,12 +124,11 @@ class GeofenceHandler(
                     message.data.geo.radius
                 )
                 .setExpirationDuration(message.data.geo.duration)
-                .setTransitionTypes(Geofence.GEOFENCE_TRANSITION_DWELL)
-                .setLoiteringDelay(TimeUnit.MINUTES.toMillis(3).toInt())
+                .setTransitionTypes(Geofence.GEOFENCE_TRANSITION_ENTER)
                 .build()
 
             val geofencingRequest = GeofencingRequest.Builder()
-                .setInitialTrigger(GeofencingRequest.INITIAL_TRIGGER_DWELL)
+                .setInitialTrigger(GeofencingRequest.INITIAL_TRIGGER_ENTER)
                 .addGeofence(geofence)
                 .build()
 

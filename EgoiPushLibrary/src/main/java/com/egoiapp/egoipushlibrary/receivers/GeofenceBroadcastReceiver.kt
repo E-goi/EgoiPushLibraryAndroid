@@ -26,7 +26,7 @@ class GeofenceBroadcastReceiver : BroadcastReceiver() {
 
                 val geofenceTransition = geofencingEvent.geofenceTransition
 
-                if (geofenceTransition == Geofence.GEOFENCE_TRANSITION_DWELL) {
+                if (geofenceTransition == Geofence.GEOFENCE_TRANSITION_ENTER) {
                     val triggeringGeofences = geofencingEvent.triggeringGeofences
 
                     if (triggeringGeofences != null) {

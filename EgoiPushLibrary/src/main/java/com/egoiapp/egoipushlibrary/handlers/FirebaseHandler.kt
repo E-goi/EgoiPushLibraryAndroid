@@ -5,7 +5,11 @@ import androidx.work.OneTimeWorkRequest
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.workDataOf
 import com.egoiapp.egoipushlibrary.EgoiPushLibrary
-import com.egoiapp.egoipushlibrary.structures.*
+import com.egoiapp.egoipushlibrary.structures.EGoiMessage
+import com.egoiapp.egoipushlibrary.structures.EGoiMessageData
+import com.egoiapp.egoipushlibrary.structures.EGoiMessageNotification
+import com.egoiapp.egoipushlibrary.structures.EgoiNotification
+import com.egoiapp.egoipushlibrary.structures.EgoiPreferences
 import com.egoiapp.egoipushlibrary.workers.FireDialogWorker
 import com.egoiapp.egoipushlibrary.workers.FireNotificationWorker
 import com.egoiapp.egoipushlibrary.workers.RegisterTokenWorker
@@ -163,6 +167,14 @@ class FirebaseHandler(
                     it.data.geo.duration = extras.getString("duration")?.toLong() ?: 0
                     it.data.geo.periodStart = extras.getString("time-start")
                     it.data.geo.periodEnd = extras.getString("time-end")
+
+                    if (it.data.geo.periodStart == "") {
+                        it.data.geo.periodStart = null
+                    }
+
+                    if (it.data.geo.periodEnd == "") {
+                        it.data.geo.periodEnd = null
+                    }
                 }
             }
         }
