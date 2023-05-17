@@ -95,8 +95,6 @@ class EgoiPushLibrary {
         setDSData(appId, apiKey, geoEnabled)
 
         IS_INITIALIZED = true
-
-        addTestGeofence()
     }
 
     private fun setDSData(appId: String, apiKey: String, geoEnabled: Boolean) = runBlocking {
