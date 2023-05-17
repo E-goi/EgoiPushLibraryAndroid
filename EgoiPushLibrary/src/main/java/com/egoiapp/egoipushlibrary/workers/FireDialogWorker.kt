@@ -49,8 +49,10 @@ class FireDialogWorker(
         ) {
             builder.setPositiveButton(egoiNotification.actionText)
             { _, _ ->
-                EgoiPushLibrary.getInstance(context)
-                    .registerEvent(EgoiPushLibrary.OPEN_EVENT, egoiNotification)
+                if (egoiNotification.messageHash != "TEST") {
+                    EgoiPushLibrary.getInstance(context)
+                        .registerEvent(EgoiPushLibrary.OPEN_EVENT, egoiNotification)
+                }
 
                 if (egoiNotification.actionType == "deeplink") {
                     EgoiPushLibrary.getInstance(context).deepLinkCallback?.let {
@@ -68,8 +70,10 @@ class FireDialogWorker(
 
             builder.setNegativeButton(egoiNotification.actionTextCancel)
             { _, _ ->
-                EgoiPushLibrary.getInstance(context)
-                    .registerEvent(EgoiPushLibrary.CANCEL_EVENT, egoiNotification)
+                if (egoiNotification.messageHash != "TEST") {
+                    EgoiPushLibrary.getInstance(context)
+                        .registerEvent(EgoiPushLibrary.CANCEL_EVENT, egoiNotification)
+                }
             }
         }
 

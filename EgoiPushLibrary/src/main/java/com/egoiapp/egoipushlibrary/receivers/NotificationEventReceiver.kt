@@ -75,8 +75,10 @@ class NotificationEventReceiver : BroadcastReceiver() {
             }
 
             if (intent.action == context.applicationContext.packageName + NOTIFICATION_CLOSE) {
-                EgoiPushLibrary.getInstance(context.applicationContext)
-                    .registerEvent(EgoiPushLibrary.CANCEL_EVENT, egoiNotification)
+                if (egoiNotification.messageHash != "TEST") {
+                    EgoiPushLibrary.getInstance(context.applicationContext)
+                        .registerEvent(EgoiPushLibrary.CANCEL_EVENT, egoiNotification)
+                }
 
                 val notificationManager =
                     context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
