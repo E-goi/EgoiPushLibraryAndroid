@@ -279,8 +279,10 @@ class FireNotificationWorker(
             deviceId = deviceId.toInt()
         )
 
-        EgoiPushLibrary.getInstance(context.applicationContext)
-            .registerEvent(EgoiPushLibrary.RECEIVED_EVENT, egoiNotification)
+        if (egoiNotification.messageHash != "TEST") {
+            EgoiPushLibrary.getInstance(context.applicationContext)
+                .registerEvent(EgoiPushLibrary.RECEIVED_EVENT, egoiNotification)
+        }
     }
 
     companion object {

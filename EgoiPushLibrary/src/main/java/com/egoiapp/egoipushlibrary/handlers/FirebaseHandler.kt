@@ -5,7 +5,11 @@ import androidx.work.OneTimeWorkRequest
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.workDataOf
 import com.egoiapp.egoipushlibrary.EgoiPushLibrary
-import com.egoiapp.egoipushlibrary.structures.*
+import com.egoiapp.egoipushlibrary.structures.EGoiMessage
+import com.egoiapp.egoipushlibrary.structures.EGoiMessageData
+import com.egoiapp.egoipushlibrary.structures.EGoiMessageNotification
+import com.egoiapp.egoipushlibrary.structures.EgoiNotification
+import com.egoiapp.egoipushlibrary.structures.EgoiPreferences
 import com.egoiapp.egoipushlibrary.workers.FireDialogWorker
 import com.egoiapp.egoipushlibrary.workers.FireNotificationWorker
 import com.egoiapp.egoipushlibrary.workers.RegisterTokenWorker
@@ -99,9 +103,10 @@ class FirebaseHandler(
         val extras = intent.extras
 
         if (extras != null && extras.getString("key") == "E-GOI_PUSH") {
-            if ((preferences.geoEnabled && !instance.location.checkPermissions() &&
-                extras.containsKey("latitude") && extras.getString("latitude") != "")
-                || (!preferences.geoEnabled && extras.containsKey("latitude") && extras.getString("latitude") != "")) {
+            if ((preferences.geoEnabled && !instance.location.checkLocationPermissions() &&
+                        extras.containsKey("latitude") && extras.getString("latitude") != "")
+                || (!preferences.geoEnabled && extras.containsKey("latitude") && extras.getString("latitude") != "")
+            ) {
                 return
             }
 
@@ -122,8 +127,6 @@ class FirebaseHandler(
                     applicationId = extras.getString("application-id") ?: "",
                     messageId = if (extras.getString("message-id", "0") != "")
                         extras.getString("message-id", "0").toInt() else 0,
-                    deviceId = if (extras.getString("device-id", "0") != "")
-                        extras.getString("device-id", "0").toInt() else 0,
                 )
             )
 
@@ -150,7 +153,7 @@ class FirebaseHandler(
                 // [Handle geolocation]
                 if (
                     preferences.geoEnabled &&
-                    instance.location.checkPermissions() &&
+                    instance.location.checkLocationPermissions() &&
                     extras.containsKey("latitude") && extras.getString("latitude") != "" &&
                     extras.containsKey("longitude") && extras.getString("longitude") != "" &&
                     extras.containsKey("radius") && extras.getString("radius") != ""
@@ -162,6 +165,16 @@ class FirebaseHandler(
                         extras.getString("longitude")?.toDouble() ?: Double.NaN
                     it.data.geo.radius = extras.getString("radius")?.toFloat() ?: 0.0.toFloat()
                     it.data.geo.duration = extras.getString("duration")?.toLong() ?: 0
+                    it.data.geo.periodStart = extras.getString("time-start")
+                    it.data.geo.periodEnd = extras.getString("time-end")
+
+                    if (it.data.geo.periodStart == "") {
+                        it.data.geo.periodStart = null
+                    }
+
+                    if (it.data.geo.periodEnd == "") {
+                        it.data.geo.periodEnd = null
+                    }
                 }
             }
         }
@@ -193,7 +206,6 @@ class FirebaseHandler(
                             appId = preferences.appId,
                             contactId = it.data.contactId,
                             messageHash = it.data.messageHash,
-                            deviceId = it.data.deviceId,
                             messageId = it.data.messageId
                         )
 
@@ -233,7 +245,6 @@ class FirebaseHandler(
                                 "appId" to preferences.appId,
                                 "contactId" to it.data.contactId,
                                 "messageHash" to it.data.messageHash,
-                                "deviceId" to it.data.deviceId,
                                 "messageId" to it.data.messageId
                             )
                         )
@@ -263,7 +274,6 @@ class FirebaseHandler(
                                 "appId" to preferences.appId,
                                 "contactId" to it.data.contactId,
                                 "messageHash" to it.data.messageHash,
-                                "deviceId" to it.data.deviceId,
                                 "messageId" to it.data.messageId
                             )
                         )

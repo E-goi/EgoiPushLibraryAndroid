@@ -16,25 +16,34 @@
         app:layout_constraintTop_toTopOf="parent">
 
         <Button
+            android:id="@+id/location"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:onClick="requestForegroundAccess"
-            android:text="Location (foreground)" />
+            android:text="@string/location" />
 
         <Button
+            android:id="@+id/location_background"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:onClick="requestBackgroundAccess"
-            android:text="Location (background)" />
+            android:text="@string/location_background"
+            android:visibility="gone" />
 
         <Button
+            android:id="@+id/notifications"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:onClick="registerToken"
-            android:text="Register Token" />
+            android:text="@string/notifications"
+            android:visibility="gone" />
+
+        <Button
+            android:id="@+id/token"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:text="@string/register_token" />
     </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

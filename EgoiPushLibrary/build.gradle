@@ -12,6 +12,10 @@ android {
         minSdkVersion 19
         targetSdkVersion 33
 
+        aarMetadata {
+            minCompileSdk 29
+        }
+
         consumerProguardFiles "consumer-rules.pro"
     }
 
@@ -30,98 +34,83 @@ android {
     kotlinOptions {
         jvmTarget = '1.8'
     }
-    namespace 'com.egoiapp.egoipushlibrary'
+
     buildFeatures {
         viewBinding true
     }
-}
 
-tasks.withType(Javadoc) {
-    enabled = false
-}
+    namespace 'com.egoiapp.egoipushlibrary'
 
-task javadoc(type: Javadoc) {
-    source = android.sourceSets.main.java.srcDirs
-    classpath += project.files(android.getBootClasspath().join(File.pathSeparator))
-}
-
-task sourcesJar(type: Jar) {
-    from android.sourceSets.main.java.srcDirs
-    getArchiveClassifier().set("sources")
-}
-
-task javadocJar(type: Jar, dependsOn: javadoc) {
-    getArchiveClassifier().set("javadoc")
-    from javadoc.destinationDir
-}
-
-afterEvaluate {
     publishing {
-        publications {
-            release(MavenPublication) {
-                from components.release
+        singleVariant('release') {
+            withSourcesJar()
+        }
+    }
+}
 
-                artifact javadocJar
-                artifact sourcesJar
+publishing {
+    publications {
+        release(MavenPublication) {
+            groupId = 'com.egoiapp.egoipushlibrary'
+            artifactId = 'egoipushlibrary'
+            version = '4.1.0'
 
-                groupId = 'com.egoiapp.egoipushlibrary'
-                artifactId = 'egoipushlibrary'
-                version = '4.0.2'
+            pom {
+                name = "EgoiPushLibrary"
+                description = "Android library responsible for handling notifications from E-goi."
+                url = "https://github.com/E-goi/EgoiPushLibraryAndroid"
+                packaging = 'aar'
 
-                pom {
-                    name = "EgoiPushLibrary"
-                    description = "Android library responsible for handling notifications from E-goi."
+                licenses {
+                    license {
+                        name = "The Apache Software License, Version 2.0"
+                        url = "http://www.apache.org/licenses/LICENSE-2.0.txt"
+                    }
+                }
+
+                developers {
+                    developer {
+                        id = "jsilva"
+                        name = "João Silva"
+                        email = "jsilva@e-goi.com"
+                    }
+                }
+
+                scm {
+                    connection = "https://github.com/E-goi/EgoiPushLibraryAndroid.git"
+                    developerConnection = "https://github.com/E-goi/EgoiPushLibraryAndroid.git"
                     url = "https://github.com/E-goi/EgoiPushLibraryAndroid"
-                    packaging = 'aar'
-
-                    licenses {
-                        license {
-                            name = "The Apache Software License, Version 2.0"
-                            url = "http://www.apache.org/licenses/LICENSE-2.0.txt"
-                        }
-                    }
-
-                    developers {
-                        developer {
-                            id = "jsilva"
-                            name = "João Silva"
-                            email = "jsilva@e-goi.com"
-                        }
-                    }
-
-                    scm {
-                        connection = "https://github.com/E-goi/EgoiPushLibraryAndroid.git"
-                        developerConnection = "https://github.com/E-goi/EgoiPushLibraryAndroid.git"
-                        url = "https://github.com/E-goi/EgoiPushLibraryAndroid"
-                    }
                 }
             }
-        }
 
-        repositories {
-            maven {
-                url = uri('https://oss.sonatype.org/service/local/staging/deploy/maven2/')
-                credentials {
-                    username "${ossrhUsername}"
-                    password "${ossrhPassword}"
-                }
+            afterEvaluate {
+                from components.release
             }
         }
     }
 
-    signing {
-        sign(publishing.publications.release)
+    repositories {
+        maven {
+            url = uri('https://oss.sonatype.org/service/local/staging/deploy/maven2/')
+            credentials {
+                username "${ossrhUsername}"
+                password "${ossrhPassword}"
+            }
+        }
     }
+}
+
+signing {
+    sign publishing.publications.release
 }
 
 dependencies {
-    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.1'
-    implementation 'androidx.core:core-ktx:1.9.0'
-    implementation 'androidx.appcompat:appcompat:1.5.1'
-    implementation 'androidx.work:work-runtime-ktx:2.7.1'
+    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4'
+    implementation 'androidx.core:core-ktx:1.10.0'
+    implementation 'androidx.appcompat:appcompat:1.6.1'
+    implementation 'androidx.work:work-runtime-ktx:2.8.1'
     implementation 'androidx.datastore:datastore-preferences:1.0.0'
-    implementation 'androidx.localbroadcastmanager:localbroadcastmanager:1.1.0'
-    implementation 'com.google.android.material:material:1.6.1'
-    implementation 'com.google.android.gms:play-services-location:20.0.0'
     implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
+    implementation 'com.google.android.material:material:1.8.0'
+    implementation 'com.google.android.gms:play-services-location:21.0.1'
 }

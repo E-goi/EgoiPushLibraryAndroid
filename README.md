@@ -1,15 +1,10 @@
-# What's new in version 4.0.2?
+# What's new in version 4.1.0?
 
-### PATCH
+### MINOR
 
-#### Duplicated Activities
+#### Geolocation period
 
-Fixed a bug where, if the use already had the application opened, a new Activity would be invoked
-instead of using the on already opened.
-
-#### Calls to callbacks
-
-Fixed a bug where the callbacks weren't being called when the application was closed.
+You can now define a period for when the notification can be displayed (through E-goi's platform).
 
 # EgoiPushLibraryAndroid
 
@@ -41,7 +36,7 @@ functional:
 This library is available through Maven Central. To install it, simply add the following line to your Podfile:
 
 ```gradle
-implementation 'com.egoiapp.egoipushlibrary:egoipushlibrary:4.0.2'
+implementation 'com.egoiapp.egoipushlibrary:egoipushlibrary:4.1.0'
 ```
 
 After installing, you can initialize the library in the **MainActivity** with following instruction:
