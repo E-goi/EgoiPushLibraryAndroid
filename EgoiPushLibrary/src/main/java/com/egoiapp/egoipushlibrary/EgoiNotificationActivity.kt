@@ -41,6 +41,11 @@ class EgoiNotificationActivity : AppCompatActivity() {
                         getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
                     notificationManager.cancel(messageId)
+                    preferences.processedNotifications.remove(i)
+                    runBlocking {
+                        EgoiPushLibrary.getInstance(applicationContext).dataStore
+                            .setDSData(DataStoreHandler.PREFERENCES, preferences.encode())
+                    }
                     break
                 }
             }
