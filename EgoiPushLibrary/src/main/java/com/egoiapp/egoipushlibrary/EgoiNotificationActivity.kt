@@ -15,7 +15,6 @@ import com.egoiapp.egoipushlibrary.structures.EgoiPreferences
 import kotlinx.coroutines.runBlocking
 
 class EgoiNotificationActivity : AppCompatActivity() {
-    private var intentProcessed: Boolean = false
     private var preferences: EgoiPreferences = EgoiPreferences()
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -31,31 +30,15 @@ class EgoiNotificationActivity : AppCompatActivity() {
             .dataStore.getDSPreferences()
 
         val messageId: Int = intent.extras?.getInt("messageId", 0) ?: 0
+        val index: Int? = getProcessedNotificationIndex(messageId)
 
-        if (messageId != 0) {
-            for (i in 0 until preferences.processedNotifications.length()) {
-                if (messageId == preferences.processedNotifications.getInt(i)) {
-                    intentProcessed = true
-
-                    val notificationManager =
-                        getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-
-                    notificationManager.cancel(messageId)
-                    preferences.processedNotifications.remove(i)
-                    runBlocking {
-                        EgoiPushLibrary.getInstance(applicationContext).dataStore
-                            .setDSData(DataStoreHandler.PREFERENCES, preferences.encode())
-                    }
-                    break
-                }
-            }
-        }
-
-        if (intentProcessed) {
+        if (index != null) {
+            removeProcessedNotification(index)
             finish()
-        } else {
-            processIntent()
+            return
         }
+
+        processIntent()
     }
 
     private fun processIntent() {
@@ -126,6 +109,13 @@ class EgoiNotificationActivity : AppCompatActivity() {
                         EgoiPushLibrary.getInstance(applicationContext).deepLinkCallback?.let {
                             it(egoiNotification)
                         }
+
+                        val index: Int? = getProcessedNotificationIndex(egoiNotification.messageId)
+
+                        if (index != null) {
+                            removeProcessedNotification(index)
+                        }
+
                         finish()
                     } else {
                         val uriIntent =
@@ -166,6 +156,13 @@ class EgoiNotificationActivity : AppCompatActivity() {
                     EgoiPushLibrary.getInstance(applicationContext).deepLinkCallback?.let {
                         it(egoiNotification)
                     }
+
+                    val index: Int? = getProcessedNotificationIndex(egoiNotification.messageId)
+
+                    if (index != null) {
+                        removeProcessedNotification(index)
+                    }
+
                     finish()
                 } else {
                     startActivity(
@@ -208,6 +205,27 @@ class EgoiNotificationActivity : AppCompatActivity() {
         }
 
         finish()
+    }
+
+    private fun getProcessedNotificationIndex(messageId: Int): Int? {
+        if (messageId > 0) {
+            for (i in 0 until preferences.processedNotifications.length()) {
+                if (messageId == preferences.processedNotifications.getInt(i)) {
+                    return i
+                }
+            }
+        }
+
+        return null
+    }
+
+    private fun removeProcessedNotification(index: Int) {
+        preferences.processedNotifications.remove(index)
+
+        runBlocking {
+            EgoiPushLibrary.getInstance(applicationContext).dataStore
+                .setDSData(DataStoreHandler.PREFERENCES, preferences.encode())
+        }
     }
 
     companion object {
