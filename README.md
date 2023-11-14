@@ -1,10 +1,10 @@
-# What's new in version 4.1.0?
+# What's new in version 4.1.1?
 
 ### MINOR
 
-#### Geolocation period
+#### Notification processed
 
-You can now define a period for when the notification can be displayed (through E-goi's platform).
+Remove notification from processed notifications when the activity is closed.
 
 # EgoiPushLibraryAndroid
 
@@ -36,7 +36,7 @@ functional:
 This library is available through Maven Central. To install it, simply add the following line to your Podfile:
 
 ```gradle
-implementation 'com.egoiapp.egoipushlibrary:egoipushlibrary:4.1.0'
+implementation 'com.egoiapp.egoipushlibrary:egoipushlibrary:4.1.1'
 ```
 
 After installing, you can initialize the library in the **MainActivity** with following instruction:
