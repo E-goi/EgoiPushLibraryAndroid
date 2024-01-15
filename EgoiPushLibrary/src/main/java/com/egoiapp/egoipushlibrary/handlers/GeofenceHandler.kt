@@ -165,6 +165,7 @@ class GeofenceHandler(
                 data = EGoiMessageData(
                     os = "android",
                     messageHash = id,
+                    mailingId = 0,
                     listId = 0,
                     contactId = "",
                     accountId = 0,
@@ -231,6 +232,7 @@ class GeofenceHandler(
                                 "appId" to preferences.appId,
                                 "contactId" to message.data.contactId,
                                 "messageHash" to message.data.messageHash,
+                                "mailingId" to message.data.mailingId,
                                 "messageId" to message.data.messageId
                             )
                         )
