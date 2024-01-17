@@ -33,7 +33,7 @@ functional:
 
 ## Install
 
-This library is available through Maven Central. To install it, simply add the following line to your Podfile:
+This library is available through Maven Central. To install it, simply add the following line to your build.gradle:
 
 ```gradle
 implementation 'com.egoiapp.egoipushlibrary:egoipushlibrary:4.1.2'
