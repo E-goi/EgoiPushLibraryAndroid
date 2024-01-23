@@ -56,6 +56,7 @@ class EgoiNotificationActivity : AppCompatActivity() {
                 appId = intent.extras?.getString("appId") ?: "",
                 contactId = intent.extras?.getString("contactId") ?: "",
                 messageHash = intent.extras?.getString("messageHash") ?: "",
+                mailingId = intent.extras?.getInt("mailingId") ?: 0,
                 deviceId = intent.extras?.getInt("deviceId", 0) ?: 0,
                 messageId = intent.extras?.getInt("messageId", 0) ?: 0
             )

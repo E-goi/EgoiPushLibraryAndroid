@@ -11,6 +11,7 @@ data class EgoiNotification(
     var appId: String,
     var contactId: String,
     var messageHash: String,
+    var mailingId: Int = 0,
     var deviceId: Int = 0,
     var messageId: Int = 0
 )

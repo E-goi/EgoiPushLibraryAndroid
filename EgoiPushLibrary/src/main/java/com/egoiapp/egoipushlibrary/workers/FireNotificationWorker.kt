@@ -39,6 +39,7 @@ class FireNotificationWorker(
     private lateinit var appId: String
     private lateinit var contactId: String
     private lateinit var messageHash: String
+    private lateinit var mailingId: Number
     private lateinit var deviceId: Number
     private lateinit var messageId: Number
 
@@ -56,8 +57,9 @@ class FireNotificationWorker(
         appId = inputData.getString("appId") ?: ""
         contactId = inputData.getString("contactId") ?: ""
         messageHash = inputData.getString("messageHash") ?: ""
-        deviceId = inputData.getInt("deviceId", 0)
+        mailingId = inputData.getInt("mailingId", 0)
         messageId = inputData.getInt("messageId", 0)
+        deviceId = inputData.getInt("deviceId", 0)
 
         if (title != "" && text != "") {
             notification = buildNotification()
@@ -123,6 +125,7 @@ class FireNotificationWorker(
         intent.putExtra("appId", appId)
         intent.putExtra("contactId", contactId)
         intent.putExtra("messageHash", messageHash)
+        intent.putExtra("mailingId", mailingId)
         intent.putExtra("deviceId", deviceId)
         intent.putExtra("messageId", messageId)
 
@@ -156,6 +159,7 @@ class FireNotificationWorker(
         viewIntent.putExtra("appId", appId)
         viewIntent.putExtra("contactId", contactId)
         viewIntent.putExtra("messageHash", messageHash)
+        viewIntent.putExtra("mailingId", mailingId)
         viewIntent.putExtra("deviceId", deviceId)
         viewIntent.putExtra("messageId", messageId)
 
@@ -189,6 +193,7 @@ class FireNotificationWorker(
         closeIntent.putExtra("appId", appId)
         closeIntent.putExtra("contactId", contactId)
         closeIntent.putExtra("messageHash", messageHash)
+        closeIntent.putExtra("mailingId", mailingId)
         closeIntent.putExtra("deviceId", deviceId)
         closeIntent.putExtra("messageId", messageId)
 
@@ -276,6 +281,7 @@ class FireNotificationWorker(
             appId = appId,
             contactId = contactId,
             messageHash = messageHash,
+            mailingId = mailingId.toInt(),
             deviceId = deviceId.toInt()
         )
 

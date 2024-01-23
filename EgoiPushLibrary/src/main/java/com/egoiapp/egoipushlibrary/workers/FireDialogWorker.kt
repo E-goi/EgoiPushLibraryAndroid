@@ -31,6 +31,7 @@ class FireDialogWorker(
             appId = inputData.getString("appId") ?: "",
             contactId = inputData.getString("contactId") ?: "",
             messageHash = inputData.getString("messageHash") ?: "",
+            mailingId = inputData.getInt("mailingId", 0),
             deviceId = inputData.getInt("deviceId", 0),
             messageId = inputData.getInt("messageId", 0)
         )

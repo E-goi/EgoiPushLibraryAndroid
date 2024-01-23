@@ -52,7 +52,7 @@ publishing {
         release(MavenPublication) {
             groupId = 'com.egoiapp.egoipushlibrary'
             artifactId = 'egoipushlibrary'
-            version = '4.1.1'
+            version = '4.1.2'
 
             pom {
                 name = "EgoiPushLibrary"

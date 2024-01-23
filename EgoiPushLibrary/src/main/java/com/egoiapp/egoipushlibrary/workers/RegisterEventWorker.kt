@@ -30,6 +30,7 @@ class RegisterEventWorker(
             payload.put("contact", inputData.getString("contactId"))
             payload.put("os", "android")
             payload.put("message_hash", inputData.getString("messageHash"))
+            payload.put("mailing_id", inputData.getInt("mailingId", 0))
             payload.put("event", inputData.getString("event"))
             payload.put("device_id", inputData.getInt("deviceId", 0))
 

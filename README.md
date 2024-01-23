@@ -1,10 +1,10 @@
-# What's new in version 4.1.1?
+# What's new in version 4.1.2?
 
 ### MINOR
 
-#### Notification processed
+#### Notification payload
 
-Remove notification from processed notifications when the activity is closed.
+Added mailing_id to event payload request to add more detail into subscriber activity when they receive a push notification
 
 # EgoiPushLibraryAndroid
 
@@ -33,10 +33,10 @@ functional:
 
 ## Install
 
-This library is available through Maven Central. To install it, simply add the following line to your Podfile:
+This library is available through Maven Central. To install it, simply add the following line to your build.gradle:
 
 ```gradle
-implementation 'com.egoiapp.egoipushlibrary:egoipushlibrary:4.1.1'
+implementation 'com.egoiapp.egoipushlibrary:egoipushlibrary:4.1.2'
 ```
 
 After installing, you can initialize the library in the **MainActivity** with following instruction:
