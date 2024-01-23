@@ -1,6 +1,6 @@
 # What's new in version 4.1.2?
 
-### MINOR
+### PATCH
 
 #### Notification payload
 
