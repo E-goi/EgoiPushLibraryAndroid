@@ -160,6 +160,7 @@ class EgoiPushLibrary {
                         "appId" to notification.appId,
                         "contactId" to notification.contactId,
                         "messageHash" to notification.messageHash,
+                        "mailingId" to notification.mailingId,
                         "event" to event,
                         "deviceId" to notification.deviceId
                     )

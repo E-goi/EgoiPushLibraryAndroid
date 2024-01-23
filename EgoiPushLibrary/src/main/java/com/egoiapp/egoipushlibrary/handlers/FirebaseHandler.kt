@@ -119,6 +119,8 @@ class FirebaseHandler(
                 data = EGoiMessageData(
                     os = extras.getString("os") ?: "android",
                     messageHash = extras.getString("message-hash") ?: "",
+                    mailingId = if (extras.getString("mailing-id", "0") != "")
+                        extras.getString("mailing-id", "0").toInt() else 0,
                     listId = if (extras.getString("list-id", "0") != "")
                         extras.getString("list-id", "0").toInt() else 0,
                     contactId = extras.getString("contact-id") ?: "",
@@ -206,6 +208,7 @@ class FirebaseHandler(
                             appId = preferences.appId,
                             contactId = it.data.contactId,
                             messageHash = it.data.messageHash,
+                            mailingId = it.data.mailingId,
                             messageId = it.data.messageId
                         )
 
@@ -245,6 +248,7 @@ class FirebaseHandler(
                                 "appId" to preferences.appId,
                                 "contactId" to it.data.contactId,
                                 "messageHash" to it.data.messageHash,
+                                "mailingId" to it.data.mailingId,
                                 "messageId" to it.data.messageId
                             )
                         )
@@ -274,6 +278,7 @@ class FirebaseHandler(
                                 "appId" to preferences.appId,
                                 "contactId" to it.data.contactId,
                                 "messageHash" to it.data.messageHash,
+                                "mailingId" to it.data.mailingId,
                                 "messageId" to it.data.messageId
                             )
                         )

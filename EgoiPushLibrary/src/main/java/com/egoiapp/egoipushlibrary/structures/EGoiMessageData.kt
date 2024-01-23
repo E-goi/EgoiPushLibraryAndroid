@@ -3,6 +3,7 @@ package com.egoiapp.egoipushlibrary.structures
 data class EGoiMessageData(
     var os: String,
     var messageHash: String,
+    var mailingId: Int,
     var listId: Int,
     var contactId: String,
     var accountId: Int,

@@ -41,6 +41,7 @@ class NotificationEventReceiver : BroadcastReceiver() {
                 appId = extras?.getString("appId") ?: "",
                 contactId = extras?.getString("contactId") ?: "",
                 messageHash = extras?.getString("messageHash") ?: "",
+                mailingId = extras?.getInt("mailingId", 0) ?: 0,
                 deviceId = extras?.getInt("deviceId", 0) ?: 0,
                 messageId = extras?.getInt("messageId", 0) ?: 0
             )
