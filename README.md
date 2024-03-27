@@ -1,10 +1,10 @@
-# What's new in version 4.1.2?
+# What's new in version 4.1.3?
 
 ### PATCH
 
-#### Notification payload
+#### HTTP requests identification
 
-Added mailing_id to event payload request to add more detail into subscriber activity when they receive a push notification
+Added an identifier to the HTTP requests.
 
 # EgoiPushLibraryAndroid
 
@@ -36,7 +36,7 @@ functional:
 This library is available through Maven Central. To install it, simply add the following line to your build.gradle:
 
 ```gradle
-implementation 'com.egoiapp.egoipushlibrary:egoipushlibrary:4.1.2'
+implementation 'com.egoiapp.egoipushlibrary:egoipushlibrary:4.1.3'
 ```
 
 After installing, you can initialize the library in the **MainActivity** with following instruction:
