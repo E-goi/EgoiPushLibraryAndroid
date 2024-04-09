@@ -38,6 +38,7 @@ class RegisterEventWorker(
 
             urlConnection = url.openConnection() as HttpsURLConnection
             urlConnection.setRequestProperty("Content-Type", "application/json")
+            urlConnection.setRequestProperty("User-Agent", "E-goi")
             urlConnection.setRequestProperty("Apikey", inputData.getString("apiKey"))
             urlConnection.requestMethod = "POST"
             urlConnection.doOutput = true
