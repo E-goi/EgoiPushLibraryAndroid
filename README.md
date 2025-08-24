@@ -1,10 +1,16 @@
-# What's new in version 4.1.3?
+# What's new in version 4.2.0?
+
+### MINOR
+
+#### Maven Central Portal Migration
+
+Migrated publishing system from legacy Sonatype OSSRH to Maven Central Portal for future-proof publishing compatibility.
 
 ### PATCH
 
-#### HTTP requests identification
+#### Notification channel
 
-Added an identifier to the HTTP requests.
+Create a unique notification channel.
 
 # EgoiPushLibraryAndroid
 
@@ -36,7 +42,7 @@ functional:
 This library is available through Maven Central. To install it, simply add the following line to your build.gradle:
 
 ```gradle
-implementation 'com.egoiapp.egoipushlibrary:egoipushlibrary:4.1.3'
+implementation 'com.egoiapp.egoipushlibrary:egoipushlibrary:4.2.0'
 ```
 
 After installing, you can initialize the library in the **MainActivity** with following instruction:
