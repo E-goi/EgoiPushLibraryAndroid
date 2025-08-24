@@ -92,7 +92,7 @@ class FireNotificationWorker(
         val descriptionText = "Channel from E-goi push notifications"
         val importance = NotificationManager.IMPORTANCE_HIGH
 
-        return NotificationChannel("egoi_channel", name, importance).apply {
+        return NotificationChannel(context.packageName + "_egoi_channel", name, importance).apply {
             description = descriptionText
         }
     }
@@ -214,7 +214,7 @@ class FireNotificationWorker(
         }
 
         val builder =
-            NotificationCompat.Builder(context, "egoi_channel")
+            NotificationCompat.Builder(context, context.packageName + "_egoi_channel")
                 .setSmallIcon(EgoiPushLibrary.getInstance(context).notificationIcon)
                 .setContentTitle(title)
                 .setContentText(text)
