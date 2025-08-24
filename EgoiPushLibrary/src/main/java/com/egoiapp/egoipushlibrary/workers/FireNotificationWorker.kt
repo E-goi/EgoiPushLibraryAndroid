@@ -129,21 +129,13 @@ class FireNotificationWorker(
         intent.putExtra("deviceId", deviceId)
         intent.putExtra("messageId", messageId)
 
-        val pendingIntent: PendingIntent = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+        val pendingIntent: PendingIntent =
             PendingIntent.getActivity(
                 context,
                 ACTIVITY_REQUEST_CODE,
                 intent,
                 PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
             )
-        } else {
-            PendingIntent.getActivity(
-                context,
-                ACTIVITY_REQUEST_CODE,
-                intent,
-                PendingIntent.FLAG_UPDATE_CURRENT
-            )
-        }
 
         val viewIntent = Intent(context, EgoiNotificationActivity::class.java)
         viewIntent.action = EgoiNotificationActivity.NOTIFICATION_ACTION_VIEW
@@ -163,21 +155,13 @@ class FireNotificationWorker(
         viewIntent.putExtra("deviceId", deviceId)
         viewIntent.putExtra("messageId", messageId)
 
-        val viewPendingIntent = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+        val viewPendingIntent =
             PendingIntent.getActivity(
                 context,
                 ACTIVITY_REQUEST_CODE,
                 viewIntent,
                 PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
             )
-        } else {
-            PendingIntent.getActivity(
-                context,
-                ACTIVITY_REQUEST_CODE,
-                viewIntent,
-                PendingIntent.FLAG_UPDATE_CURRENT
-            )
-        }
 
         val closeIntent = Intent(context, NotificationEventReceiver::class.java)
         closeIntent.action = context.applicationContext.packageName + NotificationEventReceiver.NOTIFICATION_CLOSE
@@ -197,21 +181,13 @@ class FireNotificationWorker(
         closeIntent.putExtra("deviceId", deviceId)
         closeIntent.putExtra("messageId", messageId)
 
-        val closePendingIntent = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+        val closePendingIntent =
             PendingIntent.getBroadcast(
                 context,
                 0,
                 closeIntent,
                 PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
             )
-        } else {
-            PendingIntent.getBroadcast(
-                context,
-                0,
-                closeIntent,
-                PendingIntent.FLAG_UPDATE_CURRENT
-            )
-        }
 
         val builder =
             NotificationCompat.Builder(context, context.packageName + "_egoi_channel")
@@ -222,14 +198,7 @@ class FireNotificationWorker(
                 .setContentIntent(pendingIntent)
                 .setDeleteIntent(closePendingIntent)
                 .setAutoCancel(true)
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            builder
                 .setStyle(NotificationCompat.BigTextStyle())
-        } else {
-            builder
-                .setStyle(NotificationCompat.BigTextStyle().bigText(text))
-        }
 
         if (actionType !== "" && actionText !== "" && actionUrl !== "" && actionTextCancel !== "") {
             builder
