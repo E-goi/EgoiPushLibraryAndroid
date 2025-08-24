@@ -1,7 +1,7 @@
 plugins {
     id 'com.android.library'
     id 'kotlin-android'
-    id 'maven-publish'
+    id 'com.vanniktech.maven.publish'
     id 'signing'
 }
 
@@ -27,12 +27,12 @@ android {
     }
 
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
     }
 
     kotlinOptions {
-        jvmTarget = '1.8'
+        jvmTarget = '17'
     }
 
     buildFeatures {
@@ -40,82 +40,45 @@ android {
     }
 
     namespace 'com.egoiapp.egoipushlibrary'
-
-    publishing {
-        singleVariant('release') {
-            withSourcesJar()
-        }
-    }
 }
 
-publishing {
-    publications {
-        release(MavenPublication) {
-            groupId = 'com.egoiapp.egoipushlibrary'
-            artifactId = 'egoipushlibrary'
-            version = '4.1.3'
-
-            pom {
-                name = "EgoiPushLibrary"
-                description = "Android library responsible for handling notifications from E-goi."
-                url = "https://github.com/E-goi/EgoiPushLibraryAndroid"
-                packaging = 'aar'
-
-                licenses {
-                    license {
-                        name = "The Apache Software License, Version 2.0"
-                        url = "http://www.apache.org/licenses/LICENSE-2.0.txt"
-                    }
-                }
-
-                developers {
-                    developer {
-                        id = "jsilva"
-                        name = "João Silva"
-                        email = "jsilva@e-goi.com"
-                    }
-                }
-
-                scm {
-                    connection = "https://github.com/E-goi/EgoiPushLibraryAndroid.git"
-                    developerConnection = "https://github.com/E-goi/EgoiPushLibraryAndroid.git"
-                    url = "https://github.com/E-goi/EgoiPushLibraryAndroid"
-                }
-            }
-
-        }
-    }
-
-    repositories {
-        maven {
-            url = uri('https://oss.sonatype.org/service/local/staging/deploy/maven2/')
-            credentials {
-                // Read credentials from local.properties file
-                Properties localProperties = new Properties()
-                File localPropertiesFile = project.rootProject.file('local.properties')
-                if (localPropertiesFile.exists()) {
-                    localPropertiesFile.withInputStream { localProperties.load(it) }
-                }
-                username localProperties.getProperty('ossrhUsername') ?: System.getenv('OSSRH_USERNAME')
-                password localProperties.getProperty('ossrhPassword') ?: System.getenv('OSSRH_PASSWORD')
+mavenPublishing {
+    coordinates("com.egoiapp.egoipushlibrary", "egoipushlibrary", "4.2.0")
+    
+    pom {
+        name = "EgoiPushLibrary"
+        description = "Android library responsible for handling notifications from E-goi."
+        inceptionYear = "2021"
+        url = "https://github.com/E-goi/EgoiPushLibraryAndroid"
+        
+        licenses {
+            license {
+                name = "The Apache Software License, Version 2.0"
+                url = "http://www.apache.org/licenses/LICENSE-2.0.txt"
+                distribution = "http://www.apache.org/licenses/LICENSE-2.0.txt"
             }
         }
-    }
-}
-
-afterEvaluate {
-    publishing {
-        publications {
-            release(MavenPublication) {
-                from components.release
+        
+        developers {
+            developer {
+                id = "jsilva"
+                name = "João Silva"
+                email = "jsilva@e-goi.com"
             }
         }
+        
+        scm {
+            url = "https://github.com/E-goi/EgoiPushLibraryAndroid"
+            connection = "scm:git:git://github.com/E-goi/EgoiPushLibraryAndroid.git"
+            developerConnection = "scm:git:ssh://git@github.com/E-goi/EgoiPushLibraryAndroid.git"
+        }
     }
+
+    publishToMavenCentral()
+    signAllPublications()
 }
 
-signing {
-    sign publishing.publications.release
-}
+
 
 dependencies {
     implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2'
