@@ -8,6 +8,7 @@ import com.google.firebase.messaging.RemoteMessage
 
 class FirebaseService : FirebaseMessagingService() {
 
+    @Deprecated("Deprecated in Java")
     override fun onNewToken(token: String) {
         EgoiPushLibrary.getInstance(applicationContext).firebase.updateToken(token)
         Log.d(TAG, token)

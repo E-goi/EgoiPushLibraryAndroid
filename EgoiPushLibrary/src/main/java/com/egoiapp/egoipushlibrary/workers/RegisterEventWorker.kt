@@ -8,6 +8,7 @@ import org.json.JSONObject
 import java.io.*
 import java.net.URL
 import javax.net.ssl.HttpsURLConnection
+import com.egoiapp.egoipushlibrary.BuildConfig
 
 /**
  * Worker responsible for sending the interactions of the user with the notification to E-goi
@@ -18,6 +19,11 @@ class RegisterEventWorker(
 ) : Worker(context, workerParams) {
     private val domain = "https://api.egoiapp.com/push/apps/"
     private val registerEventUrl = "/event"
+
+    private fun getUserAgent(): String {
+        val sdkVersion = BuildConfig.SDK_VERSION
+        return "E-goi/$sdkVersion (Android)"
+    }
 
     override fun doWork(): Result {
         var urlConnection: HttpsURLConnection? = null
@@ -38,7 +44,7 @@ class RegisterEventWorker(
 
             urlConnection = url.openConnection() as HttpsURLConnection
             urlConnection.setRequestProperty("Content-Type", "application/json")
-            urlConnection.setRequestProperty("User-Agent", "E-goi")
+            urlConnection.setRequestProperty("User-Agent", getUserAgent())
             urlConnection.setRequestProperty("Apikey", inputData.getString("apiKey"))
             urlConnection.requestMethod = "POST"
             urlConnection.doOutput = true
