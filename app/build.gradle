@@ -34,6 +34,6 @@ dependencies {
     implementation "androidx.work:work-runtime-ktx:2.11.2"
     implementation "com.google.android.material:material:1.14.0"
     implementation "com.google.firebase:firebase-messaging:25.1.0"
-    implementation 'com.egoiapp.egoipushlibrary:egoipushlibrary:4.2.0'
+    implementation 'com.egoiapp.egoipushlibrary:egoipushlibrary:4.2.1'
 //    implementation project(':EgoiPushLibrary')
 }
