@@ -4,6 +4,7 @@ import android.content.Context
 import android.util.Log
 import androidx.work.Worker
 import androidx.work.WorkerParameters
+import com.egoiapp.egoipushlibrary.BuildConfig
 import org.json.JSONObject
 import java.io.*
 import java.net.URL
@@ -18,6 +19,11 @@ class RegisterTokenWorker(
 ) : Worker(context, workerParams) {
     private val domain = "https://api.egoiapp.com/push/apps/"
     private val registerTokenUrl = "/token"
+
+    private fun getUserAgent(): String {
+        val sdkVersion = BuildConfig.SDK_VERSION
+        return "E-goi/$sdkVersion (Android)"
+    }
 
     override fun doWork(): Result {
         var urlConnection: HttpsURLConnection? = null
@@ -44,7 +50,7 @@ class RegisterTokenWorker(
 
             urlConnection = url.openConnection() as HttpsURLConnection
             urlConnection.setRequestProperty("Content-Type", "application/json")
-            urlConnection.setRequestProperty("User-Agent", "E-goi")
+            urlConnection.setRequestProperty("User-Agent", getUserAgent())
             urlConnection.setRequestProperty("Apikey", inputData.getString("apiKey"))
             urlConnection.requestMethod = "POST"
             urlConnection.doOutput = true

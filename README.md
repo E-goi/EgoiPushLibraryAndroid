@@ -1,16 +1,10 @@
-# What's new in version 4.2.0?
-
-### MINOR
-
-#### Maven Central Portal Migration
-
-Migrated publishing system from legacy Sonatype OSSRH to Maven Central Portal for future-proof publishing compatibility.
+# What's new in version 4.2.1?
 
 ### PATCH
 
-#### Notification channel
+#### HTTP requests identification
 
-Create a unique notification channel.
+Added the version of the SDK and OS to the request's UserAgent made to E-goi's API.
 
 # EgoiPushLibraryAndroid
 
