@@ -122,6 +122,7 @@ class EgoiNotificationActivity : AppCompatActivity() {
                         finish()
                     } else {
                         launchActionUrl(egoiNotification.actionUrl)
+                        finish()
                     }
 
                     val notificationManager =
@@ -206,11 +207,7 @@ class EgoiNotificationActivity : AppCompatActivity() {
 
         try {
             val uriIntent = Intent(Intent.ACTION_VIEW, uri)
-            if (uriIntent.resolveActivity(packageManager) != null) {
-                startActivity(uriIntent)
-            } else {
-                Log.w("EgoiPushLibrary", "Nenhuma aplicacao disponivel para resolver o URI: $url")
-            }
+            startActivity(uriIntent)
         } catch (e: ActivityNotFoundException) {
             Log.w("EgoiPushLibrary", "Nenhuma aplicacao instalada para responder ao URI: $url", e)
         } catch (e: Exception) {

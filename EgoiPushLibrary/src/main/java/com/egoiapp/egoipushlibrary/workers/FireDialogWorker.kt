@@ -96,13 +96,11 @@ class FireDialogWorker(
         }
 
         try {
-            val uriIntent = Intent(Intent.ACTION_VIEW, uri)
-            val activityContext = EgoiPushLibrary.getInstance(context).activityContext
-            if (uriIntent.resolveActivity(activityContext.packageManager) != null) {
-                activityContext.startActivity(uriIntent)
-            } else {
-                Log.w("EgoiPushLibrary", "Nenhuma aplicacao disponivel para resolver o URI: $url")
+            val uriIntent = Intent(Intent.ACTION_VIEW, uri).apply {
+                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
             }
+            val activityContext = EgoiPushLibrary.getInstance(context).activityContext
+            activityContext.startActivity(uriIntent)
         } catch (e: ActivityNotFoundException) {
             Log.w("EgoiPushLibrary", "Nenhuma aplicacao instalada para responder ao URI: $url", e)
         } catch (e: Exception) {
