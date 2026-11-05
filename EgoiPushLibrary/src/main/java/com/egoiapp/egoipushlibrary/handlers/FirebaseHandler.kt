@@ -119,16 +119,12 @@ class FirebaseHandler(
                 data = EGoiMessageData(
                     os = extras.getString("os") ?: "android",
                     messageHash = extras.getString("message-hash") ?: "",
-                    mailingId = if (extras.getString("mailing-id", "0") != "")
-                        extras.getString("mailing-id", "0").toInt() else 0,
-                    listId = if (extras.getString("list-id", "0") != "")
-                        extras.getString("list-id", "0").toInt() else 0,
+                    mailingId = extras.getString("mailing-id")?.toIntOrNull() ?: 0,
+                    listId = extras.getString("list-id")?.toIntOrNull() ?: 0,
                     contactId = extras.getString("contact-id") ?: "",
-                    accountId = if (extras.getString("account-id", "0") != "")
-                        extras.getString("account-id", "0").toInt() else 0,
+                    accountId = extras.getString("account-id")?.toIntOrNull() ?: 0,
                     applicationId = extras.getString("application-id") ?: "",
-                    messageId = if (extras.getString("message-id", "0") != "")
-                        extras.getString("message-id", "0").toInt() else 0,
+                    messageId = extras.getString("message-id")?.toIntOrNull() ?: 0,
                 )
             )
 
@@ -136,19 +132,21 @@ class FirebaseHandler(
                 // [Assign action to notification]
                 val actionsJson = extras.getString("actions")
 
-                if (actionsJson != null) {
-                    val actions = JSONObject(actionsJson)
+                if (!actionsJson.isNullOrBlank()) {
+                    runCatching {
+                        val actions = JSONObject(actionsJson)
 
-                    if (
-                        actions.has("type") &&
-                        actions.has("text") &&
-                        actions.has("url") &&
-                        actions.has("text-cancel")
-                    ) {
-                        it.data.actions.type = actions.getString("type")
-                        it.data.actions.text = actions.getString("text")
-                        it.data.actions.url = actions.getString("url")
-                        it.data.actions.textCancel = actions.getString("text-cancel")
+                        if (
+                            actions.has("type") &&
+                            actions.has("text") &&
+                            actions.has("url") &&
+                            actions.has("text-cancel")
+                        ) {
+                            it.data.actions.type = actions.getString("type")
+                            it.data.actions.text = actions.getString("text")
+                            it.data.actions.url = actions.getString("url")
+                            it.data.actions.textCancel = actions.getString("text-cancel")
+                        }
                     }
                 }
 
@@ -162,11 +160,11 @@ class FirebaseHandler(
                 ) {
                     this.geoPush = true
                     it.data.geo.latitude =
-                        extras.getString("latitude")?.toDouble() ?: Double.NaN
+                        extras.getString("latitude")?.toDoubleOrNull() ?: Double.NaN
                     it.data.geo.longitude =
-                        extras.getString("longitude")?.toDouble() ?: Double.NaN
-                    it.data.geo.radius = extras.getString("radius")?.toFloat() ?: 0.0.toFloat()
-                    it.data.geo.duration = extras.getString("duration")?.toLong() ?: 0
+                        extras.getString("longitude")?.toDoubleOrNull() ?: Double.NaN
+                    it.data.geo.radius = extras.getString("radius")?.toFloatOrNull() ?: 0.0.toFloat()
+                    it.data.geo.duration = extras.getString("duration")?.toLongOrNull() ?: 0
                     it.data.geo.periodStart = extras.getString("time-start")
                     it.data.geo.periodEnd = extras.getString("time-end")
 
