@@ -2,11 +2,13 @@ package com.egoiapp.egoipushlibrary
 
 import android.app.AlertDialog
 import android.app.NotificationManager
+import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.os.Handler
+import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import com.egoiapp.egoipushlibrary.handlers.DataStoreHandler
 import com.egoiapp.egoipushlibrary.receivers.NotificationEventReceiver
@@ -119,9 +121,8 @@ class EgoiNotificationActivity : AppCompatActivity() {
 
                         finish()
                     } else {
-                        val uriIntent =
-                            Intent(Intent.ACTION_VIEW, Uri.parse(egoiNotification.actionUrl))
-                        startActivity(uriIntent)
+                        launchActionUrl(egoiNotification.actionUrl)
+                        finish()
                     }
 
                     val notificationManager =
@@ -166,12 +167,8 @@ class EgoiNotificationActivity : AppCompatActivity() {
 
                     finish()
                 } else {
-                    startActivity(
-                        Intent(
-                            Intent.ACTION_VIEW,
-                            Uri.parse(egoiNotification.actionUrl)
-                        )
-                    )
+                    launchActionUrl(egoiNotification.actionUrl)
+                    finish()
                 }
             }
 
@@ -197,6 +194,25 @@ class EgoiNotificationActivity : AppCompatActivity() {
         }
 
         mainHandler.post(runnable)
+    }
+
+    private fun launchActionUrl(url: String) {
+        val allowedSchemes = setOf("https", "http")
+        val uri = Uri.parse(url)
+
+        if (uri.scheme?.lowercase() !in allowedSchemes) {
+            Log.w("EgoiPushLibrary", "Esquema de URL nao suportado ou bloqueado: ${uri.scheme}")
+            return
+        }
+
+        try {
+            val uriIntent = Intent(Intent.ACTION_VIEW, uri)
+            startActivity(uriIntent)
+        } catch (e: ActivityNotFoundException) {
+            Log.w("EgoiPushLibrary", "Nenhuma aplicacao instalada para responder ao URI: $url", e)
+        } catch (e: Exception) {
+            Log.e("EgoiPushLibrary", "Erro inesperado ao abrir o actionUrl: $url", e)
+        }
     }
 
     private fun finishActivity() {

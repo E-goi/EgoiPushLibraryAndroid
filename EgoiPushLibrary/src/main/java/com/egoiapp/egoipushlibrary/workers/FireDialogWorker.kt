@@ -1,10 +1,12 @@
 package com.egoiapp.egoipushlibrary.workers
 
 import android.app.AlertDialog
+import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Handler
+import android.util.Log
 import androidx.work.Worker
 import androidx.work.WorkerParameters
 import com.egoiapp.egoipushlibrary.EgoiPushLibrary
@@ -60,12 +62,7 @@ class FireDialogWorker(
                         it(egoiNotification)
                     }
                 } else {
-                    EgoiPushLibrary.getInstance(context).activityContext.startActivity(
-                        Intent(
-                            Intent.ACTION_VIEW,
-                            Uri.parse(egoiNotification.actionUrl)
-                        )
-                    )
+                    launchActionUrl(egoiNotification.actionUrl)
                 }
             }
 
@@ -87,5 +84,27 @@ class FireDialogWorker(
         mainHandler.post(runnable)
 
         return Result.success()
+    }
+
+    private fun launchActionUrl(url: String) {
+        val allowedSchemes = setOf("https", "http")
+        val uri = Uri.parse(url)
+
+        if (uri.scheme?.lowercase() !in allowedSchemes) {
+            Log.w("EgoiPushLibrary", "Esquema de URL nao suportado ou bloqueado: ${uri.scheme}")
+            return
+        }
+
+        try {
+            val uriIntent = Intent(Intent.ACTION_VIEW, uri).apply {
+                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            }
+            val activityContext = EgoiPushLibrary.getInstance(context).activityContext
+            activityContext.startActivity(uriIntent)
+        } catch (e: ActivityNotFoundException) {
+            Log.w("EgoiPushLibrary", "Nenhuma aplicacao instalada para responder ao URI: $url", e)
+        } catch (e: Exception) {
+            Log.e("EgoiPushLibrary", "Erro inesperado ao abrir o actionUrl: $url", e)
+        }
     }
 }

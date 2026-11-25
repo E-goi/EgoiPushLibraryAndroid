@@ -193,25 +193,32 @@ class GeofenceHandler(
                 val periodStart = message.data.geo.periodStart!!.split(":")
                 val periodEnd = message.data.geo.periodEnd!!.split(":")
 
-                val periodStartDateTime = Calendar.getInstance()
-                periodStartDateTime
-                    .set(Calendar.HOUR_OF_DAY, periodStart[0].toInt())
-                periodStartDateTime
-                    .set(Calendar.MINUTE, periodStart[1].toInt())
+                val startHour = periodStart.getOrNull(0)?.toIntOrNull()
+                val startMinute = periodStart.getOrNull(1)?.toIntOrNull()
+                val endHour = periodEnd.getOrNull(0)?.toIntOrNull()
+                val endMinute = periodEnd.getOrNull(1)?.toIntOrNull()
 
-                val periodEndDateTime = Calendar.getInstance()
-                periodEndDateTime
-                    .set(Calendar.HOUR_OF_DAY, periodEnd[0].toInt())
-                periodEndDateTime
-                    .set(Calendar.MINUTE, periodEnd[1].toInt())
+                if (startHour != null && startMinute != null && endHour != null && endMinute != null) {
+                    val periodStartDateTime = Calendar.getInstance()
+                    periodStartDateTime
+                        .set(Calendar.HOUR_OF_DAY, startHour)
+                    periodStartDateTime
+                        .set(Calendar.MINUTE, startMinute)
 
-                val currentDateTime = Calendar.getInstance()
+                    val periodEndDateTime = Calendar.getInstance()
+                    periodEndDateTime
+                        .set(Calendar.HOUR_OF_DAY, endHour)
+                    periodEndDateTime
+                        .set(Calendar.MINUTE, endMinute)
 
-                if (currentDateTime.before(periodStartDateTime) || currentDateTime.after(
-                        periodEndDateTime
-                    )
-                ) {
-                    return
+                    val currentDateTime = Calendar.getInstance()
+
+                    if (currentDateTime.before(periodStartDateTime) || currentDateTime.after(
+                            periodEndDateTime
+                        )
+                    ) {
+                        return
+                    }
                 }
             }
             // endregion

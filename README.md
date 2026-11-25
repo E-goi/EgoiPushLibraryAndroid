@@ -1,10 +1,14 @@
-# What's new in version 4.2.1?
+# What's new in version 4.2.2?
 
 ### PATCH
 
-#### HTTP requests identification
+#### Safer push handling
 
-Added the version of the SDK and OS to the request's UserAgent made to E-goi's API.
+Added defensive URI validation and safe parsing of the push payloads handled by Firebase, geofences, notifications and dialogs.
+
+#### Links on Android 11+
+
+Declared the package visibility queries needed to open http/https links on Android 11+ and fixed an activity backstack leak when opening a notification.
 
 # EgoiPushLibraryAndroid
 
